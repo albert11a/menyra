@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <div class="header-title">MENYRA</div>
+        <div class="header-sub">Superadmin – Kunden & QR-Codes</div>
+      </div>
+    </header>
+
+    <!-- Neues Lokal/Kunde anlegen -->
+    <section class="card">
+      <h2>Neuen Kunden anlegen</h2>
+      <p class="info">
+        Hier legst du einen neuen Kunden an (Restaurant, Café, Hotel...). MENYRA
+        generiert automatisch Codes für Kellner & Admin, und du kannst danach
+        alle QR-Links für die Tische sehen.
+      </p>
+
+      <input class="input" id="customerNameInput" placeholder="Kundenname (z.B. Inhaber: Arben)" />
+      <input class="input" id="restNameInput" placeholder="Restaurant / Lokalname (z.B. Bella Italia)" />
+      <input class="input" id="restCityInput" placeholder="Ort (z.B. Prishtina)" />
+      <input class="input" id="restIdInput" placeholder="Technische ID (z.B. bella-italia)" />
+      <input class="input" id="tableCountInput" placeholder="Anzahl Tische (z.B. 20)" />
+      <input class="input" id="yearPriceInput" placeholder="Preis pro Jahr in € (z.B. 370)" />
+      <input class="input" id="contactEmailInput" placeholder="Kontakt E-Mail (optional)" />
+      <input class="input" id="contactPhoneInput" placeholder="Kontakt Telefon (optional)" />
+
+      <button class="btn btn-primary" id="createRestBtn" style="margin-top:8px;">
+        Kunden/Lokal erstellen
+      </button>
+
+      <div class="status-text" id="adminStatus"></div>
+    </section>
+
+    <!-- Alle Kunden anzeigen -->
+    <section class="card">
+      <h2>Alle Kunden & Lokale</h2>
+      <div class="list" id="restList"></div>
+      <p class="info">
+        Beispiele:<br />
+        Gäste (QR): <code>karte.html?r=ID&t=T1</code><br />
+        Kellner: <code>kamarieri.html</code> (LogIn per Kellner-Code)<br />
+        Admin: <code>admin.html</code> (LogIn per Admin-Code oder direkt mit ID-Link)
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="menyra.js"></script>
+</body>
+</html>

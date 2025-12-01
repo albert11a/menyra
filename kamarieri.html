@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Kamarieri</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <div class="header-title">MENYRA</div>
+        <div class="header-sub">Kamarieri – Bestellungen</div>
+      </div>
+      <div class="header-sub" id="kRestLabel"></div>
+    </header>
+
+    <section class="card" id="waiterLoginCard">
+      <h2>Kellner-Code</h2>
+      <p class="info">
+        Bitte Kellner-Code eingeben, den dein Chef dir gegeben hat.
+      </p>
+      <input class="input" id="waiterCodeInput" placeholder="Kellner-Code (z.B. 123456)" />
+      <button class="btn btn-primary" id="waiterLoginBtn" style="margin-top:8px;">
+        Einloggen
+      </button>
+      <div class="status-text" id="waiterLoginStatus"></div>
+    </section>
+
+    <section class="card" id="orderCard" style="display:none;">
+      <h2>Eingehende Bestellungen</h2>
+      <div class="list" id="orderList"></div>
+      <p class="info">
+        Status: <code>neu</code> · <code>in Arbeit</code> · <code>serviert</code>
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="kamarieri.js"></script>
+</body>
+</html>

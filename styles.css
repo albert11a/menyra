@@ -1,0 +1,248 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+body {
+  background: radial-gradient(circle at top, #fdfbff, #e9f0ff);
+  color: #0f172a;
+}
+
+/* Allgemeiner Page-Container (mobil first) */
+.page {
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100vh;
+  padding: 16px 16px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+.header-title {
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  font-size: 0.9rem;
+}
+
+.header-sub {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+/* Karten */
+.card {
+  background: rgba(255,255,255,0.96);
+  padding: 14px 14px;
+  border-radius: 18px;
+  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  border: 1px solid rgba(148, 163, 184, 0.25);
+}
+
+/* Überschriften in Karten */
+.card h1, .card h2 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+
+.card p {
+  font-size: 0.82rem;
+  color: #475569;
+}
+
+/* Buttons */
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  cursor: pointer;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #2563eb, #22c55e);
+  color: #f9fafb;
+}
+
+.btn-ghost {
+  background: #e5e7eb;
+  color: #111827;
+}
+
+.btn-small {
+  padding: 4px 10px;
+  font-size: 0.75rem;
+}
+
+/* Inputs */
+.input {
+  width: 100%;
+  border-radius: 999px;
+  border: 1px solid #cbd5f5;
+  padding: 8px 12px;
+  font-size: 0.8rem;
+  margin-top: 6px;
+  background: rgba(255,255,255,0.9);
+}
+
+/* Listen / Badges */
+.list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  font-size: 0.82rem;
+}
+
+.list-item-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.badge {
+  font-size: 0.72rem;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #e0f2fe;
+  color: #0369a1;
+}
+
+/* Info / Status */
+.info {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 6px;
+}
+
+.status-text {
+  font-size: 0.8rem;
+  margin-top: 6px;
+}
+
+.status-ok {
+  color: #16a34a;
+}
+
+.status-err {
+  color: #b91c1c;
+}
+
+/* Menü-UI */
+.category-tabs {
+  margin-top: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.category-tab {
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid #d4d4d8;
+  font-size: 0.75rem;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.category-tab.active {
+  background: #0f172a;
+  color: #f9fafb;
+  border-color: #0f172a;
+}
+
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.menu-item {
+  background: #ffffff;
+  border-radius: 14px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.menu-item-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.menu-item-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.menu-item-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.menu-item-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+}
+
+.menu-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+/* Warenkorb */
+.cart-card {
+  background: #020617;
+  color: #f9fafb;
+  padding: 12px 14px;
+  border-radius: 18px;
+}
+
+.cart-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cart-items {
+  margin-top: 8px;
+  font-size: 0.8rem;
+}
+
+.cart-item-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 2px 0;
+}
+
+.cart-total {
+  margin-top: 8px;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.cart-actions {
+  margin-top: 10px;
+  display: flex;
+  gap: 6px;
+}

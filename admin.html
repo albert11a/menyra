@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Restaurant Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <div class="header-title">MENYRA</div>
+        <div class="header-sub">Restaurant Admin – Speisekarte</div>
+      </div>
+      <div class="header-sub" id="adminRestLabel"></div>
+    </header>
+
+    <section class="card" id="adminLoginCard">
+      <h2>Admin Code</h2>
+      <p class="info">
+        Bitte Admin-Code eingeben, den du von MENYRA erhalten hast.
+      </p>
+      <input class="input" id="adminCodeInput" placeholder="Admin-Code (z.B. 654321)" />
+      <button class="btn btn-primary" id="adminLoginBtn" style="margin-top:8px;">
+        Einloggen
+      </button>
+      <div class="status-text" id="adminLoginStatus"></div>
+    </section>
+
+    <section class="card" id="menuEditorCard" style="display:none;">
+      <h2>Gericht hinzufügen</h2>
+      <input class="input" id="itemNameInput" placeholder="Name (z.B. Pizza Margherita)" />
+      <input class="input" id="itemDescInput" placeholder="Beschreibung" />
+      <input class="input" id="itemPriceInput" placeholder="Preis (z.B. 8.5)" />
+      <input class="input" id="itemCatInput" placeholder="Kategorie (z.B. Pizza)" />
+      <button class="btn btn-primary" id="addItemBtn" style="margin-top:8px;">
+        Gericht speichern
+      </button>
+      <div class="status-text" id="adminItemStatus"></div>
+    </section>
+
+    <section class="card" id="menuListCard" style="display:none;">
+      <h2>Aktuelle Speisekarte</h2>
+      <div class="list" id="itemList"></div>
+      <p class="info">
+        Diese Gerichte erscheinen in der Gäste-Ansicht: <code>karte.html?r=DEINE-ID&t=T1</code>
+      </p>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
