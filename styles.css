@@ -1,10 +1,10 @@
 /* ========================================
-   GLOBAL: Schrift, Reset, Grundfarben
+   GLOBAL: Reset & Schrift
    ======================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Alle Elemente: Box-Sizing & Font */
+/* Reset + Font */
 * {
   margin: 0;
   padding: 0;
@@ -12,38 +12,45 @@
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* WICHTIG: html + body gleiche Hintergrundfarbe
-   -> keine anderen Ränder oben/unten auf iOS
-*/
+/* ========================================
+   Hintergrund: WICHTIG für iOS
+   -> Gradient direkt auf html + body
+   -> Kein anderer Background mehr mit anderen Farben
+   ======================================== */
+
 html,
 body {
   height: 100%;
-  background-color: #f3f4f6; /* neutrale, helle Grundfarbe */
+  background: radial-gradient(circle at top, #fdfbff, #e3ecff);
+  /* kein extra background-color, damit der Gradient überall benutzt wird */
 }
 
-/* Body: als App-Container */
+/* Body als Container */
 body {
   min-height: 100vh;
   color: #0f172a;
 }
 
 /* ========================================
-   APP PAGE (alle Seiten, z.B. index, menyra)
+   PAGE-CONTAINER (für index, menyra, admin, karte, kamarieri)
    ======================================== */
 
 .page {
   width: 100%;
-  max-width: 480px;          /* schön schmal wie App */
+  max-width: 480px;     /* App-Breite */
   margin: 0 auto;
   min-height: 100vh;
   padding: 16px 16px 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  background: radial-gradient(circle at top, #fdfbff, #e9f0ff);
+
+  /* WICHTIG: kein eigener Background hier,
+     damit der html/body-Gradient überall durchscheint */
+  background: transparent;
 }
 
-/* Damit nichts am Rand klebt */
+/* Sicherheit: Kinder-Elemente füllen Breite */
 .page > * {
   width: 100%;
 }
@@ -143,7 +150,6 @@ body {
   background: rgba(255, 255, 255, 0.9);
 }
 
-/* Abstand zwischen mehreren Inputs in einer Card */
 .card .input + .input {
   margin-top: 8px;
 }
@@ -181,7 +187,7 @@ body {
   margin-top: 6px;
 }
 
-/* Status-Anzeigen (grün/rot) */
+/* Status-Anzeigen */
 
 .status-text {
   font-size: 0.8rem;
@@ -212,7 +218,7 @@ body {
 }
 
 /* ========================================
-   MENÜ / KATEGORIEN (für karte.html)
+   MENÜ / KATEGORIEN (karte.html)
    ======================================== */
 
 .category-tabs {
@@ -283,7 +289,7 @@ body {
 }
 
 /* ========================================
-   WARENKORB (Gäste-Ansicht)
+   WARENKORB (Gäste-Ansicht, karte.html)
    ======================================== */
 
 .cart-card {
@@ -323,7 +329,7 @@ body {
 }
 
 /* ========================================
-   BILDER (v.a. QR-Codes im Admin)
+   BILDER (z.B. QR-Codes im Admin)
    ======================================== */
 
 img {
