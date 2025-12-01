@@ -4,7 +4,6 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Reset + Font */
 * {
   margin: 0;
   padding: 0;
@@ -13,31 +12,25 @@
 }
 
 /* ========================================
-   Hintergrund: WICHTIG für iOS
-   -> Gradient direkt auf html + body
-   -> Kein anderer Background mehr mit anderen Farben
+   EINHEITLICHER HINTERGRUND ÜBERALL
+   -> html, body UND .page dieselbe Farbe
    ======================================== */
 
 html,
 body {
   height: 100%;
-  background: radial-gradient(circle at top, #fdfbff, #e3ecff);
-  /* kein extra background-color, damit der Gradient überall benutzt wird */
+  background-color: #f3f4f6;  /* HINTERGRUNDFARBE DEINER SEITE */
 }
 
-/* Body als Container */
 body {
   min-height: 100vh;
   color: #0f172a;
 }
 
-/* ========================================
-   PAGE-CONTAINER (für index, menyra, admin, karte, kamarieri)
-   ======================================== */
-
+/* Der sichtbare App-Bereich */
 .page {
   width: 100%;
-  max-width: 480px;     /* App-Breite */
+  max-width: 480px;           /* wie eine App-Breite */
   margin: 0 auto;
   min-height: 100vh;
   padding: 16px 16px 32px;
@@ -45,9 +38,8 @@ body {
   flex-direction: column;
   gap: 16px;
 
-  /* WICHTIG: kein eigener Background hier,
-     damit der html/body-Gradient überall durchscheint */
-  background: transparent;
+  /* WICHTIG: gleich wie body/html */
+  background-color: #f3f4f6;
 }
 
 /* Sicherheit: Kinder-Elemente füllen Breite */
@@ -85,10 +77,10 @@ body {
    ======================================== */
 
 .card {
-  background: rgba(255, 255, 255, 0.96);
+  background: #ffffff;
   padding: 14px 14px;
   border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
   border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
@@ -147,7 +139,7 @@ body {
   padding: 8px 12px;
   font-size: 0.8rem;
   margin-top: 6px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #ffffff;
 }
 
 .card .input + .input {
@@ -289,7 +281,7 @@ body {
 }
 
 /* ========================================
-   WARENKORB (Gäste-Ansicht, karte.html)
+   WARENKORB (Gäste-Ansicht)
    ======================================== */
 
 .cart-card {
