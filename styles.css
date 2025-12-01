@@ -1,50 +1,62 @@
-/* ===========================
-   Global / Grundlayout
-   =========================== */
+/* ========================================
+   GLOBAL: Schrift, Reset, Grundfarben
+   ======================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* Ganz wichtig: html + body gleicher Hintergrund
-   -> keine anderen Farben oben/unten auf iOS / Safari
-*/
-html,
-body {
+/* Alle Elemente: Box-Sizing & Font */
+* {
   margin: 0;
   padding: 0;
-  height: 100%;
-  background: radial-gradient(circle at top, #fdfbff, #e9f0ff);
-}
-
-/* Body: volle Höhe, Textfarbe */
-body {
-  min-height: 100vh;
-  color: #0f172a;
+  box-sizing: border-box;
   font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
-/* ===========================
-   Page Container
-   =========================== */
+/* WICHTIG: html + body gleiche Hintergrundfarbe
+   -> keine anderen Ränder oben/unten auf iOS
+*/
+html,
+body {
+  height: 100%;
+  background-color: #f3f4f6; /* neutrale, helle Grundfarbe */
+}
+
+/* Body: als App-Container */
+body {
+  min-height: 100vh;
+  color: #0f172a;
+}
+
+/* ========================================
+   APP PAGE (alle Seiten, z.B. index, menyra)
+   ======================================== */
 
 .page {
-  max-width: 480px;
+  width: 100%;
+  max-width: 480px;          /* schön schmal wie App */
   margin: 0 auto;
   min-height: 100vh;
   padding: 16px 16px 32px;
   display: flex;
   flex-direction: column;
   gap: 16px;
+  background: radial-gradient(circle at top, #fdfbff, #e9f0ff);
 }
 
-/* ===========================
-   Header
-   =========================== */
+/* Damit nichts am Rand klebt */
+.page > * {
+  width: 100%;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
 
 .header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-top: 8px;
+  margin-top: 6px;
   margin-bottom: 4px;
 }
 
@@ -58,17 +70,18 @@ body {
 .header-sub {
   font-size: 0.72rem;
   color: #64748b;
+  text-align: right;
 }
 
-/* ===========================
-   Cards / Boxen
-   =========================== */
+/* ========================================
+   CARDS / BOXEN
+   ======================================== */
 
 .card {
   background: rgba(255, 255, 255, 0.96);
   padding: 14px 14px;
   border-radius: 18px;
-  box-shadow: 0 14px 40px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.10);
   border: 1px solid rgba(148, 163, 184, 0.25);
 }
 
@@ -84,9 +97,9 @@ body {
   color: #475569;
 }
 
-/* ===========================
-   Buttons
-   =========================== */
+/* ========================================
+   BUTTONS
+   ======================================== */
 
 .btn {
   border: none;
@@ -98,6 +111,7 @@ body {
   align-items: center;
   justify-content: center;
   text-decoration: none;
+  white-space: nowrap;
 }
 
 .btn-primary {
@@ -115,9 +129,9 @@ body {
   font-size: 0.75rem;
 }
 
-/* ===========================
-   Inputs / Formulare
-   =========================== */
+/* ========================================
+   INPUTS / FORM
+   ======================================== */
 
 .input {
   width: 100%;
@@ -129,9 +143,14 @@ body {
   background: rgba(255, 255, 255, 0.9);
 }
 
-/* ===========================
-   Listen / Infos / Badges
-   =========================== */
+/* Abstand zwischen mehreren Inputs in einer Card */
+.card .input + .input {
+  margin-top: 8px;
+}
+
+/* ========================================
+   LISTEN / BADGES / INFO-TEXT
+   ======================================== */
 
 .list {
   display: flex;
@@ -145,6 +164,7 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 10px;
 }
 
 .badge {
@@ -161,7 +181,7 @@ body {
   margin-top: 6px;
 }
 
-/* Status-Text (Fehler / OK) */
+/* Status-Anzeigen (grün/rot) */
 
 .status-text {
   font-size: 0.8rem;
@@ -176,10 +196,9 @@ body {
   color: #b91c1c;
 }
 
-/* ===========================
-   Restaurant / Kopf-Infos
-   (für Gäste-Ansicht und mehr)
-   =========================== */
+/* ========================================
+   RESTAURANT-INFOS (Gäste/Karte)
+   ======================================== */
 
 .restaurant-name {
   font-weight: 700;
@@ -192,9 +211,9 @@ body {
   margin-top: 4px;
 }
 
-/* ===========================
-   Kategorien / Menü
-   =========================== */
+/* ========================================
+   MENÜ / KATEGORIEN (für karte.html)
+   ======================================== */
 
 .category-tabs {
   margin-top: 10px;
@@ -263,9 +282,9 @@ body {
   margin-top: 4px;
 }
 
-/* ===========================
-   Warenkorb (Gäste-Ansicht)
-   =========================== */
+/* ========================================
+   WARENKORB (Gäste-Ansicht)
+   ======================================== */
 
 .cart-card {
   background: #020617;
@@ -303,10 +322,9 @@ body {
   gap: 6px;
 }
 
-/* ===========================
-   QR-Ansicht in MENYRA Admin
-   (Bild + Link)
-   =========================== */
+/* ========================================
+   BILDER (v.a. QR-Codes im Admin)
+   ======================================== */
 
 img {
   max-width: 100%;
@@ -314,13 +332,7 @@ img {
   display: block;
 }
 
-/* Damit QR-Bilder neben Text nicht zu groß wirken */
 .list-item-row img {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
-}
-
-/* Links im Admin übersichtlicher */
-a.info {
-  cursor: pointer;
 }
