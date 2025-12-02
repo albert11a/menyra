@@ -1,4 +1,4 @@
-// admin.js – Restaurant Admin: Login, Speisekarte (Kategorie, Name, Beschreibung, Preis, Bild-URL), Bestellübersicht
+// admin.js – Restaurant Admin: Login, Speisekarte (inkl. Angebote), Bestellübersicht
 
 import { db } from "./firebase-config.js";
 import {
@@ -28,6 +28,7 @@ const itemNameInput = document.getElementById("itemNameInput");
 const itemDescInput = document.getElementById("itemDescInput");
 const itemPriceInput = document.getElementById("itemPriceInput");
 const itemImageInput = document.getElementById("itemImageInput");
+const itemOfferInput = document.getElementById("itemOfferInput");
 const addItemBtn = document.getElementById("addItemBtn");
 const adminItemStatus = document.getElementById("adminItemStatus");
 const itemList = document.getElementById("itemList");
@@ -47,8 +48,8 @@ async function setRestaurantById(id) {
   adminLoginStatus.textContent = "";
   adminLoginStatus.className = "status-text";
 
-  const ref = doc(db, "restaurants", id);
-  const snap = await getDoc(ref);
+  const refRest = doc(db, "restaurants", id);
+  const snap = await getDoc(refRest);
   if (!snap.exists()) {
     adminLoginStatus.textContent = "Lokal mit dieser ID existiert nicht.";
     adminLoginStatus.classList.add("status-err");
@@ -83,11 +84,11 @@ async function loginWithCode(code) {
     adminLoginBtn.disabled = true;
     adminLoginBtn.textContent = "Prüfe...";
 
-    const q = query(
+    const qRest = query(
       collection(db, "restaurants"),
       where("ownerCode", "==", code)
     );
-    const snap = await getDocs(q);
+    const snap = await getDocs(qRest);
 
     if (snap.empty) {
       adminLoginStatus.textContent = "Kein Lokal mit diesem Admin-Code gefunden.";
@@ -128,6 +129,7 @@ async function addMenuItem() {
   const desc = itemDescInput.value.trim();
   const priceStr = itemPriceInput.value.trim();
   const imageUrl = itemImageInput.value.trim();
+  const isOffer = itemOfferInput.checked;
 
   if (!cat || !name || !priceStr) {
     adminItemStatus.textContent = "Kategorie, Name und Preis sind Pflicht.";
@@ -152,7 +154,8 @@ async function addMenuItem() {
       name,
       description: desc,
       price,
-      imageUrl: imageUrl || null, // URL, egal ob JPG/PNG/WebP/GIF
+      imageUrl: imageUrl || null,
+      offer: isOffer,
       available: true,
     });
 
@@ -164,6 +167,7 @@ async function addMenuItem() {
     itemDescInput.value = "";
     itemPriceInput.value = "";
     itemImageInput.value = "";
+    itemOfferInput.checked = false;
 
     await loadMenuItems();
   } catch (err) {
@@ -192,6 +196,8 @@ async function loadMenuItems() {
     const data = docSnap.data();
     const available = data.available !== false;
     const hasImage = !!data.imageUrl;
+    const isOffer = data.offer === true;
+
     const row = document.createElement("div");
     row.className = "list-item-row";
     row.innerHTML = `
@@ -201,7 +207,9 @@ async function loadMenuItems() {
         <span class="info">
           ${data.description || ""}${
       hasImage ? " • Foto: vorhanden" : " • Foto: keines"
-    } • Status: ${available ? "aktiv" : "inaktiv"}
+    }${isOffer ? " • ⭐ Angebot" : ""} • Status: ${
+      available ? "aktiv" : "inaktiv"
+    }
         </span>
       </span>
       <span style="display:flex; gap:6px;">
