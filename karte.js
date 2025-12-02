@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Logo, Suche, Kategorien, Angebot & Floating Cart-FAB
+// karte.js – Gäste-Ansicht mit Logo, Suche, Kategorien, Angebot-Slider & Floating Cart-FAB
 
 import { db } from "./firebase-config.js";
 import {
@@ -22,8 +22,8 @@ const categoryTabsEl = document.getElementById("categoryTabs");
 const menuListEl = document.getElementById("menuList");
 
 const offersSection = document.getElementById("offersSection");
-const offerTitleEl = document.getElementById("offerTitle");
-const offerTextEl = document.getElementById("offerText");
+const offersSlider = document.getElementById("offersSlider");
+const offersDots = document.getElementById("offersDots");
 
 const cartSection = document.getElementById("cartSection");
 const cartItemsEl = document.getElementById("cartItems");
@@ -42,6 +42,11 @@ let allMenuItems = [];
 let activeCategory = "Alle";
 let searchTerm = "";
 let cart = [];
+
+// Offers Slider State
+let offerSlides = [];
+let offerDots = [];
+let currentOfferIndex = 0;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
 
@@ -65,18 +70,164 @@ function isRestaurantOperational(data) {
   return true;
 }
 
-function renderOffer(restData) {
-  const active = restData.offerActive === true;
-  const title = restData.offerTitle || "";
-  const text = restData.offerText || "";
+function updateOfferDots(activeIndex) {
+  offerDots.forEach((dot, i) => {
+    dot.classList.toggle("active", i === activeIndex);
+  });
+}
 
-  if (active && (title || text)) {
-    offerTitleEl.textContent = title;
-    offerTextEl.textContent = text;
-    offersSection.style.display = "block";
-  } else {
+function scrollToOffer(index) {
+  if (!offerSlides[index]) return;
+  const slide = offerSlides[index];
+  const offsetLeft = slide.offsetLeft - offersSlider.offsetLeft;
+  offersSlider.scrollTo({
+    left: offsetLeft,
+    behavior: "smooth",
+  });
+  currentOfferIndex = index;
+  updateOfferDots(index);
+}
+
+function handleOfferScroll() {
+  if (!offerSlides.length) return;
+  const center = offersSlider.scrollLeft + offersSlider.clientWidth / 2;
+
+  let bestIndex = 0;
+  let bestDist = Infinity;
+  offerSlides.forEach((slide, i) => {
+    const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+    const dist = Math.abs(slideCenter - center);
+    if (dist < bestDist) {
+      bestDist = dist;
+      bestIndex = i;
+    }
+  });
+
+  currentOfferIndex = bestIndex;
+  updateOfferDots(bestIndex);
+}
+
+function renderOffersSlider(offers) {
+  if (!offers || !offers.length) {
     offersSection.style.display = "none";
+    offersSlider.innerHTML = "";
+    offersDots.innerHTML = "";
+    offerSlides = [];
+    offerDots = [];
+    return;
   }
+
+  offersSlider.innerHTML = "";
+  offersDots.innerHTML = "";
+  offerSlides = [];
+  offerDots = [];
+  currentOfferIndex = 0;
+
+  offers.forEach((o, index) => {
+    const slide = document.createElement("div");
+    slide.className = "offer-slide";
+
+    let html = "";
+    if (o.imageUrl) {
+      html += `<img src="${o.imageUrl}" alt="Angebot" class="offer-image" loading="lazy" />`;
+    }
+    html += `
+      <div class="offers-title">${o.title || ""}</div>
+      ${
+        o.price && !isNaN(o.price) && o.price > 0
+          ? `<div class="offers-price">${o.price.toFixed(2)} €</div>`
+          : ""
+      }
+      <div class="offers-text">${o.text || ""}</div>
+    `;
+
+    slide.innerHTML = html;
+    offersSlider.appendChild(slide);
+    offerSlides.push(slide);
+
+    const dot = document.createElement("button");
+    dot.type = "button";
+    dot.className = "offers-dot" + (index === 0 ? " active" : "");
+    dot.dataset.index = String(index);
+    dot.addEventListener("click", () => scrollToOffer(index));
+    offersDots.appendChild(dot);
+    offerDots.push(dot);
+  });
+
+  offersSlider.onscroll = handleOfferScroll;
+
+  offersSection.style.display = "block";
+}
+
+async function loadAndRenderOffers(restaurantRef, restData) {
+  const enabled = restData.offersEnabled !== false; // default: an
+  if (!enabled) {
+    offersSection.style.display = "none";
+    offersSlider.innerHTML = "";
+    offersDots.innerHTML = "";
+    offerSlides = [];
+    offerDots = [];
+    return;
+  }
+
+  const offersCol = collection(restaurantRef, "offers");
+  const snap = await getDocs(offersCol);
+
+  const offers = snap.docs
+    .map((docSnap) => {
+      const d = docSnap.data();
+
+      let priceNum = 0;
+      if (typeof d.price === "number") {
+        priceNum = d.price;
+      } else if (typeof d.price === "string") {
+        const parsed = parseFloat(d.price.replace(",", "."));
+        if (!isNaN(parsed)) priceNum = parsed;
+      }
+
+      return {
+        id: docSnap.id,
+        title: d.title || "",
+        text: d.text || "",
+        imageUrl: d.imageUrl || "",
+        active: d.active !== false,
+        sortOrder: d.sortOrder || 0,
+        price: priceNum,
+      };
+    })
+    .filter((o) => o.active);
+
+  offers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
+
+  // Fallback: falls noch keine neuen Offers, aber alte Felder existieren
+  if (!offers.length && restData.offerActive === true) {
+    if (restData.offerTitle || restData.offerText) {
+      let priceNum = 0;
+      if (typeof restData.offerPrice === "number") {
+        priceNum = restData.offerPrice;
+      }
+      offers.push({
+        id: "legacy",
+        title: restData.offerTitle || "",
+        text: restData.offerText || "",
+        imageUrl: restData.offerImageUrl || "",
+        active: true,
+        sortOrder: 0,
+        price: priceNum,
+      });
+    }
+  }
+
+  if (!offers.length) {
+    offersSection.style.display = "none";
+    offersSlider.innerHTML = "";
+    offersDots.innerHTML = "";
+    offerSlides = [];
+    offerDots = [];
+    return;
+  }
+
+  renderOffersSlider(offers);
 }
 
 async function loadRestaurantAndMenu() {
@@ -89,13 +240,14 @@ async function loadRestaurantAndMenu() {
       restaurantMetaEl.textContent = `ID: ${restaurantId}`;
       menuListEl.innerHTML = "<p class='info'>Bitte Personal informieren.</p>";
       cartSection.style.display = "none";
+      offersSection.style.display = "none";
       return;
     }
 
     const data = restaurantSnap.data();
     restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
 
-    // NEU: fester Begrüßungstext statt City + ID
+    // Fester Begrüßungstext
     restaurantMetaEl.textContent = "Miresevini ne menyn digjitale";
 
     if (data.logoUrl) {
@@ -109,11 +261,12 @@ async function loadRestaurantAndMenu() {
       menuListEl.innerHTML =
         "<p class='info'>Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.</p>";
       cartSection.style.display = "none";
+      offersSection.style.display = "none";
       return;
     }
 
-    // Angebot / Special
-    renderOffer(data);
+    // Angebote / Slider laden
+    await loadAndRenderOffers(restaurantRef, data);
 
     const menuCol = collection(restaurantRef, "menuItems");
     const snap = await getDocs(menuCol);
@@ -141,6 +294,7 @@ async function loadRestaurantAndMenu() {
     restaurantMetaEl.textContent = err.message;
     menuListEl.innerHTML = "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
     cartSection.style.display = "none";
+    offersSection.style.display = "none";
   }
 }
 
