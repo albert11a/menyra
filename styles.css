@@ -481,7 +481,7 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 6px;
-  margin-top: 10px;  /* ⬅ mehr Abstand von Beschreibung zu Buttons (vorher 4px) */
+  margin-top: 20px;  /* ⬅ mehr Abstand von Beschreibung zu Buttons (vorher 4px) */
 }
 
 /* ========================================
@@ -703,4 +703,5 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
+
 
