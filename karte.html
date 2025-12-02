@@ -9,7 +9,7 @@
 </head>
 <body>
   <main class="page page--karte">
-    <!-- Top: Restaurant-Card + Suche-Card + Kategorien -->
+    <!-- Top: Restaurant-Card + Sot ne fokus + Suche-Card + Kategorien -->
     <header class="karte-topbar">
       <!-- Restaurant -->
       <section class="card restaurant-card">
@@ -22,7 +22,20 @@
         </div>
       </section>
 
-      <!-- Suche in eigener weißen Card -->
+      <!-- ANGEBOTE / SOT NE FOKUS SLIDER (jetzt direkt unter Restaurant) -->
+      <section class="offers-card" id="offersSection" style="display:none;">
+        <div class="offers-header-row">
+          <div class="offers-label">SOT NE FOKUS</div>
+        </div>
+        <div class="offers-slider" id="offersSlider">
+          <!-- Slides kommen dynamisch aus Firestore -->
+        </div>
+        <div class="offers-dots" id="offersDots">
+          <!-- Dots kommen dynamisch -->
+        </div>
+      </section>
+
+      <!-- Suche in eigener weißen Card (jetzt unter Sot ne fokus) -->
       <section class="card search-card">
         <div class="search-wrapper">
           <div class="search-pill">
@@ -30,7 +43,7 @@
               id="searchInput"
               class="search-input"
               type="search"
-              placeholder="Kërko në meny..."
+              placeholder="Kërko në meny."
             />
             <button type="button" class="search-btn">
               <span class="search-btn-icon"></span>
@@ -42,19 +55,6 @@
       <!-- Kategorie-Tabs -->
       <div class="category-tabs" id="categoryTabs"></div>
     </header>
-
-    <!-- ANGEBOTE / SOT NE FOKUS SLIDER -->
-    <section class="offers-card" id="offersSection" style="display:none;">
-      <div class="offers-header-row">
-        <div class="offers-label">SOT NE FOKUS</div>
-      </div>
-      <div class="offers-slider" id="offersSlider">
-        <!-- Slides kommen dynamisch aus Firestore -->
-      </div>
-      <div class="offers-dots" id="offersDots">
-        <!-- Dots kommen dynamisch -->
-      </div>
-    </section>
 
     <!-- SPEISEKARTE -->
     <section class="card">
