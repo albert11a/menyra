@@ -152,9 +152,15 @@ body {
   white-space: nowrap;
 }
 
+/* ▶ Variante-1-Style für alle .btn-primary (Hinzufügen, etc.) */
 .btn-primary {
-  background: linear-gradient(135deg, #2563eb, #22c55e);
-  color: #f9fafb;
+  background: #ec4899;
+  color: #fdf2f8;
+  box-shadow: 0 10px 22px rgba(236, 72, 153, 0.45);
+}
+
+.btn-primary:hover {
+  background: #db2777;
 }
 
 .btn-ghost {
@@ -278,16 +284,22 @@ body {
   color: #9ca3af;
 }
 
+/* ▶ Variante-1-Style für Such-Button (rund, pink, Shadow) */
 .search-btn {
-  width: 34px;
-  height: 34px;
+  width: 42px;
+  height: 42px;
   border-radius: 999px;
   border: none;
-  background: #ec4899; /* iOS-style Accent */
+  background: #ec4899;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
+  box-shadow: 0 10px 22px rgba(236, 72, 153, 0.45);
+}
+
+.search-btn:hover {
+  background: #db2777;
 }
 
 .search-btn-icon {
@@ -326,13 +338,14 @@ body {
    FLOATING CART FAB
    ======================================== */
 
+/* ▶ Variante-1-Style in rund für den Warenkorb-FAB */
 .cart-fab {
   width: 54px;
   height: 54px;
   border-radius: 999px;
   border: none;
   background: #ec4899;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.5);
+  box-shadow: 0 10px 22px rgba(236, 72, 153, 0.5);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -432,7 +445,7 @@ body {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 25px;          /* ⬅ mehr Abstand zwischen Produkten (vorher 10px) */
+  gap: 16px;          /* Abstand zwischen Produkten */
   margin-top: 10px;
 }
 
@@ -481,7 +494,7 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 6px;
-  margin-top: 20px;  /* ⬅ mehr Abstand von Beschreibung zu Buttons (vorher 4px) */
+  margin-top: 10px;  /* Abstand Beschreibung → Buttons */
 }
 
 /* ========================================
@@ -703,5 +716,3 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
-
-
