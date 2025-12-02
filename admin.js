@@ -1,4 +1,4 @@
-// admin.js – Restaurant Admin: Login, Speisekarte (inkl. Angebote), Bestellübersicht
+// admin.js – Restaurant Admin: Login, Speisekarte & Getränke, Bestellübersicht
 
 import { db } from "./firebase-config.js";
 import {
@@ -8,33 +8,106 @@ import {
   getDocs,
   query,
   where,
-  deleteDoc,
   getDoc,
   updateDoc,
+  deleteDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-const adminRestLabel = document.getElementById("adminRestLabel");
+/* =========================
+   DOM-REFERENZEN
+   ========================= */
+
+// Login
 const adminLoginCard = document.getElementById("adminLoginCard");
-const adminCodeInput = document.getElementById("adminCodeInput");
+const adminRestIdInput = document.getElementById("adminRestIdInput");
 const adminLoginBtn = document.getElementById("adminLoginBtn");
+const adminCodeInput = document.getElementById("adminCodeInput");
+const adminCodeLoginBtn = document.getElementById("adminCodeLoginBtn");
 const adminLoginStatus = document.getElementById("adminLoginStatus");
 
+// Editor & Listen
 const menuEditorCard = document.getElementById("menuEditorCard");
 const menuListCard = document.getElementById("menuListCard");
 const ordersCard = document.getElementById("ordersCard");
+const adminRestLabel = document.getElementById("adminRestLabel");
 
-const itemCatInput = document.getElementById("itemCatInput");
+// Typ-Umschalter
+const typeFoodBtn = document.getElementById("typeFoodBtn");
+const typeDrinkBtn = document.getElementById("typeDrinkBtn");
+const typeToggleButtons = document.querySelectorAll(".type-toggle-btn");
+
+// Formular-Felder
+const itemCategorySelect = document.getElementById("itemCategorySelect");
+const itemCategoryCustomInput = document.getElementById("itemCategoryCustomInput");
 const itemNameInput = document.getElementById("itemNameInput");
 const itemDescInput = document.getElementById("itemDescInput");
 const itemPriceInput = document.getElementById("itemPriceInput");
 const itemImageInput = document.getElementById("itemImageInput");
-const itemOfferInput = document.getElementById("itemOfferInput");
-const addItemBtn = document.getElementById("addItemBtn");
+const itemSaveBtn = document.getElementById("itemSaveBtn");
+const itemResetBtn = document.getElementById("itemResetBtn");
 const adminItemStatus = document.getElementById("adminItemStatus");
+
+// Listen-Ausgabe
 const itemList = document.getElementById("itemList");
 const adminOrdersList = document.getElementById("adminOrdersList");
 
+/* =========================
+   GLOBALER STATE
+   ========================= */
+
 let currentRestaurantId = null;
+let currentItems = [];           // [{id, ...}]
+let currentEditItemId = null;    // null = neues Produkt
+let currentProductType = "food"; // "food" (Speisekarte) oder "drink" (Getränke)
+
+/* =========================
+   STANDARD-KATEGORIEN
+   ========================= */
+
+// Speisekarte – wie gewünscht
+const defaultFoodCategories = [
+  "Mengjesi",
+  "Supat",
+  "Paragjellat",
+  "Sandwich",
+  "Burger",
+  "Rizoto",
+  "Sallatat",
+  "Pasta",
+  "Pizza",
+  "Tava",
+  "Mish Pule",
+  "Mishrat",
+  "Deti",
+  "Antipasta",
+  "Desert",
+];
+
+// Getränke – auf Albanisch, möglichst viele Typen
+const defaultDrinkCategories = [
+  "Kafe & Espresso",
+  "Cappuccino & Latte",
+  "Çaj i ngrohtë",
+  "Çaj i ftohtë",
+  "Ujë i thjeshtë",
+  "Ujë i gazuar",
+  "Lëngje frutash",
+  "Pije të gazuara",
+  "Freskuese",
+  "Smoothie",
+  "Milkshake",
+  "Birra",
+  "Verë e bardhë",
+  "Verë e kuqe",
+  "Rose",
+  "Koktej",
+  "Pije alkoolike të forta",
+  "Energjike",
+];
+
+/* =========================
+   SESSION-HILFSFUNKTIONEN
+   ========================= */
 
 function saveOwnerSession(restaurantId) {
   localStorage.setItem("menyra_owner_restaurantId", restaurantId);
@@ -44,18 +117,55 @@ function loadOwnerSession() {
   return localStorage.getItem("menyra_owner_restaurantId");
 }
 
-async function setRestaurantById(id) {
-  adminLoginStatus.textContent = "";
-  adminLoginStatus.className = "status-text";
+/* =========================
+   TYP-UMSCHALTER & KATEGORIEN
+   ========================= */
 
-  const refRest = doc(db, "restaurants", id);
-  const snap = await getDoc(refRest);
-  if (!snap.exists()) {
-    adminLoginStatus.textContent = "Lokal mit dieser ID existiert nicht.";
-    adminLoginStatus.classList.add("status-err");
-    return false;
-  }
-  const data = snap.data();
+function fillCategorySelect() {
+  const cats =
+    currentProductType === "drink"
+      ? defaultDrinkCategories
+      : defaultFoodCategories;
+
+  itemCategorySelect.innerHTML = "";
+
+  const placeholderOption = document.createElement("option");
+  placeholderOption.value = "";
+  placeholderOption.textContent = "Kategorie wählen…";
+  placeholderOption.disabled = true;
+  placeholderOption.selected = true;
+  itemCategorySelect.appendChild(placeholderOption);
+
+  cats.forEach((cat) => {
+    const opt = document.createElement("option");
+    opt.value = cat;
+    opt.textContent = cat;
+    itemCategorySelect.appendChild(opt);
+  });
+}
+
+function setProductType(type) {
+  if (type !== "food" && type !== "drink") return;
+  currentProductType = type;
+
+  // Buttons visuell updaten
+  typeToggleButtons.forEach((btn) => {
+    const t = btn.dataset.type;
+    if (t === type) {
+      btn.classList.add("tab-btn-active");
+    } else {
+      btn.classList.remove("tab-btn-active");
+    }
+  });
+
+  fillCategorySelect();
+}
+
+/* =========================
+   LOGIN / RESTAURANT LADEN
+   ========================= */
+
+async function setRestaurantBySnapshot(id, data) {
   currentRestaurantId = id;
   saveOwnerSession(currentRestaurantId);
 
@@ -65,267 +175,507 @@ async function setRestaurantById(id) {
   menuListCard.style.display = "block";
   ordersCard.style.display = "block";
 
-  await loadMenuItems();
-  await loadTodayOrders();
-  return true;
-}
-
-async function loginWithCode(code) {
   adminLoginStatus.textContent = "";
   adminLoginStatus.className = "status-text";
 
-  if (!code) {
-    adminLoginStatus.textContent = "Bitte Admin-Code eingeben.";
+  await loadMenuItems();
+  await loadTodayOrders();
+}
+
+async function loginWithRestaurantId() {
+  adminLoginStatus.textContent = "";
+  adminLoginStatus.className = "status-text";
+
+  const id = (adminRestIdInput.value || "").trim();
+  if (!id) {
+    adminLoginStatus.textContent = "Bitte Restaurant-ID eingeben.";
     adminLoginStatus.classList.add("status-err");
     return;
   }
 
   try {
-    adminLoginBtn.disabled = true;
-    adminLoginBtn.textContent = "Prüfe...";
+    const refRest = doc(db, "restaurants", id);
+    const snap = await getDoc(refRest);
+    if (!snap.exists()) {
+      adminLoginStatus.textContent = "Lokal mit dieser ID existiert nicht.";
+      adminLoginStatus.classList.add("status-err");
+      return;
+    }
+    await setRestaurantBySnapshot(id, snap.data());
+  } catch (err) {
+    console.error(err);
+    adminLoginStatus.textContent = "Fehler: " + err.message;
+    adminLoginStatus.classList.add("status-err");
+  }
+}
 
-    const qRest = query(
-      collection(db, "restaurants"),
-      where("ownerCode", "==", code)
-    );
-    const snap = await getDocs(qRest);
+async function loginWithCode() {
+  adminLoginStatus.textContent = "";
+  adminLoginStatus.className = "status-text";
+
+  const code = (adminCodeInput.value || "").trim();
+  if (!code) {
+    adminLoginStatus.textContent = "Bitte Besitzer-Code eingeben.";
+    adminLoginStatus.classList.add("status-err");
+    return;
+  }
+
+  try {
+    const restCol = collection(db, "restaurants");
+    const q = query(restCol, where("ownerCode", "==", code));
+    const snap = await getDocs(q);
 
     if (snap.empty) {
-      adminLoginStatus.textContent = "Kein Lokal mit diesem Admin-Code gefunden.";
+      adminLoginStatus.textContent = "Kein Restaurant mit diesem Besitzer-Code gefunden.";
       adminLoginStatus.classList.add("status-err");
       return;
     }
 
     const docSnap = snap.docs[0];
-    const data = docSnap.data();
-    currentRestaurantId = docSnap.id;
-
-    saveOwnerSession(currentRestaurantId);
-
-    adminRestLabel.textContent = data.restaurantName || currentRestaurantId;
-    adminLoginCard.style.display = "none";
-    menuEditorCard.style.display = "block";
-    menuListCard.style.display = "block";
-    ordersCard.style.display = "block";
-
-    await loadMenuItems();
-    await loadTodayOrders();
+    await setRestaurantBySnapshot(docSnap.id, docSnap.data());
   } catch (err) {
     console.error(err);
     adminLoginStatus.textContent = "Fehler: " + err.message;
     adminLoginStatus.classList.add("status-err");
-  } finally {
-    adminLoginBtn.disabled = false;
-    adminLoginBtn.textContent = "Einloggen";
   }
 }
 
-async function addMenuItem() {
+/* =========================
+   MENÜ LADEN & RENDERN
+   ========================= */
+
+function inferTypeForItem(item) {
+  if (item.type === "food" || item.type === "drink") return item.type;
+  if (defaultDrinkCategories.includes(item.category)) return "drink";
+  return "food";
+}
+
+async function loadMenuItems() {
+  if (!currentRestaurantId) return;
+
+  const restRef = doc(db, "restaurants", currentRestaurantId);
+  const menuCol = collection(restRef, "menuItems");
+  const snap = await getDocs(menuCol);
+
+  currentItems = [];
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    currentItems.push({
+      id: docSnap.id,
+      ...data,
+    });
+  });
+
+  renderItemList();
+}
+
+function renderItemList() {
+  itemList.innerHTML = "";
+
+  if (!currentItems.length) {
+    const p = document.createElement("p");
+    p.className = "info";
+    p.textContent = "Noch keine Produkte angelegt.";
+    itemList.appendChild(p);
+    return;
+  }
+
+  // Alle Items mit sicherem type
+  const itemsWithType = currentItems.map((item) => ({
+    ...item,
+    type: inferTypeForItem(item),
+  }));
+
+  const foodMap = new Map();   // category -> [items]
+  const drinkMap = new Map();  // category -> [items]
+
+  itemsWithType.forEach((item) => {
+    const cat = item.category || "Ohne Kategorie";
+    const map = item.type === "drink" ? drinkMap : foodMap;
+    if (!map.has(cat)) map.set(cat, []);
+    map.get(cat).push(item);
+  });
+
+  // Helper zum Erzeugen einer Produktzeile (Card)
+  function createRow(item) {
+    const row = document.createElement("div");
+    row.className = "menu-item";
+
+    const header = document.createElement("div");
+    header.className = "menu-item-header";
+
+    const left = document.createElement("div");
+    const nameEl = document.createElement("div");
+    nameEl.className = "menu-item-name";
+    nameEl.textContent = item.name || "Ohne Namen";
+
+    const metaEl = document.createElement("div");
+    metaEl.style.fontSize = "0.75rem";
+    metaEl.style.color = "#64748b";
+    const typeLabel = item.type === "drink" ? "Getränk" : "Speise";
+    const catText = item.category ? item.category : "ohne Kategorie";
+    metaEl.textContent = `${typeLabel} · ${catText}`;
+
+    left.appendChild(nameEl);
+    left.appendChild(metaEl);
+
+    const priceEl = document.createElement("div");
+    priceEl.className = "menu-item-price";
+    if (typeof item.price === "number") {
+      priceEl.textContent = item.price.toFixed(2) + " €";
+    } else {
+      priceEl.textContent = "";
+    }
+
+    header.appendChild(left);
+    header.appendChild(priceEl);
+    row.appendChild(header);
+
+    if (item.description) {
+      const descEl = document.createElement("div");
+      descEl.className = "menu-item-desc";
+      descEl.textContent = item.description;
+      row.appendChild(descEl);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "menu-item-actions";
+
+    const available = item.available !== false;
+    const availBtn = document.createElement("button");
+    availBtn.className = "btn btn-ghost btn-small";
+    availBtn.textContent = available ? "Verfügbar" : "Ausgeblendet";
+    availBtn.style.opacity = available ? "1" : "0.6";
+    availBtn.addEventListener("click", () =>
+      toggleItemAvailability(item.id, available)
+    );
+
+    const editBtn = document.createElement("button");
+    editBtn.className = "btn btn-primary btn-small";
+    editBtn.textContent = "Bearbeiten";
+    editBtn.addEventListener("click", () => startEditItem(item));
+
+    const delBtn = document.createElement("button");
+    delBtn.className = "btn btn-ghost btn-small";
+    delBtn.textContent = "Löschen";
+    delBtn.addEventListener("click", () => deleteItem(item.id));
+
+    actions.appendChild(availBtn);
+    actions.appendChild(editBtn);
+    actions.appendChild(delBtn);
+
+    row.appendChild(actions);
+
+    return row;
+  }
+
+  function renderGroup(label, map) {
+    if (!map || map.size === 0) return;
+
+    const groupTitle = document.createElement("div");
+    groupTitle.className = "info";
+    groupTitle.style.fontWeight = "600";
+    groupTitle.style.marginTop = itemList.children.length ? "16px" : "0";
+    groupTitle.textContent = label;
+    itemList.appendChild(groupTitle);
+
+    // Kategorien alphabetisch sortiert
+    const sortedCats = Array.from(map.keys()).sort((a, b) =>
+      a.localeCompare(b, "de")
+    );
+
+    sortedCats.forEach((cat) => {
+      const catLabel = document.createElement("div");
+      catLabel.className = "info";
+      catLabel.style.marginTop = "6px";
+      catLabel.textContent = cat;
+      itemList.appendChild(catLabel);
+
+      map.get(cat).forEach((item) => {
+        const row = createRow(item);
+        itemList.appendChild(row);
+      });
+    });
+  }
+
+  // Erst Speisekarte, dann Getränke
+  renderGroup("Speisekarte", foodMap);
+  renderGroup("Getränke", drinkMap);
+}
+
+/* =========================
+   PRODUKT SPEICHERN / BEARBEITEN
+   ========================= */
+
+function resetForm() {
+  currentEditItemId = null;
   adminItemStatus.textContent = "";
   adminItemStatus.className = "status-text";
 
-  const cat = itemCatInput.value.trim() || "Sonstiges";
-  const name = itemNameInput.value.trim();
-  const desc = itemDescInput.value.trim();
-  const priceStr = itemPriceInput.value.trim();
-  const imageUrl = itemImageInput.value.trim();
-  const isOffer = itemOfferInput.checked;
+  itemCategoryCustomInput.value = "";
+  itemNameInput.value = "";
+  itemDescInput.value = "";
+  itemPriceInput.value = "";
+  itemImageInput.value = "";
 
-  if (!cat || !name || !priceStr) {
-    adminItemStatus.textContent = "Kategorie, Name und Preis sind Pflicht.";
+  setProductType("food");
+  itemSaveBtn.textContent = "Produkt speichern";
+}
+
+function startEditItem(item) {
+  currentEditItemId = item.id;
+  adminItemStatus.textContent = "Bearbeitung eines Produkts.";
+  adminItemStatus.className = "status-text";
+
+  const type = inferTypeForItem(item);
+  setProductType(type);
+
+  const categories =
+    type === "drink" ? defaultDrinkCategories : defaultFoodCategories;
+
+  if (item.category && categories.includes(item.category)) {
+    itemCategorySelect.value = item.category;
+    itemCategoryCustomInput.value = "";
+  } else {
+    itemCategorySelect.value = "";
+    itemCategoryCustomInput.value = item.category || "";
+  }
+
+  itemNameInput.value = item.name || "";
+  itemDescInput.value = item.description || "";
+  itemPriceInput.value =
+    typeof item.price === "number" ? item.price.toString() : "";
+  itemImageInput.value = item.imageUrl || "";
+
+  itemSaveBtn.textContent = "Produkt aktualisieren";
+}
+
+async function saveItem() {
+  if (!currentRestaurantId) return;
+
+  adminItemStatus.textContent = "";
+  adminItemStatus.className = "status-text";
+
+  const selectedCat = itemCategorySelect.value || "";
+  const customCat = (itemCategoryCustomInput.value || "").trim();
+  const category = customCat || selectedCat;
+
+  const name = (itemNameInput.value || "").trim();
+  const desc = (itemDescInput.value || "").trim();
+  const priceStr = (itemPriceInput.value || "").trim();
+  const imageUrl = (itemImageInput.value || "").trim();
+
+  if (!category) {
+    adminItemStatus.textContent = "Bitte eine Kategorie wählen oder eingeben.";
     adminItemStatus.classList.add("status-err");
     return;
   }
-
+  if (!name) {
+    adminItemStatus.textContent = "Bitte Produktname eingeben.";
+    adminItemStatus.classList.add("status-err");
+    return;
+  }
   const price = parseFloat(priceStr.replace(",", "."));
   if (isNaN(price)) {
-    adminItemStatus.textContent = "Preis ist keine Zahl.";
+    adminItemStatus.textContent = "Bitte einen gültigen Preis eingeben.";
     adminItemStatus.classList.add("status-err");
     return;
   }
 
+  const restRef = doc(db, "restaurants", currentRestaurantId);
+  const menuCol = collection(restRef, "menuItems");
+
+  const data = {
+    type: currentProductType, // "food" oder "drink"
+    category,
+    name,
+    description: desc,
+    price,
+    imageUrl: imageUrl || null,
+    available: true,
+  };
+
   try {
-    addItemBtn.disabled = true;
-    addItemBtn.textContent = "Speichere...";
+    itemSaveBtn.disabled = true;
 
-    const menuCol = collection(doc(db, "restaurants", currentRestaurantId), "menuItems");
-    await addDoc(menuCol, {
-      category: cat,
-      name,
-      description: desc,
-      price,
-      imageUrl: imageUrl || null,
-      offer: isOffer,
-      available: true,
-    });
-
-    adminItemStatus.textContent = "Gericht gespeichert.";
-    adminItemStatus.classList.add("status-ok");
-
-    itemCatInput.value = "";
-    itemNameInput.value = "";
-    itemDescInput.value = "";
-    itemPriceInput.value = "";
-    itemImageInput.value = "";
-    itemOfferInput.checked = false;
+    if (currentEditItemId) {
+      await updateDoc(doc(menuCol, currentEditItemId), data);
+      adminItemStatus.textContent = "Produkt aktualisiert.";
+      adminItemStatus.classList.add("status-ok");
+    } else {
+      await addDoc(menuCol, data);
+      adminItemStatus.textContent = "Produkt gespeichert.";
+      adminItemStatus.classList.add("status-ok");
+    }
 
     await loadMenuItems();
+    resetForm();
   } catch (err) {
     console.error(err);
     adminItemStatus.textContent = "Fehler: " + err.message;
     adminItemStatus.classList.add("status-err");
   } finally {
-    addItemBtn.disabled = false;
-    addItemBtn.textContent = "Gericht speichern";
+    itemSaveBtn.disabled = false;
   }
 }
 
-async function loadMenuItems() {
-  itemList.innerHTML = "<div class='info'>Lade...</div>";
+async function toggleItemAvailability(itemId, currentlyAvailable) {
+  if (!currentRestaurantId || !itemId) return;
 
-  const menuCol = collection(doc(db, "restaurants", currentRestaurantId), "menuItems");
-  const snap = await getDocs(menuCol);
-
-  itemList.innerHTML = "";
-  if (snap.empty) {
-    itemList.innerHTML = "<div class='info'>Noch keine Gerichte.</div>";
-    return;
+  try {
+    const restRef = doc(db, "restaurants", currentRestaurantId);
+    const menuCol = collection(restRef, "menuItems");
+    await updateDoc(doc(menuCol, itemId), {
+      available: !currentlyAvailable,
+    });
+    await loadMenuItems();
+  } catch (err) {
+    console.error(err);
   }
-
-  snap.forEach((docSnap) => {
-    const data = docSnap.data();
-    const available = data.available !== false;
-    const hasImage = !!data.imageUrl;
-    const isOffer = data.offer === true;
-
-    const row = document.createElement("div");
-    row.className = "list-item-row";
-    row.innerHTML = `
-      <span>
-        [${data.category || "Sonstiges"}] ${data.name} – ${data.price.toFixed(2)} €
-        <br/>
-        <span class="info">
-          ${data.description || ""}${
-      hasImage ? " • Foto: vorhanden" : " • Foto: keines"
-    }${isOffer ? " • ⭐ Angebot" : ""} • Status: ${
-      available ? "aktiv" : "inaktiv"
-    }
-        </span>
-      </span>
-      <span style="display:flex; gap:6px;">
-        <button class="btn btn-ghost btn-small" data-id="${docSnap.id}" data-action="toggle">
-          ${available ? "Deaktivieren" : "Aktivieren"}
-        </button>
-        <button class="btn btn-ghost btn-small" data-id="${docSnap.id}" data-action="delete">
-          Löschen
-        </button>
-      </span>
-    `;
-    itemList.appendChild(row);
-  });
-
-  itemList.addEventListener(
-    "click",
-    async (e) => {
-      const btn = e.target.closest("button[data-id]");
-      if (!btn) return;
-      const id = btn.dataset.id;
-      const action = btn.dataset.action;
-      const menuCol = collection(doc(db, "restaurants", currentRestaurantId), "menuItems");
-
-      if (action === "delete") {
-        if (!confirm("Dieses Gericht wirklich löschen?")) return;
-        await deleteDoc(doc(menuCol, id));
-        await loadMenuItems();
-      } else if (action === "toggle") {
-        const currentlyActive = btn.textContent.includes("Deaktivieren");
-        const newAvailable = !currentlyActive;
-
-        await updateDoc(doc(menuCol, id), { available: newAvailable });
-        await loadMenuItems();
-      }
-    },
-    { once: true }
-  );
 }
 
-function mapStatusLabel(status) {
-  if (status === "new") return "Neu";
-  if (status === "in_progress") return "In Arbeit";
-  if (status === "served") return "Serviert";
-  return status || "";
+async function deleteItem(itemId) {
+  if (!currentRestaurantId || !itemId) return;
+  const confirmDelete = window.confirm("Produkt wirklich löschen?");
+  if (!confirmDelete) return;
+
+  try {
+    const restRef = doc(db, "restaurants", currentRestaurantId);
+    const menuCol = collection(restRef, "menuItems");
+    await deleteDoc(doc(menuCol, itemId));
+    await loadMenuItems();
+  } catch (err) {
+    console.error(err);
+  }
 }
+
+/* =========================
+   HEUTIGE BESTELLUNGEN
+   ========================= */
 
 async function loadTodayOrders() {
-  adminOrdersList.innerHTML = "<div class='info'>Lade...</div>";
+  if (!currentRestaurantId) return;
 
-  const ordersCol = collection(doc(db, "restaurants", currentRestaurantId), "orders");
+  adminOrdersList.innerHTML = "";
+
+  const today = new Date();
+  const y = today.getFullYear();
+  const m = today.getMonth();
+  const d = today.getDate();
+
+  const restRef = doc(db, "restaurants", currentRestaurantId);
+  const ordersCol = collection(restRef, "orders");
   const snap = await getDocs(ordersCol);
 
-  const todayISO = new Date().toISOString().slice(0, 10);
-  const orders = [];
+  const ordersToday = [];
 
   snap.forEach((docSnap) => {
     const data = docSnap.data();
-    const created = data.createdAt?.toDate?.();
-    const dateStr = created ? created.toISOString().slice(0, 10) : null;
-
-    if (dateStr === todayISO) {
-      const total =
-        (data.items || []).reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0) ||
-        0;
-      orders.push({
-        id: docSnap.id,
-        table: data.table || "?",
-        status: data.status || "new",
-        time: created
-          ? created.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })
-          : "",
-        total,
-        count: (data.items || []).reduce((sum, item) => sum + (item.qty || 0), 0),
-      });
+    if (data.createdAt && data.createdAt.toDate) {
+      const dt = data.createdAt.toDate();
+      if (
+        dt.getFullYear() === y &&
+        dt.getMonth() === m &&
+        dt.getDate() === d
+      ) {
+        ordersToday.push({ id: docSnap.id, ...data, createdAt: dt });
+      }
+    } else {
+      // Falls kein Datum gesetzt ist, optional trotzdem anzeigen
     }
   });
 
-  orders.sort((a, b) => (a.time < b.time ? 1 : -1));
-
-  adminOrdersList.innerHTML = "";
-  if (!orders.length) {
-    adminOrdersList.innerHTML = "<div class='info'>Heute noch keine Bestellungen.</div>";
+  if (!ordersToday.length) {
+    const p = document.createElement("p");
+    p.className = "info";
+    p.textContent = "Heute noch keine Bestellungen.";
+    adminOrdersList.appendChild(p);
     return;
   }
 
-  orders.forEach((o) => {
-    const div = document.createElement("div");
-    div.className = "list-item-row";
-    div.innerHTML = `
-      <span>
-        ${o.time} – Tisch ${o.table}
-        <br/>
-        <span class="info">
-          ${o.count} Positionen • ${o.total.toFixed(2)} € • Status: ${mapStatusLabel(o.status)}
-        </span>
-      </span>
-    `;
-    adminOrdersList.appendChild(div);
-  });
+  ordersToday
+    .sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+    .forEach((order) => {
+      const row = document.createElement("div");
+      row.className = "list-item-row";
+
+      const left = document.createElement("div");
+      left.style.display = "flex";
+      left.style.flexDirection = "column";
+
+      const title = document.createElement("span");
+      title.style.fontSize = "0.85rem";
+      title.style.fontWeight = "600";
+      const timeStr = order.createdAt
+        ? order.createdAt.toLocaleTimeString("de-AT", {
+            hour: "2-digit",
+            minute: "2-digit",
+          })
+        : "";
+      title.textContent = `Tisch ${order.table || "?"} – ${timeStr}`;
+
+      const itemsStr =
+        (order.items || [])
+          .map((i) => `${i.qty}× ${i.name}`)
+          .join(", ") || "Keine Artikel";
+
+      const itemsSpan = document.createElement("span");
+      itemsSpan.style.fontSize = "0.78rem";
+      itemsSpan.textContent = itemsStr;
+
+      left.appendChild(title);
+      left.appendChild(itemsSpan);
+
+      const right = document.createElement("div");
+      right.style.fontSize = "0.82rem";
+      right.style.fontWeight = "600";
+
+      const total = (order.items || []).reduce(
+        (sum, i) => sum + (i.price || 0) * (i.qty || 0),
+        0
+      );
+      right.textContent = total.toFixed(2) + " €";
+
+      row.appendChild(left);
+      row.appendChild(right);
+
+      adminOrdersList.appendChild(row);
+    });
 }
 
-adminLoginBtn.addEventListener("click", () => {
-  loginWithCode(adminCodeInput.value.trim());
-});
+/* =========================
+   EVENTS
+   ========================= */
 
-addItemBtn.addEventListener("click", addMenuItem);
+// Login
+adminLoginBtn.addEventListener("click", loginWithRestaurantId);
+adminCodeLoginBtn.addEventListener("click", loginWithCode);
 
-// Direktzugang: admin.html?r=restaurantId
-const params = new URLSearchParams(window.location.search);
-const directRestId = params.get("r");
+// Typ-Umschalter
+typeFoodBtn.addEventListener("click", () => setProductType("food"));
+typeDrinkBtn.addEventListener("click", () => setProductType("drink"));
 
-if (directRestId) {
-  setRestaurantById(directRestId);
-} else {
-  const storedRestId = loadOwnerSession();
-  if (storedRestId) {
-    setRestaurantById(storedRestId);
-  }
+// Speichern / Reset
+itemSaveBtn.addEventListener("click", saveItem);
+itemResetBtn.addEventListener("click", resetForm);
+
+/* =========================
+   INIT
+   ========================= */
+
+setProductType("food");
+
+const savedId = loadOwnerSession();
+if (savedId) {
+  (async () => {
+    try {
+      const refRest = doc(db, "restaurants", savedId);
+      const snap = await getDoc(refRest);
+      if (snap.exists()) {
+        await setRestaurantBySnapshot(savedId, snap.data());
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  })();
 }
