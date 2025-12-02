@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Logo, Suche, Kategorien, Angebot-Slider & Floating Cart-FAB
+// karte.js – Gäste-Ansicht mit Logo, Suche, Kategorien, Offers-Slider & Floating Cart-FAB
 
 import { db } from "./firebase-config.js";
 import {
@@ -22,8 +22,8 @@ const categoryTabsEl = document.getElementById("categoryTabs");
 const menuListEl = document.getElementById("menuList");
 
 const offersSection = document.getElementById("offersSection");
-const offersSlider = document.getElementById("offersSlider");
-const offersDots = document.getElementById("offersDots");
+const offersSliderEl = document.getElementById("offersSlider");
+const offersDotsEl = document.getElementById("offersDots");
 
 const cartSection = document.getElementById("cartSection");
 const cartItemsEl = document.getElementById("cartItems");
@@ -44,11 +44,15 @@ let searchTerm = "";
 let cart = [];
 
 // Offers Slider State
-let offerSlides = [];
-let offerDots = [];
-let currentOfferIndex = 0;
+let offersSlides = [];
+let offersCurrentIndex = 0;
+let offersTimer = null;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
+
+/* =========================
+   HELFER: ABO & STATUS
+   ========================= */
 
 function todayISO() {
   const d = new Date();
@@ -70,165 +74,232 @@ function isRestaurantOperational(data) {
   return true;
 }
 
-function updateOfferDots(activeIndex) {
-  offerDots.forEach((dot, i) => {
-    dot.classList.toggle("active", i === activeIndex);
-  });
+/* =========================
+   OFFERS-SLIDER LOGIK
+   ========================= */
+
+function clearOffersTimer() {
+  if (offersTimer) {
+    clearInterval(offersTimer);
+    offersTimer = null;
+  }
 }
 
-function scrollToOffer(index) {
-  if (!offerSlides[index]) return;
-  const slide = offerSlides[index];
-  const offsetLeft = slide.offsetLeft - offersSlider.offsetLeft;
-  offersSlider.scrollTo({
-    left: offsetLeft,
+function goToOffer(index) {
+  if (!offersSlides.length || !offersSliderEl) return;
+  if (index < 0 || index >= offersSlides.length) return;
+
+  const slide = offersSlides[index];
+  const offset = slide.offsetLeft - offersSliderEl.offsetLeft;
+
+  offersSliderEl.scrollTo({
+    left: offset,
     behavior: "smooth",
   });
-  currentOfferIndex = index;
-  updateOfferDots(index);
+
+  offersCurrentIndex = index;
+  const dots = offersDotsEl.querySelectorAll(".offers-dot");
+  dots.forEach((d, i) => d.classList.toggle("active", i === index));
 }
 
-function handleOfferScroll() {
-  if (!offerSlides.length) return;
-  const center = offersSlider.scrollLeft + offersSlider.clientWidth / 2;
-
-  let bestIndex = 0;
-  let bestDist = Infinity;
-  offerSlides.forEach((slide, i) => {
-    const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
-    const dist = Math.abs(slideCenter - center);
-    if (dist < bestDist) {
-      bestDist = dist;
-      bestIndex = i;
-    }
-  });
-
-  currentOfferIndex = bestIndex;
-  updateOfferDots(bestIndex);
+function startOffersAutoSlide() {
+  clearOffersTimer();
+  if (offersSlides.length <= 1) return;
+  offersTimer = setInterval(() => {
+    const next = (offersCurrentIndex + 1) % offersSlides.length;
+    goToOffer(next);
+  }, 4000);
 }
 
-function renderOffersSlider(offers) {
-  if (!offers || !offers.length) {
+async function loadOffersForRestaurant(restaurantRef, restData) {
+  // Global-Schalter im Restaurant: offerActive
+  if (restData.offerActive === false) {
     offersSection.style.display = "none";
-    offersSlider.innerHTML = "";
-    offersDots.innerHTML = "";
-    offerSlides = [];
-    offerDots = [];
-    return;
-  }
-
-  offersSlider.innerHTML = "";
-  offersDots.innerHTML = "";
-  offerSlides = [];
-  offerDots = [];
-  currentOfferIndex = 0;
-
-  offers.forEach((o, index) => {
-    const slide = document.createElement("div");
-    slide.className = "offer-slide";
-
-    let html = "";
-    if (o.imageUrl) {
-      html += `<img src="${o.imageUrl}" alt="Angebot" class="offer-image" loading="lazy" />`;
-    }
-    html += `
-      <div class="offers-title">${o.title || ""}</div>
-      ${
-        o.price && !isNaN(o.price) && o.price > 0
-          ? `<div class="offers-price">${o.price.toFixed(2)} €</div>`
-          : ""
-      }
-      <div class="offers-text">${o.text || ""}</div>
-    `;
-
-    slide.innerHTML = html;
-    offersSlider.appendChild(slide);
-    offerSlides.push(slide);
-
-    const dot = document.createElement("button");
-    dot.type = "button";
-    dot.className = "offers-dot" + (index === 0 ? " active" : "");
-    dot.dataset.index = String(index);
-    dot.addEventListener("click", () => scrollToOffer(index));
-    offersDots.appendChild(dot);
-    offerDots.push(dot);
-  });
-
-  offersSlider.onscroll = handleOfferScroll;
-
-  offersSection.style.display = "block";
-}
-
-async function loadAndRenderOffers(restaurantRef, restData) {
-  const enabled = restData.offersEnabled !== false; // default: an
-  if (!enabled) {
-    offersSection.style.display = "none";
-    offersSlider.innerHTML = "";
-    offersDots.innerHTML = "";
-    offerSlides = [];
-    offerDots = [];
+    clearOffersTimer();
     return;
   }
 
   const offersCol = collection(restaurantRef, "offers");
   const snap = await getDocs(offersCol);
 
-  const offers = snap.docs
-    .map((docSnap) => {
-      const d = docSnap.data();
-
-      let priceNum = 0;
-      if (typeof d.price === "number") {
-        priceNum = d.price;
-      } else if (typeof d.price === "string") {
-        const parsed = parseFloat(d.price.replace(",", "."));
-        if (!isNaN(parsed)) priceNum = parsed;
-      }
-
-      return {
-        id: docSnap.id,
-        title: d.title || "",
-        text: d.text || "",
-        imageUrl: d.imageUrl || "",
-        active: d.active !== false,
-        sortOrder: d.sortOrder || 0,
-        price: priceNum,
-      };
-    })
-    .filter((o) => o.active);
-
-  offers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-
-  // Fallback: falls noch keine neuen Offers, aber alte Felder existieren
-  if (!offers.length && restData.offerActive === true) {
-    if (restData.offerTitle || restData.offerText) {
-      let priceNum = 0;
-      if (typeof restData.offerPrice === "number") {
-        priceNum = restData.offerPrice;
-      }
-      offers.push({
-        id: "legacy",
-        title: restData.offerTitle || "",
-        text: restData.offerText || "",
-        imageUrl: restData.offerImageUrl || "",
-        active: true,
-        sortOrder: 0,
-        price: priceNum,
-      });
-    }
-  }
+  const offers = [];
+  snap.forEach((docSnap) => {
+    const d = docSnap.data();
+    if (d.active === false) return; // nur aktive zeigen
+    offers.push({
+      id: docSnap.id,
+      ...d,
+    });
+  });
 
   if (!offers.length) {
     offersSection.style.display = "none";
-    offersSlider.innerHTML = "";
-    offersDots.innerHTML = "";
-    offerSlides = [];
-    offerDots = [];
+    clearOffersTimer();
     return;
   }
 
   renderOffersSlider(offers);
 }
+
+function renderOffersSlider(offers) {
+  offersSliderEl.innerHTML = "";
+  offersDotsEl.innerHTML = "";
+  offersSection.style.display = "block";
+
+  const dotsFrag = document.createDocumentFragment();
+  const slidesFrag = document.createDocumentFragment();
+
+  offers.forEach((offer, index) => {
+    // Menü-Item auflösen, falls verknüpft
+    let linkedMenuItem = null;
+    if (offer.menuItemId) {
+      linkedMenuItem = allMenuItems.find((m) => m.id === offer.menuItemId) || null;
+    }
+
+    const title =
+      offer.title ||
+      (linkedMenuItem ? linkedMenuItem.name : "Angebot");
+    const description =
+      offer.description ||
+      (linkedMenuItem ? linkedMenuItem.description : "");
+    const imageUrl =
+      offer.imageUrl ||
+      (linkedMenuItem ? linkedMenuItem.imageUrl : null);
+
+    let price = null;
+    if (typeof offer.price === "number") {
+      price = offer.price;
+    } else if (linkedMenuItem && typeof linkedMenuItem.price === "number") {
+      price = linkedMenuItem.price;
+    }
+
+    const addToCart = offer.addToCart === true;
+
+    // Slide erstellen
+    const slide = document.createElement("div");
+    slide.className = "offer-slide";
+
+    if (imageUrl) {
+      const img = document.createElement("img");
+      img.src = imageUrl;
+      img.alt = title;
+      img.loading = "lazy";
+      img.className = "offer-image";
+      slide.appendChild(img);
+    } else {
+      // Fallback-Hintergrund wenn kein Bild
+      const placeholder = document.createElement("div");
+      placeholder.className = "offer-image";
+      slide.appendChild(placeholder);
+    }
+
+    const header = document.createElement("div");
+    header.className = "offer-header";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "offer-title";
+    titleEl.textContent = title;
+
+    const priceEl = document.createElement("div");
+    priceEl.className = "offer-price";
+    priceEl.textContent =
+      typeof price === "number" ? price.toFixed(2) + " €" : "";
+
+    header.appendChild(titleEl);
+    header.appendChild(priceEl);
+    slide.appendChild(header);
+
+    const descEl = document.createElement("div");
+    descEl.className = "offer-desc";
+    descEl.textContent = description || "";
+    slide.appendChild(descEl);
+
+    if (addToCart && (linkedMenuItem || typeof price === "number")) {
+      // Bestellbares Angebot
+      const actions = document.createElement("div");
+      actions.className = "offer-actions";
+
+      const minusBtn = document.createElement("button");
+      minusBtn.className = "btn btn-ghost";
+      minusBtn.textContent = "−";
+
+      const plusBtn = document.createElement("button");
+      plusBtn.className = "btn btn-primary";
+      plusBtn.textContent = "Hinzufügen";
+
+      // Item bestimmen, das in den Warenkorb geht
+      const targetItem = linkedMenuItem
+        ? linkedMenuItem
+        : {
+            id: "offer:" + offer.id,
+            name: title,
+            price: price || 0,
+          };
+
+      minusBtn.addEventListener("click", () => {
+        changeCart(targetItem, -1);
+      });
+      plusBtn.addEventListener("click", () => {
+        changeCart(targetItem, 1);
+      });
+
+      actions.appendChild(minusBtn);
+      actions.appendChild(plusBtn);
+      slide.appendChild(actions);
+    } else {
+      // Nur Info/Werbung
+      const infoOnly = document.createElement("div");
+      infoOnly.className = "offer-info-only";
+      infoOnly.textContent =
+        "Vetëm informacion / reklamë – jo e porositshme direkt.";
+      slide.appendChild(infoOnly);
+    }
+
+    slidesFrag.appendChild(slide);
+
+    // Dot für Slider
+    const dot = document.createElement("button");
+    dot.className = "offers-dot" + (index === 0 ? " active" : "");
+    dot.dataset.index = String(index);
+    dot.addEventListener("click", () => {
+      goToOffer(index);
+      startOffersAutoSlide();
+    });
+    dotsFrag.appendChild(dot);
+  });
+
+  offersSliderEl.appendChild(slidesFrag);
+  offersDotsEl.appendChild(dotsFrag);
+
+  offersSlides = Array.from(
+    offersSliderEl.querySelectorAll(".offer-slide")
+  );
+  offersCurrentIndex = 0;
+  startOffersAutoSlide();
+
+  // Aktiven Dot beim manuellen Scrollen updaten
+  offersSliderEl.addEventListener("scroll", () => {
+    if (!offersSlides.length) return;
+    const center = offersSliderEl.scrollLeft + offersSliderEl.clientWidth / 2;
+    let bestIndex = 0;
+    let bestDist = Infinity;
+    offersSlides.forEach((slide, i) => {
+      const slideCenter = slide.offsetLeft + slide.offsetWidth / 2;
+      const dist = Math.abs(slideCenter - center);
+      if (dist < bestDist) {
+        bestDist = dist;
+        bestIndex = i;
+      }
+    });
+    offersCurrentIndex = bestIndex;
+    const dots = offersDotsEl.querySelectorAll(".offers-dot");
+    dots.forEach((d, i) => d.classList.toggle("active", i === bestIndex));
+  });
+}
+
+/* =========================
+   RESTAURANT & MENÜ LADEN
+   ========================= */
 
 async function loadRestaurantAndMenu() {
   try {
@@ -246,9 +317,8 @@ async function loadRestaurantAndMenu() {
 
     const data = restaurantSnap.data();
     restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
-
-    // Fester Begrüßungstext
-    restaurantMetaEl.textContent = "Miresevini ne menyn digjitale";
+    // Fixer Text statt Stadt/ID
+    restaurantMetaEl.textContent = "Mirësevini në menynë digjitale";
 
     if (data.logoUrl) {
       restaurantLogoEl.src = data.logoUrl;
@@ -265,9 +335,7 @@ async function loadRestaurantAndMenu() {
       return;
     }
 
-    // Angebote / Slider laden
-    await loadAndRenderOffers(restaurantRef, data);
-
+    // Speisekarte laden
     const menuCol = collection(restaurantRef, "menuItems");
     const snap = await getDocs(menuCol);
 
@@ -288,6 +356,9 @@ async function loadRestaurantAndMenu() {
 
     renderCategories();
     renderMenu();
+
+    // Angebote-Slider laden
+    await loadOffersForRestaurant(restaurantRef, data);
   } catch (err) {
     console.error(err);
     restaurantNameEl.textContent = "Fehler";
@@ -297,6 +368,10 @@ async function loadRestaurantAndMenu() {
     offersSection.style.display = "none";
   }
 }
+
+/* =========================
+   KATEGORIEN & MENÜ
+   ========================= */
 
 function getCategories() {
   const set = new Set();
@@ -407,6 +482,10 @@ function renderMenu() {
   });
 }
 
+/* =========================
+   WARENKORB
+   ========================= */
+
 function changeCart(item, delta) {
   const index = cart.findIndex((c) => c.id === item.id);
   if (index === -1 && delta > 0) {
@@ -423,7 +502,7 @@ function updateCartBadge() {
   if (totalQty > 0) {
     cartBadgeEl.textContent = String(totalQty);
     cartBadgeEl.style.display = "flex";
-    cartFab.classList.add("visible"); // Fade-In ein
+    cartFab.classList.add("visible"); // Fade-In
   } else {
     cartBadgeEl.style.display = "none";
     cartFab.classList.remove("visible"); // Fade-Out
@@ -501,6 +580,10 @@ async function sendOrder() {
     sendOrderBtn.textContent = "Bestellung senden";
   }
 }
+
+/* =========================
+   EVENTS
+   ========================= */
 
 clearCartBtn.addEventListener("click", () => {
   cart = [];
