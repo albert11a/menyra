@@ -9,35 +9,55 @@
 </head>
 <body>
   <main class="page">
-    <header class="header">
-      <div>
-        <div class="header-title">MENYRA</div>
-        <div class="header-sub" id="tableLabel">Tisch: ?</div>
-      </div>
-    </header>
-
-    <!-- Restaurant-Kopf mit Logo -->
-    <section class="card">
-      <div class="restaurant-header">
-        <img id="restaurantLogo" class="rest-logo" style="display:none;" alt="Logo" />
-        <div>
-          <div class="restaurant-name" id="restaurantName">Lokal</div>
-          <div class="restaurant-meta" id="restaurantMeta"></div>
+    <!-- STICKY TOP-BEREICH -->
+    <div class="top-shell">
+      <!-- Restaurant-Kopf mit Logo -->
+      <section class="card card-rest">
+        <div class="restaurant-header">
+          <img id="restaurantLogo" class="rest-logo" style="display:none;" alt="Logo" />
+          <div>
+            <div class="restaurant-name" id="restaurantName">Lokal</div>
+            <div class="restaurant-meta" id="restaurantMeta"></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Kategorien & Speisekarte -->
-    <section class="card">
-      <h2>Speisekarte</h2>
-      <div class="category-tabs" id="categoryTabs"></div>
+      <!-- Suche + Warenkorb + Kategorien -->
+      <section class="card card-top-controls">
+        <div class="top-search-row">
+          <div class="search-pill">
+            <span class="search-icon">🔍</span>
+            <input
+              id="searchInput"
+              class="search-input"
+              placeholder="Kërko në meny..."
+            />
+          </div>
+          <button class="cart-icon-btn" id="cartIconBtn" aria-label="Warenkorb">
+            🧺
+            <span class="cart-badge" id="cartBadge" style="display:none;"></span>
+          </button>
+        </div>
+
+        <div class="category-tabs" id="categoryTabs"></div>
+      </section>
+
+      <!-- Angebote-Bereich (optional) -->
+      <section class="card offers-card" id="offersSection" style="display:none;">
+        <h2>Oferta speciale</h2>
+        <div class="offers-list" id="offersList"></div>
+      </section>
+    </div>
+
+    <!-- PRODUKT-LISTE (scrollbar) -->
+    <section class="card product-list-card">
       <div class="menu-list" id="menuList"></div>
     </section>
 
-    <!-- Warenkorb -->
+    <!-- Warenkorb unten -->
     <section class="cart-card" id="cartSection" style="display:none;">
       <div class="cart-header">
-        <span>Deine Bestellung</span>
+        <span>Porosia juaj</span>
       </div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-total" id="cartTotal"></div>
@@ -45,11 +65,11 @@
         id="noteInput"
         class="input"
         style="border-radius: 12px; margin-top:8px;"
-        placeholder="Hinweis für die Küche (optional)"
+        placeholder="Shënim për kuzhinën (opsionale)"
       ></textarea>
       <div class="cart-actions">
-        <button class="btn btn-ghost" id="clearCartBtn">Leeren</button>
-        <button class="btn btn-primary" id="sendOrderBtn">Bestellung senden</button>
+        <button class="btn btn-ghost" id="clearCartBtn">Pastro</button>
+        <button class="btn btn-primary" id="sendOrderBtn">Dërgo porosinë</button>
       </div>
       <div class="status-text" id="statusMsg"></div>
     </section>
