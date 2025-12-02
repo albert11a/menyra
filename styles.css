@@ -98,7 +98,7 @@ body {
   color: #475569;
 }
 
-/* Restaurant-Card (Shpija e Vjetër) */
+/* Restaurant-Card */
 
 .restaurant-card {
   padding: 14px 16px;
@@ -112,9 +112,9 @@ body {
 
 .rest-logo {
   height: 44px;
-  width: auto;              /* Bild darf seine Breite behalten */
-  border-radius: 8px;       /* leicht abgerundet, aber kein Kreis mehr */
-  object-fit: contain;      /* komplettes Logo sichtbar, nicht gecroppt */
+  width: auto;
+  border-radius: 8px;
+  object-fit: contain;
   border: 1px solid #e2e8f0;
 }
 
@@ -478,7 +478,7 @@ body {
 }
 
 /* ========================================
-   ANGEBOTS-KARTE (Karte)
+   ANGEBOTS-KARTE (Karte / Slider)
    ======================================== */
 
 .offers-card {
@@ -497,9 +497,36 @@ body {
   opacity: 0.7;
 }
 
+.offers-slider {
+  margin-top: 8px;
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 4px;
+  scroll-snap-type: x mandatory;
+}
+
+.offer-slide {
+  flex: 0 0 82%;
+  scroll-snap-align: start;
+}
+
+.offer-image {
+  width: 100%;
+  max-height: 180px;
+  border-radius: 12px;
+  object-fit: cover;
+}
+
 .offers-title {
-  margin-top: 4px;
+  margin-top: 6px;
   font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.offers-price {
+  margin-top: 2px;
+  font-size: 0.85rem;
   font-weight: 600;
 }
 
@@ -507,6 +534,32 @@ body {
   margin-top: 3px;
   font-size: 0.8rem;
   opacity: 0.9;
+}
+
+/* Slider-Dots */
+
+.offers-dots {
+  margin-top: 8px;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.offers-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: rgba(148, 163, 184, 0.6);
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.offers-dot.active {
+  width: 10px;
+  height: 6px;
+  border-radius: 999px;
+  background: #f9fafb;
 }
 
 /* ========================================
@@ -547,6 +600,81 @@ body {
   margin-top: 10px;
   display: flex;
   gap: 6px;
+}
+
+/* ========================================
+   SUPERADMIN DETAIL / TABS
+   ======================================== */
+
+.detail-status-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+.detail-tabs {
+  margin-top: 8px;
+  display: flex;
+  gap: 6px;
+  border-bottom: 1px solid #e5e7eb;
+  padding-bottom: 4px;
+}
+
+.detail-tab {
+  border: none;
+  background: transparent;
+  font-size: 0.8rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: #64748b;
+}
+
+.detail-tab.active {
+  background: #0f172a;
+  color: #f9fafb;
+}
+
+.detail-tab-content {
+  margin-top: 10px;
+}
+
+.detail-form {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detail-field > span {
+  font-size: 0.75rem;
+  color: #64748b;
+  display: block;
+  margin-bottom: 2px;
+}
+
+/* Label für Checkbox-Angebote */
+
+.offer-flag-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  margin-top: 8px;
+}
+
+/* Menü im Superadmin (Tab) */
+
+.menu-admin-row {
+  padding: 6px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+/* Angebote im Superadmin */
+
+.offer-admin-card {
+  padding: 10px 12px;
 }
 
 /* ========================================
