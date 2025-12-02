@@ -332,8 +332,6 @@ body {
    FLOATING CART FAB
    ======================================== */
 
-/* runder Warenkorb, gleiche Farbe */
-
 .cart-fab {
   width: 54px;
   height: 54px;
@@ -415,30 +413,52 @@ body {
 }
 
 /* ========================================
-   MENÜ / KATEGORIEN (karte.html)
+   TABS-CONTAINER (Button-Farbe, iOS-Style)
    ======================================== */
 
+.tabs-wrapper {
+  background: #643A71;
+  border-radius: 999px;
+  padding: 4px;
+  margin-top: -4px;   /* etwas höher, näher an vorherigem Element */
+  margin-bottom: 4px; /* kleiner Abstand zur Card darunter */
+}
+
+.tabs-wrapper--drinks {
+  margin-top: 4px;    /* Drinks-Tabs etwas näher an der Suche */
+}
+
+.tabs-wrapper--food {
+  margin-top: 6px;
+}
+
 .category-tabs {
-  margin-top: 2px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
 }
 
-.category-tab {
+/* Tabs im lila Container (Segment-Control Style) */
+
+.tabs-wrapper .category-tab {
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid #d4d4d8;
+  border: 1px solid rgba(248, 250, 252, 0.7);
   font-size: 0.75rem;
   background: #f9fafb;
   cursor: pointer;
+  color: #111827;
 }
 
-.category-tab.active {
-  background: #0f172a;
+.tabs-wrapper .category-tab.active {
+  background: #111827;
   color: #f9fafb;
-  border-color: #0f172a;
+  border-color: #111827;
 }
+
+/* ========================================
+   MENÜ / KATEGORIEN (karte.html)
+   ======================================== */
 
 .menu-list {
   display: flex;
@@ -457,7 +477,7 @@ body {
   gap: 4px;
 }
 
-/* Produktbild in Karte */
+/* Produktbild in Karte – normal */
 
 .menu-item-image {
   width: 100%;
@@ -493,6 +513,71 @@ body {
   justify-content: flex-end;
   gap: 10px;
   margin-top: 20px;  /* Abstand Beschreibung → Buttons */
+}
+
+/* ========================================
+   GETRÄNKE-KARTE (2 Spalten über Speisekarte)
+   ======================================== */
+
+#drinksSection h2 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.drinks-list {
+  margin-top: 8px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.drink-item {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+/* Getränkebild (2 in einer Reihe, gleich hoch) */
+.drink-image {
+  width: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  aspect-ratio: 3 / 4;
+  margin-bottom: 6px;
+}
+
+.drink-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drink-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.drink-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.drink-desc {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+/* Mehr Abstand Text → Buttons */
+.drink-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 14px;
 }
 
 /* ========================================
@@ -547,6 +632,8 @@ body {
   scroll-snap-align: center;
 }
 
+/* Angebotsbild – normal */
+
 .offer-image {
   width: 100%;
   height: 180px; /* gleiche Höhe für alle */
@@ -559,7 +646,7 @@ body {
 .offer-header {
   display: flex;
   justify-content: space-between;
-  alignItems: center;
+  align-items: center;
   margin-bottom: 10px;
 }
 
@@ -714,4 +801,3 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
-
