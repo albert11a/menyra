@@ -152,15 +152,17 @@ body {
   white-space: nowrap;
 }
 
-/* ▶ Variante-1-Style für alle .btn-primary (Hinzufügen, etc.) */
+/* dezentes Pink, Border gleiche Farbe */
 .btn-primary {
-  background: #ec4899;
-  color: #fdf2f8;
+  background: #f9a8d4;
+  color: #ffffff;
+  border: 1px solid #f9a8d4;
   box-shadow: none;
 }
 
 .btn-primary:hover {
-  background: #db2777;
+  background: #f472b6;
+  border-color: #f472b6;
 }
 
 .btn-ghost {
@@ -284,13 +286,14 @@ body {
   color: #9ca3af;
 }
 
-/* ▶ Variante-1-Style für Such-Button (rund, pink, Shadow) */
+/* Such-Button dezent pink, mit cleanem Icon */
+
 .search-btn {
-  width: 42px;
-  height: 42px;
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
-  border: none;
-  background: #ec4899;
+  border: 1px solid #f9a8d4;
+  background: #f9a8d4;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -299,52 +302,45 @@ body {
 }
 
 .search-btn:hover {
-  background: #db2777;
+  background: #f472b6;
+  border-color: #f472b6;
 }
 
+/* vereinfachtes, sauberes Lupe-Icon (kein Doppelkreis mehr) */
 .search-btn-icon {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   border-radius: 999px;
-  border: 1.8px solid #ffffff;
-  box-sizing: border-box;
+  border: 2px solid #ffffff;
   position: relative;
+  box-sizing: border-box;
 }
 
-/* "iOS" Such-Icon – Kreis mit kleinem Stab */
-.search-btn-icon::before,
+/* nur noch der Griff, damit es nicht verzerrt wirkt */
 .search-btn-icon::after {
   content: "";
   position: absolute;
-  background-color: #ffffff;
-}
-
-.search-btn-icon::before {
-  inset: 3px;
-  border-radius: 999px;
-  border: 1.6px solid #ffffff;
-}
-
-.search-btn-icon::after {
   width: 7px;
-  height: 1.7px;
+  height: 2px;
   border-radius: 999px;
-  transform: rotate(45deg);
+  background: #ffffff;
   right: -1px;
-  bottom: 2px;
+  bottom: 1px;
+  transform: rotate(45deg);
 }
 
 /* ========================================
    FLOATING CART FAB
    ======================================== */
 
-/* ▶ Variante-1-Style in rund für den Warenkorb-FAB */
+/* runder Warenkorb, gleiche dezente Pink-Farbe */
+
 .cart-fab {
   width: 54px;
   height: 54px;
   border-radius: 999px;
-  border: none;
-  background: #ec4899;
+  border: 1px solid #f9a8d4;
+  background: #f9a8d4;
   box-shadow: none;
   display: flex;
   align-items: center;
@@ -368,30 +364,35 @@ body {
 }
 
 .cart-fab-icon {
-  width: 22px;
-  height: 18px;
+  width: 20px;
+  height: 16px;
   position: relative;
+  box-sizing: border-box;
 }
 
-/* Minimaler "iOS"-Cart */
+/* sauberer Warenkorb – nur Korb + Griff */
+
 .cart-fab-icon::before,
 .cart-fab-icon::after {
   content: "";
   position: absolute;
   border-radius: 3px;
-  border: 1.8px solid #ffffff;
+  border: 2px solid #ffffff;
+  box-sizing: border-box;
 }
 
+/* Körbchen */
 .cart-fab-icon::before {
   left: 2px;
   right: 2px;
-  top: 4px;
-  bottom: 0;
+  top: 5px;
+  bottom: 1px;
   border-radius: 5px 5px 4px 4px;
 }
 
+/* Griff */
 .cart-fab-icon::after {
-  width: 9px;
+  width: 8px;
   height: 5px;
   border-bottom: none;
   border-radius: 6px 6px 0 0;
@@ -445,7 +446,7 @@ body {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 30px;          /* Abstand zwischen Produkten */
+  gap: 30px;          /* Abstand zwischen Produkten (so gelassen) */
   margin-top: 10px;
 }
 
@@ -494,7 +495,7 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;  /* Abstand Beschreibung → Buttons */
+  margin-top: 20px;  /* Abstand Beschreibung → Buttons (so gelassen) */
 }
 
 /* ========================================
@@ -716,7 +717,3 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
-
-
-
-
