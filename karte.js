@@ -48,9 +48,10 @@ const searchInput = document.getElementById("searchInput");
 const cartFab = document.getElementById("cartFab");
 const cartBadgeEl = document.getElementById("cartBadge");
 
-let allMenuItems = [];
-let drinksItems = [];                // Nur Getränke
-let drinkCategoryNames = new Set();  // Kategorien, die Getränke sind
+let allMenuItems = [];      // alle Produkte mit type
+let drinksItems = [];       // nur type === 'drink'
+let foodItems = [];         // nur type === 'food'
+
 let activeFoodCategory = "Alle";
 let activeDrinksCategory = null;
 let searchTerm = "";
@@ -310,6 +311,40 @@ function renderOffersSlider(offers) {
    RESTAURANT & MENÜ LADEN
    ========================= */
 
+function inferTypeForItem(item) {
+  // Fallback nur für alte Daten ohne type
+  if (item.type === "food" || item.type === "drink") return item.type;
+
+  const cat = (item.category || "").toLowerCase();
+  const drinksWords = [
+    "getränke",
+    "getraenke",
+    "drinks",
+    "freskuese",
+    "cafe",
+    "kafe",
+    "kafe & espresso",
+    "cappuccino",
+    "latte",
+    "çaj",
+    "caj",
+    "ujë",
+    "uje",
+    "lëngje",
+    "lengje",
+    "birra",
+    "verë",
+    "vere",
+    "koktej",
+    "energjike",
+  ];
+
+  if (drinksWords.some((w) => cat.includes(w))) {
+    return "drink";
+  }
+  return "food";
+}
+
 async function loadRestaurantAndMenu() {
   try {
     const restaurantRef = doc(db, "restaurants", restaurantId);
@@ -323,6 +358,7 @@ async function loadRestaurantAndMenu() {
       offersSection.style.display = "none";
       if (drinksSection) drinksSection.style.display = "none";
       if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+      if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
       return;
     }
 
@@ -345,6 +381,7 @@ async function loadRestaurantAndMenu() {
       offersSection.style.display = "none";
       if (drinksSection) drinksSection.style.display = "none";
       if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+      if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
       return;
     }
 
@@ -352,7 +389,7 @@ async function loadRestaurantAndMenu() {
     const menuCol = collection(restaurantRef, "menuItems");
     const snap = await getDocs(menuCol);
 
-    allMenuItems = snap.docs
+    let items = snap.docs
       .map((docSnap) => {
         const d = docSnap.data();
         return {
@@ -363,28 +400,21 @@ async function loadRestaurantAndMenu() {
           category: d.category || "Sonstiges",
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
+          type: d.type || null, // kommt jetzt vom Admin
         };
       })
       .filter((item) => item.available);
 
-    // Getränke herausfiltern (du steuerst das mit Kategorienamen)
-    drinksItems = allMenuItems.filter((item) => {
-      if (!item.category) return false;
-      const catLower = item.category.toLowerCase();
-      return (
-        catLower === "getränke" ||
-        catLower === "getraenke" ||
-        catLower === "drinks" ||
-        catLower === "freskuese" ||
-        catLower === "cafe" ||
-        catLower === "kafe"
-      );
-    });
+    // Typ für alte Produkte nachrüsten
+    items = items.map((item) => ({
+      ...item,
+      type: inferTypeForItem(item),
+    }));
 
-    // Set mit allen Getränke-Kategorien (für Filter unten)
-    drinkCategoryNames = new Set(drinksItems.map((i) => i.category));
+    allMenuItems = items;
+    drinksItems = allMenuItems.filter((i) => i.type === "drink");
+    foodItems = allMenuItems.filter((i) => i.type === "food");
 
-    // Tabs & Listen rendern
     renderDrinksTabs();
     renderDrinks();
     renderFoodCategories();
@@ -402,6 +432,7 @@ async function loadRestaurantAndMenu() {
     offersSection.style.display = "none";
     if (drinksSection) drinksSection.style.display = "none";
     if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+    if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
   }
 }
 
@@ -433,7 +464,7 @@ function renderDrinksTabs() {
   if (drinksSection) drinksSection.style.display = "block";
   drinksTabsEl.innerHTML = "";
 
-  // Standard: falls keine aktive Kategorie gesetzt/gültig ist → erste nehmen
+  // Standard: wenn keine aktive Kategorie gesetzt/gültig → erste nehmen
   if (!activeDrinksCategory || !cats.includes(activeDrinksCategory)) {
     activeDrinksCategory = cats[0];
   }
@@ -535,15 +566,13 @@ function renderDrinks() {
 }
 
 /* =========================
-   SPEISEKARTE-TABS & -LISTE (ohne Getränke)
+   SPEISEKARTE-TABS & -LISTE (nur food)
    ========================= */
 
 function getFoodCategories() {
   const set = new Set();
-  allMenuItems.forEach((i) => {
-    if (!i.category) return;
-    if (drinkCategoryNames.has(i.category)) return; // Getränke-Kategorien raus
-    set.add(i.category);
+  foodItems.forEach((i) => {
+    if (i.category) set.add(i.category);
   });
   return Array.from(set);
 }
@@ -556,7 +585,7 @@ function renderFoodCategories() {
   const cats = getFoodCategories();
 
   if (!cats.length) {
-    // Keine Speise-Kategorien → Tabs trotzdem minimal mit "Alle"
+    // Keine Speise-Kategorien -> nur "Alle"
     foodTabsWrapper.style.display = "block";
   } else {
     foodTabsWrapper.style.display = "block";
@@ -591,10 +620,8 @@ function renderFoodCategories() {
 function renderMenu() {
   menuListEl.innerHTML = "";
 
-  // Basis: nur Food-Items, keine Getränke
-  let items = allMenuItems.filter(
-    (i) => !drinkCategoryNames.has(i.category)
-  );
+  // Nur Speisen
+  let items = foodItems;
 
   if (activeFoodCategory !== "Alle") {
     items = items.filter((i) => i.category === activeFoodCategory);
