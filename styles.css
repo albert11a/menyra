@@ -445,7 +445,7 @@ body {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 25px;          /* Abstand zwischen Produkten */
+  gap: 30px;          /* Abstand zwischen Produkten */
   margin-top: 10px;
 }
 
@@ -493,8 +493,8 @@ body {
 .menu-item-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 20px;
-  margin-top: 10px;  /* Abstand Beschreibung → Buttons */
+  gap: 10px;
+  margin-top: 20px;  /* Abstand Beschreibung → Buttons */
 }
 
 /* ========================================
@@ -716,6 +716,7 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
+
 
 
 
