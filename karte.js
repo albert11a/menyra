@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Logo & Produktbildern (lazy load)
+// karte.js – Gäste-Ansicht mit Logo, Suche, Angeboten & Warenkorb-Badge
 
 import { db } from "./firebase-config.js";
 import {
@@ -14,12 +14,16 @@ const params = new URLSearchParams(window.location.search);
 const restaurantId = params.get("r") || "test-restaurant";
 const tableId = params.get("t") || "T1";
 
-document.getElementById("tableLabel").textContent = `Tisch: ${tableId}`;
-
+// DOM-Elemente
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
+const searchInputEl = document.getElementById("searchInput");
+const cartIconBtn = document.getElementById("cartIconBtn");
+const cartBadgeEl = document.getElementById("cartBadge");
 const categoryTabsEl = document.getElementById("categoryTabs");
+const offersSectionEl = document.getElementById("offersSection");
+const offersListEl = document.getElementById("offersList");
 const menuListEl = document.getElementById("menuList");
 const cartSection = document.getElementById("cartSection");
 const cartItemsEl = document.getElementById("cartItems");
@@ -32,6 +36,7 @@ const statusMsg = document.getElementById("statusMsg");
 let allMenuItems = [];
 let activeCategory = "Alle";
 let cart = [];
+let searchQuery = "";
 
 function todayISO() {
   const d = new Date();
@@ -68,7 +73,7 @@ async function loadRestaurantAndMenu() {
 
     const data = restaurantSnap.data();
     restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
-    restaurantMetaEl.textContent = `${data.city || ""} · ID: ${restaurantId}`;
+    restaurantMetaEl.textContent = `${data.city || ""} · Tisch ${tableId}`;
 
     if (data.logoUrl) {
       restaurantLogoEl.src = data.logoUrl;
@@ -98,12 +103,15 @@ async function loadRestaurantAndMenu() {
           category: d.category || "Sonstiges",
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
+          isOffer: d.offer === true,
         };
       })
       .filter((item) => item.available);
 
     renderCategories();
+    renderOffers();
     renderMenu();
+    updateCartBadge();
   } catch (err) {
     console.error(err);
     restaurantNameEl.textContent = "Fehler";
@@ -147,16 +155,98 @@ function renderCategories() {
   });
 }
 
+function matchesSearch(item) {
+  if (!searchQuery) return true;
+  const q = searchQuery.toLowerCase();
+  return (
+    item.name.toLowerCase().includes(q) ||
+    (item.description || "").toLowerCase().includes(q)
+  );
+}
+
+function renderOffers() {
+  const offerItems = allMenuItems.filter((i) => i.isOffer && matchesSearch(i));
+
+  if (!offerItems.length) {
+    offersSectionEl.style.display = "none";
+    offersListEl.innerHTML = "";
+    return;
+  }
+
+  offersSectionEl.style.display = "block";
+  offersListEl.innerHTML = "";
+
+  offerItems.forEach((item) => {
+    const div = document.createElement("div");
+    div.className = "offer-item";
+
+    if (item.imageUrl) {
+      const img = document.createElement("img");
+      img.src = item.imageUrl;
+      img.alt = item.name;
+      img.className = "offer-thumb";
+      img.loading = "lazy";
+      div.appendChild(img);
+    }
+
+    const textWrap = document.createElement("div");
+    textWrap.className = "offer-text";
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "offer-name";
+    titleEl.textContent = item.name;
+
+    const descEl = document.createElement("div");
+    descEl.className = "offer-desc";
+    descEl.textContent = item.description;
+
+    const bottomRow = document.createElement("div");
+    bottomRow.className = "offer-bottom-row";
+
+    const priceEl = document.createElement("div");
+    priceEl.className = "offer-price";
+    priceEl.textContent = item.price.toFixed(2) + " €";
+
+    const tagEl = document.createElement("div");
+    tagEl.className = "offer-tag";
+    tagEl.textContent = "Ofertë";
+
+    bottomRow.appendChild(priceEl);
+    bottomRow.appendChild(tagEl);
+
+    textWrap.appendChild(titleEl);
+    if (item.description) textWrap.appendChild(descEl);
+    textWrap.appendChild(bottomRow);
+
+    const actions = document.createElement("div");
+    actions.className = "offer-actions";
+
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn btn-primary btn-small";
+    addBtn.textContent = "Shto";
+    addBtn.addEventListener("click", () => changeCart(item, 1));
+
+    actions.appendChild(addBtn);
+
+    div.appendChild(textWrap);
+    div.appendChild(actions);
+
+    offersListEl.appendChild(div);
+  });
+}
+
 function renderMenu() {
   menuListEl.innerHTML = "";
 
-  const items =
+  let items =
     activeCategory === "Alle"
       ? allMenuItems
       : allMenuItems.filter((i) => i.category === activeCategory);
 
+  items = items.filter((i) => matchesSearch(i));
+
   if (!items.length) {
-    menuListEl.innerHTML = "<p class='info'>Keine Produkte.</p>";
+    menuListEl.innerHTML = "<p class='info'>Nuk ka produkte për këtë filtër.</p>";
     return;
   }
 
@@ -164,13 +254,12 @@ function renderMenu() {
     const div = document.createElement("div");
     div.className = "menu-item";
 
-    // Wir bauen das DOM per JS, damit wir loading="lazy" setzen können
     if (item.imageUrl) {
       const img = document.createElement("img");
       img.src = item.imageUrl;
       img.alt = item.name;
       img.className = "menu-item-image";
-      img.loading = "lazy"; // wichtig für langsamere Verbindungen
+      img.loading = "lazy";
       div.appendChild(img);
     }
 
@@ -189,10 +278,12 @@ function renderMenu() {
     header.appendChild(priceEl);
     div.appendChild(header);
 
-    const descEl = document.createElement("div");
-    descEl.className = "menu-item-desc";
-    descEl.textContent = item.description;
-    div.appendChild(descEl);
+    if (item.description) {
+      const descEl = document.createElement("div");
+      descEl.className = "menu-item-desc";
+      descEl.textContent = item.description;
+      div.appendChild(descEl);
+    }
 
     const actions = document.createElement("div");
     actions.className = "menu-item-actions";
@@ -224,11 +315,14 @@ function changeCart(item, delta) {
     if (cart[index].qty <= 0) cart.splice(index, 1);
   }
   renderCart();
+  updateCartBadge();
 }
 
 function renderCart() {
   if (!cart.length) {
     cartSection.style.display = "none";
+    cartItemsEl.innerHTML = "";
+    cartTotalEl.textContent = "";
     return;
   }
 
@@ -247,7 +341,17 @@ function renderCart() {
     cartItemsEl.appendChild(row);
   });
 
-  cartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
+  cartTotalEl.textContent = `Total: ${total.toFixed(2)} €`;
+}
+
+function updateCartBadge() {
+  const count = cart.reduce((sum, item) => sum + item.qty, 0);
+  if (!count) {
+    cartBadgeEl.style.display = "none";
+    return;
+  }
+  cartBadgeEl.style.display = "flex";
+  cartBadgeEl.textContent = count;
 }
 
 async function sendOrder() {
@@ -255,14 +359,14 @@ async function sendOrder() {
   statusMsg.className = "status-text";
 
   if (!cart.length) {
-    statusMsg.textContent = "Bitte zuerst Produkte auswählen.";
+    statusMsg.textContent = "Së pari zgjidh produkte.";
     statusMsg.classList.add("status-err");
     return;
   }
 
   try {
     sendOrderBtn.disabled = true;
-    sendOrderBtn.textContent = "Sende...";
+    sendOrderBtn.textContent = "Duke dërguar...";
 
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const ordersCol = collection(restaurantRef, "orders");
@@ -283,24 +387,40 @@ async function sendOrder() {
 
     cart = [];
     renderCart();
+    updateCartBadge();
     noteInput.value = "";
-    statusMsg.textContent = "Bestellung gesendet. Danke!";
+    statusMsg.textContent = "Porosia u dërgua. Faleminderit!";
     statusMsg.classList.add("status-ok");
   } catch (err) {
     console.error(err);
-    statusMsg.textContent = "Fehler: " + err.message;
+    statusMsg.textContent = "Gabim: " + err.message;
     statusMsg.classList.add("status-err");
   } finally {
     sendOrderBtn.disabled = false;
-    sendOrderBtn.textContent = "Bestellung senden";
+    sendOrderBtn.textContent = "Dërgo porosinë";
   }
 }
 
+// Events
 clearCartBtn.addEventListener("click", () => {
   cart = [];
   renderCart();
+  updateCartBadge();
 });
 
 sendOrderBtn.addEventListener("click", sendOrder);
+
+// Warenkorb-Icon scrollt zum Warenkorb
+cartIconBtn.addEventListener("click", () => {
+  if (!cart.length) return;
+  cartSection.scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
+// Suche
+searchInputEl.addEventListener("input", () => {
+  searchQuery = (searchInputEl.value || "").trim();
+  renderOffers();
+  renderMenu();
+});
 
 loadRestaurantAndMenu();
