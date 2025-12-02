@@ -4,6 +4,7 @@
   <meta charset="UTF-8" />
   <title>MENYRA – Kamarieri</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f3f4f6" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -11,7 +12,7 @@
     <header class="header">
       <div>
         <div class="header-title">MENYRA</div>
-        <div class="header-sub">Kamarieri – Bestellungen</div>
+        <div class="header-sub">Kellner · Bestellungen in Echtzeit</div>
       </div>
       <div class="header-sub" id="kRestLabel"></div>
     </header>
@@ -30,9 +31,23 @@
 
     <section class="card" id="orderCard" style="display:none;">
       <h2>Eingehende Bestellungen</h2>
-      <div class="list" id="orderList"></div>
+
+      <div class="list" id="statusFilterRow">
+        <div class="list-item-row">
+          <span class="info">Filter nach Status:</span>
+          <span style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-small btn-ghost" data-filter="all">Alle</button>
+            <button class="btn btn-small btn-ghost" data-filter="new">Neu</button>
+            <button class="btn btn-small btn-ghost" data-filter="in_progress">In Arbeit</button>
+            <button class="btn btn-small btn-ghost" data-filter="served">Serviert</button>
+          </span>
+        </div>
+      </div>
+
+      <div class="list" id="orderList" style="margin-top:10px;"></div>
       <p class="info">
-        Status: <code>neu</code> · <code>in Arbeit</code> · <code>serviert</code>
+        Status wird oben an jeder Bestellung angezeigt. Tippe auf „In Arbeit“ oder „Serviert“,
+        um den Status zu ändern.
       </p>
     </section>
   </main>
