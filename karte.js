@@ -1,3 +1,5 @@
+// karte.js – Gäste-Ansicht mit Logo & Produktbildern (lazy load)
+
 import { db } from "./firebase-config.js";
 import {
   collection,
@@ -14,6 +16,7 @@ const tableId = params.get("t") || "T1";
 
 document.getElementById("tableLabel").textContent = `Tisch: ${tableId}`;
 
+const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
 const categoryTabsEl = document.getElementById("categoryTabs");
@@ -30,6 +33,26 @@ let allMenuItems = [];
 let activeCategory = "Alle";
 let cart = [];
 
+function todayISO() {
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${y}-${m}-${day}`;
+}
+
+function isSubscriptionValid(data) {
+  if (!data.subscriptionUntil) return true;
+  const today = todayISO();
+  return data.subscriptionUntil >= today;
+}
+
+function isRestaurantOperational(data) {
+  if (data.active === false) return false;
+  if (!isSubscriptionValid(data)) return false;
+  return true;
+}
+
 async function loadRestaurantAndMenu() {
   try {
     const restaurantRef = doc(db, "restaurants", restaurantId);
@@ -38,26 +61,46 @@ async function loadRestaurantAndMenu() {
     if (!restaurantSnap.exists()) {
       restaurantNameEl.textContent = "Lokal nicht gefunden";
       restaurantMetaEl.textContent = `ID: ${restaurantId}`;
+      menuListEl.innerHTML = "<p class='info'>Bitte Personal informieren.</p>";
+      cartSection.style.display = "none";
       return;
     }
 
     const data = restaurantSnap.data();
-    restaurantNameEl.textContent = data.name || "Unbenanntes Lokal";
+    restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
     restaurantMetaEl.textContent = `${data.city || ""} · ID: ${restaurantId}`;
+
+    if (data.logoUrl) {
+      restaurantLogoEl.src = data.logoUrl;
+      restaurantLogoEl.style.display = "block";
+    } else {
+      restaurantLogoEl.style.display = "none";
+    }
+
+    if (!isRestaurantOperational(data)) {
+      menuListEl.innerHTML =
+        "<p class='info'>Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.</p>";
+      cartSection.style.display = "none";
+      return;
+    }
 
     const menuCol = collection(restaurantRef, "menuItems");
     const snap = await getDocs(menuCol);
 
-    allMenuItems = snap.docs.map((docSnap) => {
-      const d = docSnap.data();
-      return {
-        id: docSnap.id,
-        name: d.name || "Produkt",
-        description: d.description || "",
-        price: d.price || 0,
-        category: d.category || "Sonstiges",
-      };
-    });
+    allMenuItems = snap.docs
+      .map((docSnap) => {
+        const d = docSnap.data();
+        return {
+          id: docSnap.id,
+          name: d.name || "Produkt",
+          description: d.description || "",
+          price: d.price || 0,
+          category: d.category || "Sonstiges",
+          available: d.available !== false,
+          imageUrl: d.imageUrl || null,
+        };
+      })
+      .filter((item) => item.available);
 
     renderCategories();
     renderMenu();
@@ -65,6 +108,8 @@ async function loadRestaurantAndMenu() {
     console.error(err);
     restaurantNameEl.textContent = "Fehler";
     restaurantMetaEl.textContent = err.message;
+    menuListEl.innerHTML = "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
+    cartSection.style.display = "none";
   }
 }
 
@@ -118,21 +163,54 @@ function renderMenu() {
   items.forEach((item) => {
     const div = document.createElement("div");
     div.className = "menu-item";
-    div.innerHTML = `
-      <div class="menu-item-header">
-        <div class="menu-item-name">${item.name}</div>
-        <div class="menu-item-price">${item.price.toFixed(2)} €</div>
-      </div>
-      <div class="menu-item-desc">${item.description}</div>
-      <div class="menu-item-actions">
-        <button class="btn btn-ghost" data-id="${item.id}" data-action="minus">−</button>
-        <button class="btn btn-primary" data-id="${item.id}" data-action="plus">Hinzufügen</button>
-      </div>
-    `;
-    const minusBtn = div.querySelector('[data-action="minus"]');
-    const plusBtn = div.querySelector('[data-action="plus"]');
+
+    // Wir bauen das DOM per JS, damit wir loading="lazy" setzen können
+    if (item.imageUrl) {
+      const img = document.createElement("img");
+      img.src = item.imageUrl;
+      img.alt = item.name;
+      img.className = "menu-item-image";
+      img.loading = "lazy"; // wichtig für langsamere Verbindungen
+      div.appendChild(img);
+    }
+
+    const header = document.createElement("div");
+    header.className = "menu-item-header";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "menu-item-name";
+    nameEl.textContent = item.name;
+
+    const priceEl = document.createElement("div");
+    priceEl.className = "menu-item-price";
+    priceEl.textContent = item.price.toFixed(2) + " €";
+
+    header.appendChild(nameEl);
+    header.appendChild(priceEl);
+    div.appendChild(header);
+
+    const descEl = document.createElement("div");
+    descEl.className = "menu-item-desc";
+    descEl.textContent = item.description;
+    div.appendChild(descEl);
+
+    const actions = document.createElement("div");
+    actions.className = "menu-item-actions";
+
+    const minusBtn = document.createElement("button");
+    minusBtn.className = "btn btn-ghost";
+    minusBtn.textContent = "−";
     minusBtn.addEventListener("click", () => changeCart(item, -1));
+
+    const plusBtn = document.createElement("button");
+    plusBtn.className = "btn btn-primary";
+    plusBtn.textContent = "Hinzufügen";
     plusBtn.addEventListener("click", () => changeCart(item, 1));
+
+    actions.appendChild(minusBtn);
+    actions.appendChild(plusBtn);
+    div.appendChild(actions);
+
     menuListEl.appendChild(div);
   });
 }
@@ -177,7 +255,7 @@ async function sendOrder() {
   statusMsg.className = "status-text";
 
   if (!cart.length) {
-    statusMsg.textContent = "Bitte zuerst Produkte hinzufügen.";
+    statusMsg.textContent = "Bitte zuerst Produkte auswählen.";
     statusMsg.classList.add("status-err");
     return;
   }
