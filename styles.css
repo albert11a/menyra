@@ -152,17 +152,17 @@ body {
   white-space: nowrap;
 }
 
-/* Hauptfarbe: #AD343E */
+/* Hauptfarbe: #643A71 */
 .btn-primary {
-  background: #AD343E;
+  background: #643A71;
   color: #ffffff;
-  border: 1px solid #AD343E;
+  border: 1px solid #643A71;
   box-shadow: none;
 }
 
 .btn-primary:hover {
-  background: #8C2B35;
-  border-color: #8C2B35;
+  background: #4F2F59;
+  border-color: #4F2F59;
 }
 
 .btn-ghost {
@@ -286,14 +286,14 @@ body {
   color: #9ca3af;
 }
 
-/* Such-Button mit #AD343E */
+/* Such-Button mit #643A71 */
 
 .search-btn {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid #AD343E;
-  background: #AD343E;
+  border: 1px solid #643A71;
+  background: #643A71;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,8 +302,8 @@ body {
 }
 
 .search-btn:hover {
-  background: #8C2B35;
-  border-color: #8C2B35;
+  background: #4F2F59;
+  border-color: #4F2F59;
 }
 
 /* vereinfachtes, sauberes Lupe-Icon */
@@ -338,8 +338,8 @@ body {
   width: 54px;
   height: 54px;
   border-radius: 999px;
-  border: 1px solid #AD343E;
-  background: #AD343E;
+  border: 1px solid #643A71;
+  background: #643A71;
   box-shadow: none;
   display: flex;
   align-items: center;
@@ -559,7 +559,7 @@ body {
 .offer-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  alignItems: center;
   margin-bottom: 10px;
 }
 
