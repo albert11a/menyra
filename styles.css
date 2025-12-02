@@ -295,7 +295,7 @@ body {
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  box-shadow: 0 10px 22px rgba(236, 72, 153, 0.45);
+  box-shadow: none;
 }
 
 .search-btn:hover {
@@ -345,7 +345,7 @@ body {
   border-radius: 999px;
   border: none;
   background: #ec4899;
-  box-shadow: 0 10px 22px rgba(236, 72, 153, 0.5);
+  box-shadow: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -716,4 +716,5 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
+
 
