@@ -457,11 +457,11 @@ body {
   gap: 4px;
 }
 
-/* Produktbild in Karte */
+/* Produktbild in Karte – JETZT 540px Höhe */
 
 .menu-item-image {
   width: 100%;
-  max-height: 160px;
+  height: 540px;
   border-radius: 12px;
   object-fit: cover;
   margin-bottom: 6px;
@@ -547,9 +547,11 @@ body {
   scroll-snap-align: center;
 }
 
+/* Angebotsbild – JETZT 540px Höhe */
+
 .offer-image {
   width: 100%;
-  height: 180px; /* gleiche Höhe für alle */
+  height: 540px; /* gleiche Höhe für alle */
   border-radius: 14px;
   object-fit: cover;
   background: #1f2937;
@@ -559,7 +561,7 @@ body {
 .offer-header {
   display: flex;
   justify-content: space-between;
-  alignItems: center;
+  align-items: center;
   margin-bottom: 10px;
 }
 
