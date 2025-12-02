@@ -98,6 +98,37 @@ body {
   color: #475569;
 }
 
+/* Restaurant-Card (Shpija e Vjetër) */
+
+.restaurant-card {
+  padding: 14px 16px;
+}
+
+.restaurant-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.rest-logo {
+  width: 44px;
+  height: 44px;
+  border-radius: 999px;
+  object-fit: cover;
+  border: 1px solid #e2e8f0;
+}
+
+.restaurant-name {
+  font-weight: 700;
+  font-size: 1.05rem;
+}
+
+.restaurant-meta {
+  font-size: 0.8rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
 /* ========================================
    BUTTONS
    ======================================== */
@@ -197,68 +228,19 @@ body {
 }
 
 /* ========================================
-   RESTAURANT-INFOS (Gäste/Karte)
-   ======================================== */
-
-.restaurant-header {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.rest-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 999px;
-  object-fit: cover;
-  border: 1px solid #e2e8f0;
-}
-
-.restaurant-name {
-  font-weight: 700;
-  font-size: 1.05rem;
-}
-
-.restaurant-meta {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-/* ========================================
-   KARTE: TOP-BEREICH (Logo + Suche + Tabs)
+   KARTE: TOP-BEREICH
    ======================================== */
 
 .karte-topbar {
-  padding-bottom: 8px;
-  margin-bottom: 4px;
-  /* kein sticky – alles scrollt */
-}
-
-.karte-header-row {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
 }
 
-.karte-header-left {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.karte-divider {
-  margin-top: 10px;
-  height: 1px;
-  border-radius: 999px;
-  background: linear-gradient(to right, rgba(148, 163, 184, 0.2), rgba(148, 163, 184, 0.8), rgba(148, 163, 184, 0.2));
-}
-
-/* Suche – Breuninger-/Dribbble-Style */
+/* Search wie Dribbble-Beispiel */
 
 .search-wrapper {
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 .search-pill {
@@ -266,7 +248,7 @@ body {
   align-items: center;
   background: #f4f4f5;
   border-radius: 999px;
-  padding: 4px 4px 4px 14px;
+  padding: 4px 4px 4px 16px;
 }
 
 .search-input {
@@ -276,7 +258,7 @@ body {
   background: transparent;
   font-size: 0.82rem;
   color: #111827;
-  padding: 6px 6px 6px 0;
+  padding: 8px 6px 8px 0;
 }
 
 .search-input::placeholder {
@@ -284,11 +266,11 @@ body {
 }
 
 .search-btn {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
   border: none;
-  background: #ec4899; /* gleiche Farbe wie Warenkorb */
+  background: #ec4899; /* iOS-style Accent */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -296,8 +278,35 @@ body {
 }
 
 .search-btn-icon {
-  font-size: 0.9rem;
-  color: #ffffff;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  border: 1.8px solid #ffffff;
+  box-sizing: border-box;
+  position: relative;
+}
+
+/* "iOS" Such-Icon – Kreis mit kleinem Stab */
+.search-btn-icon::before,
+.search-btn-icon::after {
+  content: "";
+  position: absolute;
+  background-color: #ffffff;
+}
+
+.search-btn-icon::before {
+  inset: 3px;
+  border-radius: 999px;
+  border: 1.6px solid #ffffff;
+}
+
+.search-btn-icon::after {
+  width: 7px;
+  height: 1.7px;
+  border-radius: 999px;
+  transform: rotate(45deg);
+  right: -1px;
+  bottom: 2px;
 }
 
 /* ========================================
@@ -309,7 +318,7 @@ body {
   height: 54px;
   border-radius: 999px;
   border: none;
-  background: #ec4899; /* gleiche Farbe wie Suche */
+  background: #ec4899;
   box-shadow: 0 12px 30px rgba(15, 23, 42, 0.5);
   display: flex;
   align-items: center;
@@ -320,7 +329,6 @@ body {
   bottom: 26px;
   z-index: 50;
 
-  /* versteckt als Default – wird per JS sichtbar gemacht */
   opacity: 0;
   transform: translateY(16px);
   pointer-events: none;
@@ -334,8 +342,35 @@ body {
 }
 
 .cart-fab-icon {
-  font-size: 1.1rem;
-  color: #f9fafb;
+  width: 22px;
+  height: 18px;
+  position: relative;
+}
+
+/* Minimaler "iOS"-Cart */
+.cart-fab-icon::before,
+.cart-fab-icon::after {
+  content: "";
+  position: absolute;
+  border-radius: 3px;
+  border: 1.8px solid #ffffff;
+}
+
+.cart-fab-icon::before {
+  left: 2px;
+  right: 2px;
+  top: 4px;
+  bottom: 0;
+  border-radius: 5px 5px 4px 4px;
+}
+
+.cart-fab-icon::after {
+  width: 9px;
+  height: 5px;
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  left: 6px;
+  top: 0;
 }
 
 .cart-fab-badge {
@@ -345,11 +380,11 @@ body {
   min-width: 18px;
   height: 18px;
   border-radius: 999px;
-  background: #000000; /* schwarzer Kreis */
-  color: #ffffff;      /* weiße Zahl */
+  background: #000000;
+  color: #ffffff;
   font-size: 0.7rem;
   padding: 0 5px;
-  display: none;       /* nur bei Artikeln sichtbar */
+  display: none;
   align-items: center;
   justify-content: center;
   font-weight: 600;
@@ -360,7 +395,7 @@ body {
    ======================================== */
 
 .category-tabs {
-  margin-top: 10px;
+  margin-top: 2px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
