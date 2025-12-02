@@ -1,323 +1,82 @@
-// admin.js – Restaurant Admin: Login, Speisekarte (Kategorie, Name, Beschreibung, Preis, Bild-URL), Bestellübersicht
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Restaurant Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f3f4f6" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <div class="header-title">MENYRA</div>
+        <div class="header-sub">Restaurant Admin – Speisekarte & Bestellungen</div>
+      </div>
+      <div class="header-sub" id="adminRestLabel"></div>
+    </header>
 
-import { db } from "./firebase-config.js";
-import {
-  collection,
-  doc,
-  addDoc,
-  getDocs,
-  query,
-  where,
-  deleteDoc,
-  getDoc,
-  updateDoc,
-} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+    <!-- Login-Bereich -->
+    <section class="card" id="adminLoginCard">
+      <h2>Admin Code</h2>
+      <p class="info">
+        Bitte Admin-Code eingeben, den du von MENYRA erhalten hast.
+        Alternativ kannst du direkt über einen Link mit <code>?r=DEINE-ID</code> einsteigen.
+      </p>
+      <input class="input" id="adminCodeInput" placeholder="Admin-Code (z.B. 654321)" />
+      <button class="btn btn-primary" id="adminLoginBtn" style="margin-top:8px;">
+        Einloggen
+      </button>
+      <div class="status-text" id="adminLoginStatus"></div>
+    </section>
 
-const adminRestLabel = document.getElementById("adminRestLabel");
-const adminLoginCard = document.getElementById("adminLoginCard");
-const adminCodeInput = document.getElementById("adminCodeInput");
-const adminLoginBtn = document.getElementById("adminLoginBtn");
-const adminLoginStatus = document.getElementById("adminLoginStatus");
+    <!-- Menü bearbeiten -->
+    <section class="card" id="menuEditorCard" style="display:none;">
+      <h2>Gericht hinzufügen</h2>
 
-const menuEditorCard = document.getElementById("menuEditorCard");
-const menuListCard = document.getElementById("menuListCard");
-const ordersCard = document.getElementById("ordersCard");
+      <input class="input" id="itemCatInput" placeholder="Kategorie (z.B. Sallata)" />
+      <input class="input" id="itemNameInput" placeholder="Name (z.B. Sallatë Pule)" />
+      <input class="input" id="itemDescInput" placeholder="Beschreibung" />
+      <input class="input" id="itemPriceInput" placeholder="Preis (z.B. 5.2)" />
+      <input
+        class="input"
+        id="itemImageInput"
+        placeholder="Bild-URL (optional, z.B. images/sallate-pule.jpg)"
+      />
 
-const itemCatInput = document.getElementById("itemCatInput");
-const itemNameInput = document.getElementById("itemNameInput");
-const itemDescInput = document.getElementById("itemDescInput");
-const itemPriceInput = document.getElementById("itemPriceInput");
-const itemImageInput = document.getElementById("itemImageInput");
-const addItemBtn = document.getElementById("addItemBtn");
-const adminItemStatus = document.getElementById("adminItemStatus");
-const itemList = document.getElementById("itemList");
-const adminOrdersList = document.getElementById("adminOrdersList");
+      <label class="offer-flag-label">
+        <input type="checkbox" id="itemOfferInput" />
+        <span>Als Angebot hervorheben (Angebote-Karte oben)</span>
+      </label>
 
-let currentRestaurantId = null;
+      <button class="btn btn-primary" id="addItemBtn" style="margin-top:8px;">
+        Gericht speichern
+      </button>
+      <div class="status-text" id="adminItemStatus"></div>
+    </section>
 
-function saveOwnerSession(restaurantId) {
-  localStorage.setItem("menyra_owner_restaurantId", restaurantId);
-}
+    <!-- Aktuelle Speisekarte -->
+    <section class="card" id="menuListCard" style="display:none;">
+      <h2>Aktuelle Speisekarte</h2>
+      <div class="list" id="itemList"></div>
+      <p class="info">
+        Gerichte können deaktiviert werden, statt sie zu löschen. Nur aktive
+        erscheinen für Gäste in der Ansicht <code>karte.html</code>.
+      </p>
+    </section>
 
-function loadOwnerSession() {
-  return localStorage.getItem("menyra_owner_restaurantId");
-}
+    <!-- Heutige Bestellungen -->
+    <section class="card" id="ordersCard" style="display:none;">
+      <h2>Heutige Bestellungen</h2>
+      <div class="list" id="adminOrdersList"></div>
+      <p class="info">
+        Übersicht der Bestellungen des heutigen Tages aus
+        <code>restaurants/&lt;ID&gt;/orders</code>.
+      </p>
+    </section>
+  </main>
 
-async function setRestaurantById(id) {
-  adminLoginStatus.textContent = "";
-  adminLoginStatus.className = "status-text";
-
-  const ref = doc(db, "restaurants", id);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) {
-    adminLoginStatus.textContent = "Lokal mit dieser ID existiert nicht.";
-    adminLoginStatus.classList.add("status-err");
-    return false;
-  }
-  const data = snap.data();
-  currentRestaurantId = id;
-  saveOwnerSession(currentRestaurantId);
-
-  adminRestLabel.textContent = data.restaurantName || currentRestaurantId;
-  adminLoginCard.style.display = "none";
-  menuEditorCard.style.display = "block";
-  menuListCard.style.display = "block";
-  ordersCard.style.display = "block";
-
-  await loadMenuItems();
-  await loadTodayOrders();
-  return true;
-}
-
-async function loginWithCode(code) {
-  adminLoginStatus.textContent = "";
-  adminLoginStatus.className = "status-text";
-
-  if (!code) {
-    adminLoginStatus.textContent = "Bitte Admin-Code eingeben.";
-    adminLoginStatus.classList.add("status-err");
-    return;
-  }
-
-  try {
-    adminLoginBtn.disabled = true;
-    adminLoginBtn.textContent = "Prüfe...";
-
-    const q = query(
-      collection(db, "restaurants"),
-      where("ownerCode", "==", code)
-    );
-    const snap = await getDocs(q);
-
-    if (snap.empty) {
-      adminLoginStatus.textContent = "Kein Lokal mit diesem Admin-Code gefunden.";
-      adminLoginStatus.classList.add("status-err");
-      return;
-    }
-
-    const docSnap = snap.docs[0];
-    const data = docSnap.data();
-    currentRestaurantId = docSnap.id;
-
-    saveOwnerSession(currentRestaurantId);
-
-    adminRestLabel.textContent = data.restaurantName || currentRestaurantId;
-    adminLoginCard.style.display = "none";
-    menuEditorCard.style.display = "block";
-    menuListCard.style.display = "block";
-    ordersCard.style.display = "block";
-
-    await loadMenuItems();
-    await loadTodayOrders();
-  } catch (err) {
-    console.error(err);
-    adminLoginStatus.textContent = "Fehler: " + err.message;
-    adminLoginStatus.classList.add("status-err");
-  } finally {
-    adminLoginBtn.disabled = false;
-    adminLoginBtn.textContent = "Einloggen";
-  }
-}
-
-async function addMenuItem() {
-  adminItemStatus.textContent = "";
-  adminItemStatus.className = "status-text";
-
-  const cat = itemCatInput.value.trim() || "Sonstiges";
-  const name = itemNameInput.value.trim();
-  const desc = itemDescInput.value.trim();
-  const priceStr = itemPriceInput.value.trim();
-  const imageUrl = itemImageInput.value.trim();
-
-  if (!cat || !name || !priceStr) {
-    adminItemStatus.textContent = "Kategorie, Name und Preis sind Pflicht.";
-    adminItemStatus.classList.add("status-err");
-    return;
-  }
-
-  const price = parseFloat(priceStr.replace(",", "."));
-  if (isNaN(price)) {
-    adminItemStatus.textContent = "Preis ist keine Zahl.";
-    adminItemStatus.classList.add("status-err");
-    return;
-  }
-
-  try {
-    addItemBtn.disabled = true;
-    addItemBtn.textContent = "Speichere...";
-
-    const menuCol = collection(doc(db, "restaurants", currentRestaurantId), "menuItems");
-    await addDoc(menuCol, {
-      category: cat,
-      name,
-      description: desc,
-      price,
-      imageUrl: imageUrl || null, // URL, egal ob JPG/PNG/WebP/GIF
-      available: true,
-    });
-
-    adminItemStatus.textContent = "Gericht gespeichert.";
-    adminItemStatus.classList.add("status-ok");
-
-    itemCatInput.value = "";
-    itemNameInput.value = "";
-    itemDescInput.value = "";
-    itemPriceInput.value = "";
-    itemImageInput.value = "";
-
-    await loadMenuItems();
-  } catch (err) {
-    console.error(err);
-    adminItemStatus.textContent = "Fehler: " + err.message;
-    adminItemStatus.classList.add("status-err");
-  } finally {
-    addItemBtn.disabled = false;
-    addItemBtn.textContent = "Gericht speichern";
-  }
-}
-
-async function loadMenuItems() {
-  itemList.innerHTML = "<div class='info'>Lade...</div>";
-
-  const menuCol = collection(doc(db, "restaurants", currentRestaurantId), "menuItems");
-  const snap = await getDocs(menuCol);
-
-  itemList.innerHTML = "";
-  if (snap.empty) {
-    itemList.innerHTML = "<div class='info'>Noch keine Gerichte.</div>";
-    return;
-  }
-
-  snap.forEach((docSnap) => {
-    const data = docSnap.data();
-    const available = data.available !== false;
-    const hasImage = !!data.imageUrl;
-    const row = document.createElement("div");
-    row.className = "list-item-row";
-    row.innerHTML = `
-      <span>
-        [${data.category || "Sonstiges"}] ${data.name} – ${data.price.toFixed(2)} €
-        <br/>
-        <span class="info">
-          ${data.description || ""}${
-      hasImage ? " • Foto: vorhanden" : " • Foto: keines"
-    } • Status: ${available ? "aktiv" : "inaktiv"}
-        </span>
-      </span>
-      <span style="display:flex; gap:6px;">
-        <button class="btn btn-ghost btn-small" data-id="${docSnap.id}" data-action="toggle">
-          ${available ? "Deaktivieren" : "Aktivieren"}
-        </button>
-        <button class="btn btn-ghost btn-small" data-id="${docSnap.id}" data-action="delete">
-          Löschen
-        </button>
-      </span>
-    `;
-    itemList.appendChild(row);
-  });
-
-  itemList.addEventListener(
-    "click",
-    async (e) => {
-      const btn = e.target.closest("button[data-id]");
-      if (!btn) return;
-      const id = btn.dataset.id;
-      const action = btn.dataset.action;
-      const menuCol = collection(doc(db, "restaurants", currentRestaurantId), "menuItems");
-
-      if (action === "delete") {
-        if (!confirm("Dieses Gericht wirklich löschen?")) return;
-        await deleteDoc(doc(menuCol, id));
-        await loadMenuItems();
-      } else if (action === "toggle") {
-        const currentlyActive = btn.textContent.includes("Deaktivieren");
-        const newAvailable = !currentlyActive;
-
-        await updateDoc(doc(menuCol, id), { available: newAvailable });
-        await loadMenuItems();
-      }
-    },
-    { once: true }
-  );
-}
-
-function mapStatusLabel(status) {
-  if (status === "new") return "Neu";
-  if (status === "in_progress") return "In Arbeit";
-  if (status === "served") return "Serviert";
-  return status || "";
-}
-
-async function loadTodayOrders() {
-  adminOrdersList.innerHTML = "<div class='info'>Lade...</div>";
-
-  const ordersCol = collection(doc(db, "restaurants", currentRestaurantId), "orders");
-  const snap = await getDocs(ordersCol);
-
-  const todayISO = new Date().toISOString().slice(0, 10);
-  const orders = [];
-
-  snap.forEach((docSnap) => {
-    const data = docSnap.data();
-    const created = data.createdAt?.toDate?.();
-    const dateStr = created ? created.toISOString().slice(0, 10) : null;
-
-    if (dateStr === todayISO) {
-      const total =
-        (data.items || []).reduce((sum, item) => sum + (item.price || 0) * (item.qty || 0), 0) ||
-        0;
-      orders.push({
-        id: docSnap.id,
-        table: data.table || "?",
-        status: data.status || "new",
-        time: created
-          ? created.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })
-          : "",
-        total,
-        count: (data.items || []).reduce((sum, item) => sum + (item.qty || 0), 0),
-      });
-    }
-  });
-
-  orders.sort((a, b) => (a.time < b.time ? 1 : -1));
-
-  adminOrdersList.innerHTML = "";
-  if (!orders.length) {
-    adminOrdersList.innerHTML = "<div class='info'>Heute noch keine Bestellungen.</div>";
-    return;
-  }
-
-  orders.forEach((o) => {
-    const div = document.createElement("div");
-    div.className = "list-item-row";
-    div.innerHTML = `
-      <span>
-        ${o.time} – Tisch ${o.table}
-        <br/>
-        <span class="info">
-          ${o.count} Positionen • ${o.total.toFixed(2)} € • Status: ${mapStatusLabel(o.status)}
-        </span>
-      </span>
-    `;
-    adminOrdersList.appendChild(div);
-  });
-}
-
-adminLoginBtn.addEventListener("click", () => {
-  loginWithCode(adminCodeInput.value.trim());
-});
-
-addItemBtn.addEventListener("click", addMenuItem);
-
-// Direktzugang: admin.html?r=restaurantId
-const params = new URLSearchParams(window.location.search);
-const directRestId = params.get("r");
-
-if (directRestId) {
-  setRestaurantById(directRestId);
-} else {
-  const storedRestId = loadOwnerSession();
-  if (storedRestId) {
-    setRestaurantById(storedRestId);
-  }
-}
+  <script type="module" src="admin.js"></script>
+</body>
+</html>
