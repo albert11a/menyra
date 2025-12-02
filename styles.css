@@ -129,6 +129,12 @@ body {
   margin-top: 2px;
 }
 
+/* Search-Card (für Suchfeld) */
+
+.search-card {
+  padding: 10px 14px;
+}
+
 /* ========================================
    BUTTONS
    ======================================== */
@@ -240,7 +246,7 @@ body {
 /* Search wie Dribbble-Beispiel */
 
 .search-wrapper {
-  margin-top: 4px;
+  margin-top: 0;
 }
 
 .search-pill {
