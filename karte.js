@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Logo, Suche, Angeboten & Warenkorb-Badge
+// karte.js – Gäste-Ansicht mit Logo, Suche, Kategorien, Angebot & Floating Cart-FAB
 
 import { db } from "./firebase-config.js";
 import {
@@ -14,17 +14,17 @@ const params = new URLSearchParams(window.location.search);
 const restaurantId = params.get("r") || "test-restaurant";
 const tableId = params.get("t") || "T1";
 
-// DOM-Elemente
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
-const searchInputEl = document.getElementById("searchInput");
-const cartIconBtn = document.getElementById("cartIconBtn");
-const cartBadgeEl = document.getElementById("cartBadge");
+
 const categoryTabsEl = document.getElementById("categoryTabs");
-const offersSectionEl = document.getElementById("offersSection");
-const offersListEl = document.getElementById("offersList");
 const menuListEl = document.getElementById("menuList");
+
+const offersSection = document.getElementById("offersSection");
+const offerTitleEl = document.getElementById("offerTitle");
+const offerTextEl = document.getElementById("offerText");
+
 const cartSection = document.getElementById("cartSection");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
@@ -32,11 +32,18 @@ const clearCartBtn = document.getElementById("clearCartBtn");
 const sendOrderBtn = document.getElementById("sendOrderBtn");
 const noteInput = document.getElementById("noteInput");
 const statusMsg = document.getElementById("statusMsg");
+const cartTableLabel = document.getElementById("cartTableLabel");
+
+const searchInput = document.getElementById("searchInput");
+const cartFab = document.getElementById("cartFab");
+const cartBadgeEl = document.getElementById("cartBadge");
 
 let allMenuItems = [];
 let activeCategory = "Alle";
+let searchTerm = "";
 let cart = [];
-let searchQuery = "";
+
+cartTableLabel.textContent = `Tisch ${tableId}`;
 
 function todayISO() {
   const d = new Date();
@@ -58,6 +65,20 @@ function isRestaurantOperational(data) {
   return true;
 }
 
+function renderOffer(restData) {
+  const active = restData.offerActive === true;
+  const title = restData.offerTitle || "";
+  const text = restData.offerText || "";
+
+  if (active && (title || text)) {
+    offerTitleEl.textContent = title;
+    offerTextEl.textContent = text;
+    offersSection.style.display = "block";
+  } else {
+    offersSection.style.display = "none";
+  }
+}
+
 async function loadRestaurantAndMenu() {
   try {
     const restaurantRef = doc(db, "restaurants", restaurantId);
@@ -73,7 +94,7 @@ async function loadRestaurantAndMenu() {
 
     const data = restaurantSnap.data();
     restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
-    restaurantMetaEl.textContent = `${data.city || ""} · Tisch ${tableId}`;
+    restaurantMetaEl.textContent = `${data.city || ""} · ID: ${restaurantId}`;
 
     if (data.logoUrl) {
       restaurantLogoEl.src = data.logoUrl;
@@ -89,6 +110,9 @@ async function loadRestaurantAndMenu() {
       return;
     }
 
+    // Angebot / Special
+    renderOffer(data);
+
     const menuCol = collection(restaurantRef, "menuItems");
     const snap = await getDocs(menuCol);
 
@@ -103,15 +127,12 @@ async function loadRestaurantAndMenu() {
           category: d.category || "Sonstiges",
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
-          isOffer: d.offer === true,
         };
       })
       .filter((item) => item.available);
 
     renderCategories();
-    renderOffers();
     renderMenu();
-    updateCartBadge();
   } catch (err) {
     console.error(err);
     restaurantNameEl.textContent = "Fehler";
@@ -155,86 +176,6 @@ function renderCategories() {
   });
 }
 
-function matchesSearch(item) {
-  if (!searchQuery) return true;
-  const q = searchQuery.toLowerCase();
-  return (
-    item.name.toLowerCase().includes(q) ||
-    (item.description || "").toLowerCase().includes(q)
-  );
-}
-
-function renderOffers() {
-  const offerItems = allMenuItems.filter((i) => i.isOffer && matchesSearch(i));
-
-  if (!offerItems.length) {
-    offersSectionEl.style.display = "none";
-    offersListEl.innerHTML = "";
-    return;
-  }
-
-  offersSectionEl.style.display = "block";
-  offersListEl.innerHTML = "";
-
-  offerItems.forEach((item) => {
-    const div = document.createElement("div");
-    div.className = "offer-item";
-
-    if (item.imageUrl) {
-      const img = document.createElement("img");
-      img.src = item.imageUrl;
-      img.alt = item.name;
-      img.className = "offer-thumb";
-      img.loading = "lazy";
-      div.appendChild(img);
-    }
-
-    const textWrap = document.createElement("div");
-    textWrap.className = "offer-text";
-
-    const titleEl = document.createElement("div");
-    titleEl.className = "offer-name";
-    titleEl.textContent = item.name;
-
-    const descEl = document.createElement("div");
-    descEl.className = "offer-desc";
-    descEl.textContent = item.description;
-
-    const bottomRow = document.createElement("div");
-    bottomRow.className = "offer-bottom-row";
-
-    const priceEl = document.createElement("div");
-    priceEl.className = "offer-price";
-    priceEl.textContent = item.price.toFixed(2) + " €";
-
-    const tagEl = document.createElement("div");
-    tagEl.className = "offer-tag";
-    tagEl.textContent = "Ofertë";
-
-    bottomRow.appendChild(priceEl);
-    bottomRow.appendChild(tagEl);
-
-    textWrap.appendChild(titleEl);
-    if (item.description) textWrap.appendChild(descEl);
-    textWrap.appendChild(bottomRow);
-
-    const actions = document.createElement("div");
-    actions.className = "offer-actions";
-
-    const addBtn = document.createElement("button");
-    addBtn.className = "btn btn-primary btn-small";
-    addBtn.textContent = "Shto";
-    addBtn.addEventListener("click", () => changeCart(item, 1));
-
-    actions.appendChild(addBtn);
-
-    div.appendChild(textWrap);
-    div.appendChild(actions);
-
-    offersListEl.appendChild(div);
-  });
-}
-
 function renderMenu() {
   menuListEl.innerHTML = "";
 
@@ -243,10 +184,16 @@ function renderMenu() {
       ? allMenuItems
       : allMenuItems.filter((i) => i.category === activeCategory);
 
-  items = items.filter((i) => matchesSearch(i));
+  if (searchTerm) {
+    const q = searchTerm;
+    items = items.filter((i) => {
+      const text = `${i.name} ${i.description}`.toLowerCase();
+      return text.includes(q);
+    });
+  }
 
   if (!items.length) {
-    menuListEl.innerHTML = "<p class='info'>Nuk ka produkte për këtë filtër.</p>";
+    menuListEl.innerHTML = "<p class='info'>Keine Produkte.</p>";
     return;
   }
 
@@ -278,12 +225,10 @@ function renderMenu() {
     header.appendChild(priceEl);
     div.appendChild(header);
 
-    if (item.description) {
-      const descEl = document.createElement("div");
-      descEl.className = "menu-item-desc";
-      descEl.textContent = item.description;
-      div.appendChild(descEl);
-    }
+    const descEl = document.createElement("div");
+    descEl.className = "menu-item-desc";
+    descEl.textContent = item.description;
+    div.appendChild(descEl);
 
     const actions = document.createElement("div");
     actions.className = "menu-item-actions";
@@ -315,14 +260,24 @@ function changeCart(item, delta) {
     if (cart[index].qty <= 0) cart.splice(index, 1);
   }
   renderCart();
-  updateCartBadge();
+}
+
+function updateCartBadge() {
+  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+  if (totalQty > 0) {
+    cartBadgeEl.textContent = String(totalQty);
+    cartBadgeEl.style.display = "flex";
+    cartFab.classList.add("visible"); // Fade-In ein
+  } else {
+    cartBadgeEl.style.display = "none";
+    cartFab.classList.remove("visible"); // Fade-Out
+  }
 }
 
 function renderCart() {
   if (!cart.length) {
     cartSection.style.display = "none";
-    cartItemsEl.innerHTML = "";
-    cartTotalEl.textContent = "";
+    updateCartBadge();
     return;
   }
 
@@ -341,17 +296,8 @@ function renderCart() {
     cartItemsEl.appendChild(row);
   });
 
-  cartTotalEl.textContent = `Total: ${total.toFixed(2)} €`;
-}
-
-function updateCartBadge() {
-  const count = cart.reduce((sum, item) => sum + item.qty, 0);
-  if (!count) {
-    cartBadgeEl.style.display = "none";
-    return;
-  }
-  cartBadgeEl.style.display = "flex";
-  cartBadgeEl.textContent = count;
+  cartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
+  updateCartBadge();
 }
 
 async function sendOrder() {
@@ -359,14 +305,14 @@ async function sendOrder() {
   statusMsg.className = "status-text";
 
   if (!cart.length) {
-    statusMsg.textContent = "Së pari zgjidh produkte.";
+    statusMsg.textContent = "Bitte zuerst Produkte auswählen.";
     statusMsg.classList.add("status-err");
     return;
   }
 
   try {
     sendOrderBtn.disabled = true;
-    sendOrderBtn.textContent = "Duke dërguar...";
+    sendOrderBtn.textContent = "Sende...";
 
     const restaurantRef = doc(db, "restaurants", restaurantId);
     const ordersCol = collection(restaurantRef, "orders");
@@ -387,40 +333,39 @@ async function sendOrder() {
 
     cart = [];
     renderCart();
-    updateCartBadge();
     noteInput.value = "";
-    statusMsg.textContent = "Porosia u dërgua. Faleminderit!";
+    statusMsg.textContent = "Bestellung gesendet. Danke!";
     statusMsg.classList.add("status-ok");
   } catch (err) {
     console.error(err);
-    statusMsg.textContent = "Gabim: " + err.message;
+    statusMsg.textContent = "Fehler: " + err.message;
     statusMsg.classList.add("status-err");
   } finally {
     sendOrderBtn.disabled = false;
-    sendOrderBtn.textContent = "Dërgo porosinë";
+    sendOrderBtn.textContent = "Bestellung senden";
   }
 }
 
-// Events
 clearCartBtn.addEventListener("click", () => {
   cart = [];
   renderCart();
-  updateCartBadge();
 });
 
 sendOrderBtn.addEventListener("click", sendOrder);
 
-// Warenkorb-Icon scrollt zum Warenkorb
-cartIconBtn.addEventListener("click", () => {
-  if (!cart.length) return;
-  cartSection.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
 // Suche
-searchInputEl.addEventListener("input", () => {
-  searchQuery = (searchInputEl.value || "").trim();
-  renderOffers();
+searchInput.addEventListener("input", () => {
+  searchTerm = (searchInput.value || "").trim().toLowerCase();
   renderMenu();
 });
 
+// Floating Cart Button: scrollt zum Warenkorb
+cartFab.addEventListener("click", () => {
+  if (cartSection.style.display !== "none") {
+    cartSection.scrollIntoView({ behavior: "smooth", block: "end" });
+  }
+});
+
+// Initial load
 loadRestaurantAndMenu();
+renderCart(); // sorgt dafür, dass FAB am Anfang versteckt ist
