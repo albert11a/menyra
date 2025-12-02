@@ -111,10 +111,10 @@ body {
 }
 
 .rest-logo {
-  width: 44px;
   height: 44px;
-  border-radius: 999px;
-  object-fit: cover;
+  width: auto;              /* Bild darf seine Breite behalten */
+  border-radius: 8px;       /* leicht abgerundet, aber kein Kreis mehr */
+  object-fit: contain;      /* komplettes Logo sichtbar, nicht gecroppt */
   border: 1px solid #e2e8f0;
 }
 
