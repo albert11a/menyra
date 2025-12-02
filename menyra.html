@@ -62,6 +62,102 @@
         Admin: <code>admin.html</code> (LogIn per Admin-Code oder direkt mit <code>?r=ID</code>)
       </p>
     </section>
+
+    <!-- Kundendetails / Tabs -->
+    <section class="card" id="restDetailCard" style="display:none;">
+      <h2 id="detailTitle">Kundendetails</h2>
+      <p class="info" id="detailSubtitle"></p>
+
+      <div class="detail-status-row">
+        <span class="badge" id="detailStatusBadge">Status</span>
+        <span class="info" id="detailAboInfo"></span>
+      </div>
+
+      <div class="detail-tabs" id="detailTabs">
+        <button class="detail-tab active" data-tab="info">Übersicht</button>
+        <button class="detail-tab" data-tab="menu">Speisekarte</button>
+        <button class="detail-tab" data-tab="offers">Angebote</button>
+      </div>
+
+      <!-- TAB: INFO -->
+      <div class="detail-tab-content" id="tab-info">
+        <div class="detail-form">
+          <label class="detail-field">
+            <span>Restaurant / Lokal</span>
+            <input class="input" id="detailNameInput" />
+          </label>
+          <label class="detail-field">
+            <span>Inhaber / Kunde</span>
+            <input class="input" id="detailOwnerInput" />
+          </label>
+          <label class="detail-field">
+            <span>Stadt / Ort</span>
+            <input class="input" id="detailCityInput" />
+          </label>
+          <label class="detail-field">
+            <span>Telefon</span>
+            <input class="input" id="detailPhoneInput" />
+          </label>
+          <label class="detail-field">
+            <span>Anzahl Tische</span>
+            <input class="input" id="detailTableCountInput" />
+          </label>
+          <label class="detail-field">
+            <span>Preis pro Jahr (€)</span>
+            <input class="input" id="detailYearPriceInput" />
+          </label>
+          <label class="detail-field">
+            <span>Logo-URL</span>
+            <input class="input" id="detailLogoUrlInput" />
+          </label>
+        </div>
+
+        <p class="info" id="detailCodesInfo"></p>
+
+        <button class="btn btn-primary" id="detailSaveBtn" style="margin-top:8px;">
+          Änderungen speichern
+        </button>
+        <div class="status-text" id="detailInfoStatus"></div>
+      </div>
+
+      <!-- TAB: SPEISEKARTE -->
+      <div class="detail-tab-content" id="tab-menu" style="display:none;">
+        <p class="info">
+          Speisekarte dieses Lokals. Du kannst Gerichte bearbeiten, deaktivieren oder löschen.
+        </p>
+        <div class="list" id="detailMenuList" style="margin-top:8px;"></div>
+        <p class="info" style="margin-top:10px;">
+          Für umfangreiche Änderungen kannst du auch direkt in den Restaurant-Admin wechseln.
+        </p>
+        <a class="btn btn-ghost btn-small" id="detailOpenAdminLink" href="#" target="_blank">
+          Restaurant-Admin öffnen
+        </a>
+      </div>
+
+      <!-- TAB: ANGEBOTE -->
+      <div class="detail-tab-content" id="tab-offers" style="display:none;">
+        <label class="offer-flag-label">
+          <input type="checkbox" id="offersEnabledInput" />
+          <span>Angebote für dieses Lokal auf der Gästeseite anzeigen</span>
+        </label>
+
+        <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+          <button class="btn btn-primary btn-small" id="addOfferBtn">
+            Neues Angebot
+          </button>
+        </div>
+
+        <div class="status-text" id="offersStatus"></div>
+
+        <div class="list" id="offersList" style="margin-top:10px;"></div>
+
+        <p class="info">
+          Aktive Angebote werden als horizontale Slider-Karten in der Gäste-Ansicht angezeigt.
+          Du kannst mehrere Angebote anlegen. Wenn du alle deaktivierst oder die Checkbox
+          oben ausschaltest, wird die Angebots-Section komplett ausgeblendet.
+        </p>
+      </div>
+    </section>
   </main>
 
   <script type="module" src="menyra.js"></script>
