@@ -2,8 +2,9 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>MENYRA – Karte & Bestellung</title>
+  <title>MENYRA – Karte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f3f4f6" />
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
@@ -11,43 +12,47 @@
     <header class="header">
       <div>
         <div class="header-title">MENYRA</div>
-        <div class="header-sub">Digitale Speisekarte</div>
+        <div class="header-sub" id="tableLabel">Tisch: ?</div>
       </div>
-      <div class="header-sub" id="tableLabel"></div>
     </header>
 
+    <!-- Restaurant-Kopf mit Logo -->
     <section class="card">
-      <div class="restaurant-name" id="restaurantName">Lädt...</div>
-      <div class="restaurant-meta" id="restaurantMeta"></div>
+      <div class="restaurant-header">
+        <img id="restaurantLogo" class="rest-logo" style="display:none;" alt="Logo" />
+        <div>
+          <div class="restaurant-name" id="restaurantName">Lokal</div>
+          <div class="restaurant-meta" id="restaurantMeta"></div>
+        </div>
+      </div>
+    </section>
 
+    <!-- Kategorien & Speisekarte -->
+    <section class="card">
+      <h2>Speisekarte</h2>
       <div class="category-tabs" id="categoryTabs"></div>
       <div class="menu-list" id="menuList"></div>
     </section>
 
+    <!-- Warenkorb -->
     <section class="cart-card" id="cartSection" style="display:none;">
       <div class="cart-header">
-        <div>Deine Bestellung</div>
-        <button class="btn btn-ghost btn-small" id="clearCartBtn">Leeren</button>
+        <span>Deine Bestellung</span>
       </div>
       <div class="cart-items" id="cartItems"></div>
       <div class="cart-total" id="cartTotal"></div>
+      <textarea
+        id="noteInput"
+        class="input"
+        style="border-radius: 12px; margin-top:8px;"
+        placeholder="Hinweis für die Küche (optional)"
+      ></textarea>
       <div class="cart-actions">
-        <input
-          type="text"
-          id="noteInput"
-          class="input"
-          placeholder="Optional: Hinweis (z.B. ohne Zwiebel)"
-        />
-      </div>
-      <div class="cart-actions">
+        <button class="btn btn-ghost" id="clearCartBtn">Leeren</button>
         <button class="btn btn-primary" id="sendOrderBtn">Bestellung senden</button>
       </div>
       <div class="status-text" id="statusMsg"></div>
     </section>
-
-    <p class="info">
-      Diese Seite wird nur über QR-Code aufgerufen.
-    </p>
   </main>
 
   <script type="module" src="karte.js"></script>
