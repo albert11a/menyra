@@ -413,23 +413,24 @@ body {
 }
 
 /* ========================================
-   TABS-CONTAINER (Button-Farbe, iOS-Style)
+   TABS-CONTAINER (jetzt ohne Hintergrund)
    ======================================== */
 
 .tabs-wrapper {
-  background: #643A71;
-  border-radius: 999px;
-  padding: 4px;
-  margin-top: -4px;   /* etwas höher, näher an vorherigem Element */
-  margin-bottom: 4px; /* kleiner Abstand zur Card darunter */
+  /* kein Hintergrund, kein Border – nur für Abstand zuständig */
+  background: transparent;
+  border-radius: 0;
+  padding: 0;
+  margin-top: 6px;
+  margin-bottom: 4px;
 }
 
 .tabs-wrapper--drinks {
-  margin-top: 4px;    /* Drinks-Tabs etwas näher an der Suche */
+  margin-top: 8px;
 }
 
 .tabs-wrapper--food {
-  margin-top: 6px;
+  margin-top: 8px;
 }
 
 .category-tabs {
@@ -438,12 +439,12 @@ body {
   gap: 6px;
 }
 
-/* Tabs im lila Container (Segment-Control Style) */
+/* Tabs selbst bleiben wie vorher "Pills" */
 
 .tabs-wrapper .category-tab {
   padding: 6px 10px;
   border-radius: 999px;
-  border: 1px solid rgba(248, 250, 252, 0.7);
+  border: 1px solid rgba(17, 24, 39, 0.08);
   font-size: 0.75rem;
   background: #f9fafb;
   cursor: pointer;
