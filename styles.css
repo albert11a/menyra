@@ -152,17 +152,17 @@ body {
   white-space: nowrap;
 }
 
-/* dezentes Pink, Border gleiche Farbe */
+/* Hauptfarbe: #AD343E */
 .btn-primary {
-  background: #f9a8d4;
+  background: #AD343E;
   color: #ffffff;
-  border: 1px solid #f9a8d4;
+  border: 1px solid #AD343E;
   box-shadow: none;
 }
 
 .btn-primary:hover {
-  background: #f472b6;
-  border-color: #f472b6;
+  background: #8C2B35;
+  border-color: #8C2B35;
 }
 
 .btn-ghost {
@@ -286,14 +286,14 @@ body {
   color: #9ca3af;
 }
 
-/* Such-Button dezent pink, mit cleanem Icon */
+/* Such-Button mit #AD343E */
 
 .search-btn {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid #f9a8d4;
-  background: #f9a8d4;
+  border: 1px solid #AD343E;
+  background: #AD343E;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -302,11 +302,11 @@ body {
 }
 
 .search-btn:hover {
-  background: #f472b6;
-  border-color: #f472b6;
+  background: #8C2B35;
+  border-color: #8C2B35;
 }
 
-/* vereinfachtes, sauberes Lupe-Icon (kein Doppelkreis mehr) */
+/* vereinfachtes, sauberes Lupe-Icon */
 .search-btn-icon {
   width: 16px;
   height: 16px;
@@ -316,7 +316,6 @@ body {
   box-sizing: border-box;
 }
 
-/* nur noch der Griff, damit es nicht verzerrt wirkt */
 .search-btn-icon::after {
   content: "";
   position: absolute;
@@ -333,14 +332,14 @@ body {
    FLOATING CART FAB
    ======================================== */
 
-/* runder Warenkorb, gleiche dezente Pink-Farbe */
+/* runder Warenkorb, gleiche Farbe */
 
 .cart-fab {
   width: 54px;
   height: 54px;
   border-radius: 999px;
-  border: 1px solid #f9a8d4;
-  background: #f9a8d4;
+  border: 1px solid #AD343E;
+  background: #AD343E;
   box-shadow: none;
   display: flex;
   align-items: center;
@@ -369,8 +368,6 @@ body {
   position: relative;
   box-sizing: border-box;
 }
-
-/* sauberer Warenkorb – nur Korb + Griff */
 
 .cart-fab-icon::before,
 .cart-fab-icon::after {
@@ -446,7 +443,7 @@ body {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 30px;          /* Abstand zwischen Produkten (so gelassen) */
+  gap: 30px;          /* Abstand zwischen Produkten */
   margin-top: 10px;
 }
 
@@ -495,7 +492,7 @@ body {
   display: flex;
   justify-content: flex-end;
   gap: 10px;
-  margin-top: 20px;  /* Abstand Beschreibung → Buttons (so gelassen) */
+  margin-top: 20px;  /* Abstand Beschreibung → Buttons */
 }
 
 /* ========================================
