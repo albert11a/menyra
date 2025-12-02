@@ -9,7 +9,7 @@
 </head>
 <body>
   <main class="page page--karte">
-    <!-- Top: Restaurant-Card + Sot ne fokus + Suche-Card + Kategorien -->
+    <!-- Top: Restaurant-Card + Sot ne fokus + Suche-Card -->
     <header class="karte-topbar">
       <!-- Restaurant -->
       <section class="card restaurant-card">
@@ -22,7 +22,7 @@
         </div>
       </section>
 
-      <!-- ANGEBOTE / SOT NE FOKUS SLIDER (jetzt direkt unter Restaurant) -->
+      <!-- ANGEBOTE / SOT NE FOKUS SLIDER (direkt unter Restaurant) -->
       <section class="offers-card" id="offersSection" style="display:none;">
         <div class="offers-header-row">
           <div class="offers-label">SOT NE FOKUS</div>
@@ -35,7 +35,7 @@
         </div>
       </section>
 
-      <!-- Suche in eigener weißen Card (jetzt unter Sot ne fokus) -->
+      <!-- Suche in eigener weißen Card (unter Sot ne fokus) -->
       <section class="card search-card">
         <div class="search-wrapper">
           <div class="search-pill">
@@ -43,7 +43,7 @@
               id="searchInput"
               class="search-input"
               type="search"
-              placeholder="Kërko në meny."
+              placeholder="Kërko në menyn."
             />
             <button type="button" class="search-btn">
               <span class="search-btn-icon"></span>
@@ -51,10 +51,23 @@
           </div>
         </div>
       </section>
-
-      <!-- Kategorie-Tabs -->
-      <div class="category-tabs" id="categoryTabs"></div>
     </header>
+
+    <!-- TABS für Getränke (außerhalb der Getränke-Card) -->
+    <section class="tabs-wrapper tabs-wrapper--drinks" id="drinksTabsWrapper" style="display:none;">
+      <div class="category-tabs category-tabs--drinks" id="drinksTabs"></div>
+    </section>
+
+    <!-- GETRÄNKE-KARTE -->
+    <section class="card" id="drinksSection" style="display:none;">
+      <h2>Getränke</h2>
+      <div class="drinks-list" id="drinksList"></div>
+    </section>
+
+    <!-- TABS für Speisekarte (außerhalb der Speisekarten-Card) -->
+    <section class="tabs-wrapper tabs-wrapper--food" id="foodTabsWrapper">
+      <div class="category-tabs category-tabs--food" id="foodCategoryTabs"></div>
+    </section>
 
     <!-- SPEISEKARTE -->
     <section class="card">
