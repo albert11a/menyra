@@ -94,7 +94,9 @@ async function loadRestaurantAndMenu() {
 
     const data = restaurantSnap.data();
     restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
-    restaurantMetaEl.textContent = `${data.city || ""} · ID: ${restaurantId}`;
+
+    // NEU: fester Begrüßungstext statt City + ID
+    restaurantMetaEl.textContent = "Miresevini ne menyn digjitale";
 
     if (data.logoUrl) {
       restaurantLogoEl.src = data.logoUrl;
