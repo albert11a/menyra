@@ -44,7 +44,7 @@ body {
 }
 
 /* ========================================
-   HEADER
+   HEADER (für andere Seiten wie index, menyra, admin)
    ======================================== */
 
 .header {
@@ -220,359 +220,98 @@ body {
 }
 
 /* ========================================
-   MENÜ / KATEGORIEN (karte.html)
+   KARTE: TOP-BEREICH (sticky)
    ======================================== */
 
-.category-tabs {
-  margin-top: 10px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
+.top-shell {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background-color: #f3f4f6;
+  padding-top: 4px;
+  padding-bottom: 8px;
 }
 
-.category-tab {
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid #d4d4d8;
-  font-size: 0.75rem;
-  background: #f9fafb;
-  cursor: pointer;
-}
-
-.category-tab.active {
-  background: #0f172a;
-  color: #f9fafb;
-  border-color: #0f172a;
-}
-
-.menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  margin-top: 10px;
-}
-
-.menu-item {
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 10px 12px;
-  border: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-/* Produktbild in Karte */
-
-.menu-item-image {
-  width: 100%;
-  max-height: 160px;
-  border-radius: 12px;
-  object-fit: cover;
+.card-rest {
   margin-bottom: 6px;
 }
 
-.menu-item-header {
+.card-top-controls {
+  margin-top: 0;
+}
+
+/* Suche + Warenkorb */
+
+.top-search-row {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-}
-
-.menu-item-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.menu-item-price {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.menu-item-desc {
-  font-size: 0.78rem;
-  color: #64748b;
-}
-
-.menu-item-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: 4px;
-}
-
-/* ========================================
-   WARENKORB (Gäste-Ansicht)
-   ======================================== */
-
-.cart-card {
-  background: #020617;
-  color: #f9fafb;
-  padding: 12px 14px;
-  border-radius: 18px;
-}
-
-.cart-header {
-  display: flex;
   justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.search-pill {
+  flex: 1;
+  display: flex;
   align-items: center;
-}
-
-.cart-items {
-  margin-top: 8px;
-  font-size: 0.8rem;
-}
-
-.cart-item-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 2px 0;
-}
-
-.cart-total {
-  margin-top: 8px;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.cart-actions {
-  margin-top: 10px;
-  display: flex;
   gap: 6px;
-}
-
-/* ========================================
-   BILDER (z.B. QR-Codes im Admin)
-   ======================================== */
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
-
-.list-item-row img {
-  border-radius: 12px;
+  background: #ffffff;
+  border-radius: 999px;
   border: 1px solid #e2e8f0;
-}
-/* ========================================
-   GLOBAL: Reset & Schrift
-   ======================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  padding: 6px 10px;
 }
 
-/* ========================================
-   EINHEITLICHER HINTERGRUND ÜBERALL
-   ======================================== */
-
-html,
-body {
-  height: 100%;
-  background-color: #f3f4f6;
+.search-icon {
+  font-size: 0.8rem;
+  color: #9ca3af;
 }
 
-body {
-  min-height: 100vh;
+.search-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-size: 0.82rem;
+  width: 100%;
   color: #0f172a;
 }
 
-/* Der sichtbare App-Bereich */
-.page {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 16px 16px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background-color: #f3f4f6;
+.search-input::placeholder {
+  color: #9ca3af;
 }
 
-.page > * {
-  width: 100%;
-}
-
-/* ========================================
-   HEADER
-   ======================================== */
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 6px;
-  margin-bottom: 4px;
-}
-
-.header-title {
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-}
-
-.header-sub {
-  font-size: 0.72rem;
-  color: #64748b;
-  text-align: right;
-}
-
-/* ========================================
-   CARDS / BOXEN
-   ======================================== */
-
-.card {
-  background: #ffffff;
-  padding: 14px 14px;
-  border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.25);
-}
-
-.card h1,
-.card h2 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.card p {
-  font-size: 0.82rem;
-  color: #475569;
-}
-
-/* ========================================
-   BUTTONS
-   ======================================== */
-
-.btn {
-  border: none;
+.cart-icon-btn {
+  width: 40px;
+  height: 40px;
   border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.btn-primary {
+  border: none;
   background: linear-gradient(135deg, #2563eb, #22c55e);
   color: #f9fafb;
-}
-
-.btn-ghost {
-  background: #e5e7eb;
-  color: #111827;
-}
-
-.btn-small {
-  padding: 4px 10px;
-  font-size: 0.75rem;
-}
-
-/* ========================================
-   INPUTS / FORM
-   ======================================== */
-
-.input {
-  width: 100%;
-  border-radius: 999px;
-  border: 1px solid #cbd5f5;
-  padding: 8px 12px;
-  font-size: 0.8rem;
-  margin-top: 6px;
-  background: #ffffff;
-}
-
-.card .input + .input {
-  margin-top: 8px;
-}
-
-/* ========================================
-   LISTEN / BADGES / INFO-TEXT
-   ======================================== */
-
-.list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  margin-top: 8px;
-  font-size: 0.82rem;
-}
-
-.list-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-.badge {
-  font-size: 0.72rem;
-  padding: 3px 8px;
-  border-radius: 999px;
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.info {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 6px;
-}
-
-/* Status-Anzeigen */
-
-.status-text {
-  font-size: 0.8rem;
-  margin-top: 6px;
-}
-
-.status-ok {
-  color: #16a34a;
-}
-
-.status-err {
-  color: #b91c1c;
-}
-
-/* ========================================
-   RESTAURANT-INFOS (Gäste/Karte)
-   ======================================== */
-
-.restaurant-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  justify-content: center;
+  position: relative;
+  font-size: 1.1rem;
+  box-shadow: 0 10px 20px rgba(15, 23, 42, 0.25);
 }
 
-.rest-logo {
-  width: 44px;
-  height: 44px;
+/* Badge für Anzahl der Artikel */
+
+.cart-badge {
+  position: absolute;
+  top: 0;
+  right: 0;
+  transform: translate(35%, -35%);
+  background: #ef4444;
+  color: #ffffff;
   border-radius: 999px;
-  object-fit: cover;
-  border: 1px solid #e2e8f0;
-}
-
-.restaurant-name {
-  font-weight: 700;
-  font-size: 1.05rem;
-}
-
-.restaurant-meta {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 2px;
+  font-size: 0.65rem;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 0 0 2px #f3f4f6;
 }
 
 /* ========================================
@@ -580,7 +319,7 @@ body {
    ======================================== */
 
 .category-tabs {
-  margin-top: 10px;
+  margin-top: 4px;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
@@ -601,11 +340,15 @@ body {
   border-color: #0f172a;
 }
 
+.product-list-card {
+  margin-top: 8px;
+}
+
 .menu-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  margin-top: 10px;
+  margin-top: 4px;
 }
 
 .menu-item {
@@ -622,7 +365,7 @@ body {
 
 .menu-item-image {
   width: 100%;
-  max-height: 160px;
+  max-height: 180px;
   border-radius: 12px;
   object-fit: cover;
   margin-bottom: 6px;
@@ -654,6 +397,74 @@ body {
   justify-content: flex-end;
   gap: 6px;
   margin-top: 4px;
+}
+
+/* ========================================
+   ANGEBOTE-BEREICH
+   ======================================== */
+
+.offers-card h2 {
+  font-size: 0.95rem;
+  margin-bottom: 6px;
+}
+
+.offers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.offer-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 14px;
+  background: #f9fafb;
+  border: 1px solid #e2e8f0;
+}
+
+.offer-thumb {
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.offer-text {
+  flex: 1;
+}
+
+.offer-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.offer-desc {
+  font-size: 0.75rem;
+  color: #64748b;
+  margin-top: 2px;
+}
+
+.offer-bottom-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+.offer-price {
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.offer-tag {
+  font-size: 0.7rem;
+  color: #0f766e;
+  background: #ccfbf1;
+  border-radius: 999px;
+  padding: 2px 8px;
 }
 
 /* ========================================
@@ -697,7 +508,7 @@ body {
 }
 
 /* ========================================
-   BILDER (z.B. QR-Codes im Admin)
+   BILDER GENERELL
    ======================================== */
 
 img {
@@ -706,7 +517,20 @@ img {
   display: block;
 }
 
-.list-item-row img {
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
+/* ========================================
+   ADMIN: kleines Angebot-Label
+   ======================================== */
+
+.offer-flag-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 6px;
+  font-size: 0.8rem;
+  color: #0f766e;
+}
+
+.offer-flag-label input {
+  width: 16px;
+  height: 16px;
 }
