@@ -18,13 +18,22 @@ const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
 
-const categoryTabsEl = document.getElementById("categoryTabs");
+// Tabs & Listen
+const drinksSection = document.getElementById("drinksSection");
+const drinksTabsWrapper = document.getElementById("drinksTabsWrapper");
+const drinksTabsEl = document.getElementById("drinksTabs");
+const drinksListEl = document.getElementById("drinksList");
+
+const foodTabsWrapper = document.getElementById("foodTabsWrapper");
+const foodCategoryTabsEl = document.getElementById("foodCategoryTabs");
 const menuListEl = document.getElementById("menuList");
 
+// Offers
 const offersSection = document.getElementById("offersSection");
 const offersSliderEl = document.getElementById("offersSlider");
 const offersDotsEl = document.getElementById("offersDots");
 
+// Warenkorb
 const cartSection = document.getElementById("cartSection");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
@@ -34,12 +43,16 @@ const noteInput = document.getElementById("noteInput");
 const statusMsg = document.getElementById("statusMsg");
 const cartTableLabel = document.getElementById("cartTableLabel");
 
+// Suche & FAB
 const searchInput = document.getElementById("searchInput");
 const cartFab = document.getElementById("cartFab");
 const cartBadgeEl = document.getElementById("cartBadge");
 
 let allMenuItems = [];
-let activeCategory = "Alle";
+let drinksItems = [];                // Nur Getränke
+let drinkCategoryNames = new Set();  // Kategorien, die Getränke sind
+let activeFoodCategory = "Alle";
+let activeDrinksCategory = null;
 let searchTerm = "";
 let cart = [];
 
@@ -153,18 +166,16 @@ function renderOffersSlider(offers) {
     // Menü-Item auflösen, falls verknüpft
     let linkedMenuItem = null;
     if (offer.menuItemId) {
-      linkedMenuItem = allMenuItems.find((m) => m.id === offer.menuItemId) || null;
+      linkedMenuItem =
+        allMenuItems.find((m) => m.id === offer.menuItemId) || null;
     }
 
     const title =
-      offer.title ||
-      (linkedMenuItem ? linkedMenuItem.name : "Angebot");
+      offer.title || (linkedMenuItem ? linkedMenuItem.name : "Angebot");
     const description =
-      offer.description ||
-      (linkedMenuItem ? linkedMenuItem.description : "");
+      offer.description || (linkedMenuItem ? linkedMenuItem.description : "");
     const imageUrl =
-      offer.imageUrl ||
-      (linkedMenuItem ? linkedMenuItem.imageUrl : null);
+      offer.imageUrl || (linkedMenuItem ? linkedMenuItem.imageUrl : null);
 
     let price = null;
     if (typeof offer.price === "number") {
@@ -271,9 +282,7 @@ function renderOffersSlider(offers) {
   offersSliderEl.appendChild(slidesFrag);
   offersDotsEl.appendChild(dotsFrag);
 
-  offersSlides = Array.from(
-    offersSliderEl.querySelectorAll(".offer-slide")
-  );
+  offersSlides = Array.from(offersSliderEl.querySelectorAll(".offer-slide"));
   offersCurrentIndex = 0;
   startOffersAutoSlide();
 
@@ -312,6 +321,8 @@ async function loadRestaurantAndMenu() {
       menuListEl.innerHTML = "<p class='info'>Bitte Personal informieren.</p>";
       cartSection.style.display = "none";
       offersSection.style.display = "none";
+      if (drinksSection) drinksSection.style.display = "none";
+      if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
       return;
     }
 
@@ -332,6 +343,8 @@ async function loadRestaurantAndMenu() {
         "<p class='info'>Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.</p>";
       cartSection.style.display = "none";
       offersSection.style.display = "none";
+      if (drinksSection) drinksSection.style.display = "none";
+      if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
       return;
     }
 
@@ -354,7 +367,27 @@ async function loadRestaurantAndMenu() {
       })
       .filter((item) => item.available);
 
-    renderCategories();
+    // Getränke herausfiltern (du steuerst das mit Kategorienamen)
+    drinksItems = allMenuItems.filter((item) => {
+      if (!item.category) return false;
+      const catLower = item.category.toLowerCase();
+      return (
+        catLower === "getränke" ||
+        catLower === "getraenke" ||
+        catLower === "drinks" ||
+        catLower === "freskuese" ||
+        catLower === "cafe" ||
+        catLower === "kafe"
+      );
+    });
+
+    // Set mit allen Getränke-Kategorien (für Filter unten)
+    drinkCategoryNames = new Set(drinksItems.map((i) => i.category));
+
+    // Tabs & Listen rendern
+    renderDrinksTabs();
+    renderDrinks();
+    renderFoodCategories();
     renderMenu();
 
     // Angebote-Slider laden
@@ -363,57 +396,209 @@ async function loadRestaurantAndMenu() {
     console.error(err);
     restaurantNameEl.textContent = "Fehler";
     restaurantMetaEl.textContent = err.message;
-    menuListEl.innerHTML = "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
+    menuListEl.innerHTML =
+      "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
     cartSection.style.display = "none";
     offersSection.style.display = "none";
+    if (drinksSection) drinksSection.style.display = "none";
+    if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
   }
 }
 
 /* =========================
-   KATEGORIEN & MENÜ
+   GETRÄNKE-TABS & -LISTE (2 Spalten)
    ========================= */
 
-function getCategories() {
+function getDrinkCategories() {
   const set = new Set();
-  allMenuItems.forEach((i) => set.add(i.category));
+  drinksItems.forEach((i) => {
+    if (i.category) set.add(i.category);
+  });
   return Array.from(set);
 }
 
-function renderCategories() {
-  categoryTabsEl.innerHTML = "";
+function renderDrinksTabs() {
+  if (!drinksTabsWrapper || !drinksTabsEl) return;
 
-  const allBtn = document.createElement("button");
-  allBtn.className =
-    "category-tab" + (activeCategory === "Alle" ? " active" : "");
-  allBtn.textContent = "Alle";
-  allBtn.addEventListener("click", () => {
-    activeCategory = "Alle";
-    renderCategories();
-    renderMenu();
-  });
-  categoryTabsEl.appendChild(allBtn);
+  const cats = getDrinkCategories();
 
-  getCategories().forEach((cat) => {
+  if (!cats.length) {
+    drinksTabsWrapper.style.display = "none";
+    if (drinksSection) drinksSection.style.display = "none";
+    drinksTabsEl.innerHTML = "";
+    return;
+  }
+
+  drinksTabsWrapper.style.display = "block";
+  if (drinksSection) drinksSection.style.display = "block";
+  drinksTabsEl.innerHTML = "";
+
+  // Standard: falls keine aktive Kategorie gesetzt/gültig ist → erste nehmen
+  if (!activeDrinksCategory || !cats.includes(activeDrinksCategory)) {
+    activeDrinksCategory = cats[0];
+  }
+
+  cats.forEach((cat) => {
     const btn = document.createElement("button");
     btn.className =
-      "category-tab" + (activeCategory === cat ? " active" : "");
+      "category-tab" + (activeDrinksCategory === cat ? " active" : "");
     btn.textContent = cat;
     btn.addEventListener("click", () => {
-      activeCategory = cat;
-      renderCategories();
+      activeDrinksCategory = cat;
+      renderDrinksTabs();
+      renderDrinks();
+    });
+    drinksTabsEl.appendChild(btn);
+  });
+}
+
+function renderDrinks() {
+  if (!drinksSection || !drinksListEl) return;
+
+  drinksListEl.innerHTML = "";
+
+  if (!drinksItems.length) {
+    drinksSection.style.display = "none";
+    if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+    return;
+  }
+
+  drinksSection.style.display = "block";
+  if (drinksTabsWrapper) drinksTabsWrapper.style.display = "block";
+
+  let items = drinksItems;
+  if (activeDrinksCategory) {
+    items = drinksItems.filter((i) => i.category === activeDrinksCategory);
+  }
+
+  if (!items.length) {
+    drinksListEl.innerHTML = "<p class='info'>Keine Getränke.</p>";
+    return;
+  }
+
+  items.forEach((item) => {
+    const div = document.createElement("div");
+    div.className = "drink-item";
+
+    // Bild (optional)
+    if (item.imageUrl) {
+      const img = document.createElement("img");
+      img.src = item.imageUrl;
+      img.alt = item.name;
+      img.loading = "lazy";
+      img.className = "drink-image";
+      div.appendChild(img);
+    }
+
+    const header = document.createElement("div");
+    header.className = "drink-header";
+
+    const nameEl = document.createElement("div");
+    nameEl.className = "drink-name";
+    nameEl.textContent = item.name;
+
+    const priceEl = document.createElement("div");
+    priceEl.className = "drink-price";
+    priceEl.textContent = item.price.toFixed(2) + " €";
+
+    header.appendChild(nameEl);
+    header.appendChild(priceEl);
+    div.appendChild(header);
+
+    // Beschreibung optional
+    if (item.description && item.description.trim() !== "") {
+      const descEl = document.createElement("div");
+      descEl.className = "drink-desc";
+      descEl.textContent = item.description;
+      div.appendChild(descEl);
+    }
+
+    const actions = document.createElement("div");
+    actions.className = "drink-actions";
+
+    const minusBtn = document.createElement("button");
+    minusBtn.className = "btn btn-ghost btn-small";
+    minusBtn.textContent = "−";
+    minusBtn.addEventListener("click", () => changeCart(item, -1));
+
+    const plusBtn = document.createElement("button");
+    plusBtn.className = "btn btn-primary btn-small";
+    plusBtn.textContent = "Hinzufügen";
+    plusBtn.addEventListener("click", () => changeCart(item, 1));
+
+    actions.appendChild(minusBtn);
+    actions.appendChild(plusBtn);
+    div.appendChild(actions);
+
+    drinksListEl.appendChild(div);
+  });
+}
+
+/* =========================
+   SPEISEKARTE-TABS & -LISTE (ohne Getränke)
+   ========================= */
+
+function getFoodCategories() {
+  const set = new Set();
+  allMenuItems.forEach((i) => {
+    if (!i.category) return;
+    if (drinkCategoryNames.has(i.category)) return; // Getränke-Kategorien raus
+    set.add(i.category);
+  });
+  return Array.from(set);
+}
+
+function renderFoodCategories() {
+  if (!foodCategoryTabsEl || !foodTabsWrapper) return;
+
+  foodCategoryTabsEl.innerHTML = "";
+
+  const cats = getFoodCategories();
+
+  if (!cats.length) {
+    // Keine Speise-Kategorien → Tabs trotzdem minimal mit "Alle"
+    foodTabsWrapper.style.display = "block";
+  } else {
+    foodTabsWrapper.style.display = "block";
+  }
+
+  // "Alle" Button
+  const allBtn = document.createElement("button");
+  allBtn.className =
+    "category-tab" + (activeFoodCategory === "Alle" ? " active" : "");
+  allBtn.textContent = "Alle";
+  allBtn.addEventListener("click", () => {
+    activeFoodCategory = "Alle";
+    renderFoodCategories();
+    renderMenu();
+  });
+  foodCategoryTabsEl.appendChild(allBtn);
+
+  cats.forEach((cat) => {
+    const btn = document.createElement("button");
+    btn.className =
+      "category-tab" + (activeFoodCategory === cat ? " active" : "");
+    btn.textContent = cat;
+    btn.addEventListener("click", () => {
+      activeFoodCategory = cat;
+      renderFoodCategories();
       renderMenu();
     });
-    categoryTabsEl.appendChild(btn);
+    foodCategoryTabsEl.appendChild(btn);
   });
 }
 
 function renderMenu() {
   menuListEl.innerHTML = "";
 
-  let items =
-    activeCategory === "Alle"
-      ? allMenuItems
-      : allMenuItems.filter((i) => i.category === activeCategory);
+  // Basis: nur Food-Items, keine Getränke
+  let items = allMenuItems.filter(
+    (i) => !drinkCategoryNames.has(i.category)
+  );
+
+  if (activeFoodCategory !== "Alle") {
+    items = items.filter((i) => i.category === activeFoodCategory);
+  }
 
   if (searchTerm) {
     const q = searchTerm;
@@ -592,7 +777,7 @@ clearCartBtn.addEventListener("click", () => {
 
 sendOrderBtn.addEventListener("click", sendOrder);
 
-// Suche (live)
+// Suche (live) – nur für Speisekarte (Food)
 searchInput.addEventListener("input", () => {
   searchTerm = (searchInput.value || "").trim().toLowerCase();
   renderMenu();
