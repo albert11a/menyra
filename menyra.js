@@ -11,6 +11,10 @@ import {
   deleteDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
+/* =========================
+   DOM: Kunden-Tab
+   ========================= */
+
 const restNameInput = document.getElementById("restNameInput");
 const ownerNameInput = document.getElementById("ownerNameInput");
 const restCityInput = document.getElementById("restCityInput");
@@ -25,41 +29,50 @@ const restList = document.getElementById("restList");
 const searchInput = document.getElementById("searchInput");
 const filterActive = document.getElementById("filterActive");
 
-// Detail-Bereich
-const restDetailCard = document.getElementById("restDetailCard");
-const detailTitle = document.getElementById("detailTitle");
-const detailSubtitle = document.getElementById("detailSubtitle");
-const detailStatusBadge = document.getElementById("detailStatusBadge");
-const detailAboInfo = document.getElementById("detailAboInfo");
+/* =========================
+   DOM: Tabs
+   ========================= */
 
-const detailTabs = document.getElementById("detailTabs");
-const tabInfo = document.getElementById("tab-info");
-const tabMenu = document.getElementById("tab-menu");
-const tabOffers = document.getElementById("tab-offers");
+const customersTab = document.getElementById("customersTab");
+const offersTab = document.getElementById("offersTab");
+const tabButtons = document.querySelectorAll(".tab-btn");
 
-const detailNameInput = document.getElementById("detailNameInput");
-const detailOwnerInput = document.getElementById("detailOwnerInput");
-const detailCityInput = document.getElementById("detailCityInput");
-const detailPhoneInput = document.getElementById("detailPhoneInput");
-const detailTableCountInput = document.getElementById("detailTableCountInput");
-const detailYearPriceInput = document.getElementById("detailYearPriceInput");
-const detailLogoUrlInput = document.getElementById("detailLogoUrlInput");
-const detailCodesInfo = document.getElementById("detailCodesInfo");
-const detailSaveBtn = document.getElementById("detailSaveBtn");
-const detailInfoStatus = document.getElementById("detailInfoStatus");
+/* =========================
+   DOM: Angebote-Tab
+   ========================= */
 
-const detailMenuList = document.getElementById("detailMenuList");
-const detailOpenAdminLink = document.getElementById("detailOpenAdminLink");
-
+const offerRestaurantSelect = document.getElementById("offerRestaurantSelect");
 const offersEnabledInput = document.getElementById("offersEnabledInput");
-const addOfferBtn = document.getElementById("addOfferBtn");
-const offersStatus = document.getElementById("offersStatus");
-const offersList = document.getElementById("offersList");
+
+const offerEditorCard = document.getElementById("offerEditorCard");
+const offerListCard = document.getElementById("offerListCard");
+
+const offerTitleInput = document.getElementById("offerTitleInput");
+const offerPriceInput = document.getElementById("offerPriceInput");
+const offerImageInput = document.getElementById("offerImageInput");
+const offerDescInput = document.getElementById("offerDescInput");
+const offerActiveInput = document.getElementById("offerActiveInput");
+const offerAddToCartInput = document.getElementById("offerAddToCartInput");
+const offerMenuItemSelect = document.getElementById("offerMenuItemSelect");
+const offerSaveBtn = document.getElementById("offerSaveBtn");
+const offerNewBtn = document.getElementById("offerNewBtn");
+const offerStatus = document.getElementById("offerStatus");
+const offerList = document.getElementById("offerList");
+
+/* =========================
+   GLOBAL STATE
+   ========================= */
 
 const BASE_URL = window.location.origin;
 
-let currentRestaurantId = null;
-let currentRestaurantData = null;
+let restaurantsCache = [];            // [{id, data}]
+let currentOfferRestaurantId = null;  // Restaurant für Angebote
+let currentOfferEditingId = null;     // Angebot im Edit-Modus
+let currentOfferMenuItems = [];       // menuItems des aktuellen Restaurants
+
+/* =========================
+   HELFER
+   ========================= */
 
 function generateCode() {
   return String(Math.floor(100000 + Math.random() * 900000)); // 6-stellig
@@ -78,7 +91,7 @@ function addOneYearISO() {
   d.setFullYear(d.getFullYear() + 1);
   const year = d.getFullYear();
   const month = String(d.getMonth() + 1).padStart(2, "0");
-  const day = String(d.getDate()).padStart(2, "0");
+  const day = String(d.getDate() + 0).toString().padStart(2, "0");
   return `${year}-${month}-${day}`;
 }
 
@@ -115,6 +128,30 @@ function getStatusBadgeColor(label) {
       return { bg: "#e5e7eb", fg: "#374151" };
   }
 }
+
+/* =========================
+   TABS
+   ========================= */
+
+tabButtons.forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const target = btn.dataset.tabTarget;
+    tabButtons.forEach((b) => b.classList.remove("tab-btn-active"));
+    btn.classList.add("tab-btn-active");
+
+    if (target === "offersTab") {
+      customersTab.style.display = "none";
+      offersTab.style.display = "block";
+    } else {
+      customersTab.style.display = "block";
+      offersTab.style.display = "none";
+    }
+  });
+});
+
+/* =========================
+   KUNDEN – NEUES RESTAURANT
+   ========================= */
 
 async function createRestaurant() {
   adminStatus.textContent = "";
@@ -166,10 +203,10 @@ async function createRestaurant() {
       waiterCode,
       ownerCode,
       active: true,
+      offerActive: true, // Angebote standardmäßig aktiv
       createdAt: serverTimestamp(),
       subscriptionStart,
       subscriptionUntil,
-      offersEnabled: true, // Angebote standardmäßig aktiv
     });
 
     adminStatus.textContent = `Kunde "${restaurantName}" angelegt. Kellner-Code: ${waiterCode}, Admin-Code: ${ownerCode}`;
@@ -194,15 +231,26 @@ async function createRestaurant() {
   }
 }
 
+/* =========================
+   KUNDEN – LISTE LADEN
+   ========================= */
+
 async function loadRestaurants() {
   restList.innerHTML = "<div class='info'>Lade...</div>";
-  const snap = await getDocs(collection(db, "restaurants"));
 
+  restaurantsCache = [];
+  if (offerRestaurantSelect) {
+    offerRestaurantSelect.innerHTML = '<option value="">Lokal wählen...</option>';
+  }
+
+  const snap = await getDocs(collection(db, "restaurants"));
   restList.innerHTML = "";
 
   snap.forEach((docSnap) => {
     const data = docSnap.data();
     const id = docSnap.id;
+    restaurantsCache.push({ id, data });
+
     const tables = data.tableCount || 0;
 
     // yearPrice sauber in Zahl umwandeln
@@ -269,20 +317,20 @@ async function loadRestaurants() {
       </div>
 
       <div class="list" style="margin-top:8px;">
-        <button class="btn btn-primary btn-small" 
-                data-action="details" 
-                data-id="${id}">
-          Details
-        </button>
         <button class="btn btn-ghost btn-small" 
                 data-action="show-qr" 
                 data-id="${id}" 
                 data-tables="${tables}">
           QR & Links
         </button>
-        <a class="btn btn-ghost btn-small" href="admin.html?r=${encodeURIComponent(id)}">
+        <a class="btn btn-primary btn-small" href="admin.html?r=${encodeURIComponent(id)}">
           Speisekarte
         </a>
+        <button class="btn btn-ghost btn-small"
+                data-action="edit"
+                data-id="${id}">
+          Bearbeiten
+        </button>
         <button class="btn btn-ghost btn-small"
                 data-action="toggle-active"
                 data-id="${id}">
@@ -294,6 +342,16 @@ async function loadRestaurants() {
     `;
 
     restList.appendChild(card);
+
+    // Dropdown im Angebote-Tab füllen
+    if (offerRestaurantSelect) {
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = data.restaurantName
+        ? `${data.restaurantName} (${id})`
+        : id;
+      offerRestaurantSelect.appendChild(opt);
+    }
   });
 
   if (!restList.hasChildNodes()) {
@@ -304,7 +362,10 @@ async function loadRestaurants() {
   applyFilters();
 }
 
-// QR-Block / Details / Aktiv-Status
+/* =========================
+   KUNDEN – QR / TOGGLE / EDIT
+   ========================= */
+
 restList.addEventListener("click", async (e) => {
   const qrBtn = e.target.closest("button[data-action='show-qr']");
   if (qrBtn) {
@@ -356,10 +417,10 @@ restList.addEventListener("click", async (e) => {
     return;
   }
 
-  const detailBtn = e.target.closest("button[data-action='details']");
-  if (detailBtn) {
-    const id = detailBtn.dataset.id;
-    await openDetailsForRestaurant(id);
+  const editBtn = e.target.closest("button[data-action='edit']");
+  if (editBtn) {
+    const id = editBtn.dataset.id;
+    await editRestaurant(id);
     return;
   }
 
@@ -382,13 +443,18 @@ async function toggleActive(id, btn) {
 
     await updateDoc(ref, { active: newActive });
 
-    // Liste aktualisieren
-    await loadRestaurants();
-
-    // Detailbereich neu laden, wenn dieser Kunde aktiv ist
-    if (currentRestaurantId === id) {
-      await openDetailsForRestaurant(id);
+    card.dataset.active = newActive ? "1" : "0";
+    const statusLabel = getStatusLabel({ active: newActive, subscriptionUntil: null });
+    const colors = getStatusBadgeColor(statusLabel);
+    const badge = card.querySelector(".badge");
+    if (badge) {
+      badge.textContent = statusLabel;
+      badge.style.background = colors.bg;
+      badge.style.color = colors.fg;
     }
+    btn.textContent = newActive ? "Deaktivieren" : "Aktivieren";
+
+    applyFilters();
   } catch (err) {
     console.error(err);
     alert("Fehler beim Aktualisieren: " + err.message);
@@ -397,26 +463,8 @@ async function toggleActive(id, btn) {
   }
 }
 
-/* ================================
-   DETAIL: Tabs
-   ================================ */
-
-detailTabs.addEventListener("click", (e) => {
-  const btn = e.target.closest(".detail-tab");
-  if (!btn) return;
-
-  const tab = btn.dataset.tab;
-  const allTabs = detailTabs.querySelectorAll(".detail-tab");
-  allTabs.forEach((t) => {
-    t.classList.toggle("active", t.dataset.tab === tab);
-  });
-
-  tabInfo.style.display = tab === "info" ? "block" : "none";
-  tabMenu.style.display = tab === "menu" ? "block" : "none";
-  tabOffers.style.display = tab === "offers" ? "block" : "none";
-});
-
-async function openDetailsForRestaurant(id) {
+// Bearbeiten-Funktion über popups (vorerst beibehalten)
+async function editRestaurant(id) {
   try {
     const ref = doc(db, "restaurants", id);
     const snap = await getDoc(ref);
@@ -424,106 +472,57 @@ async function openDetailsForRestaurant(id) {
       alert("Kunde/Lokal nicht gefunden.");
       return;
     }
-    currentRestaurantId = id;
-    currentRestaurantData = snap.data();
+    const data = snap.data();
 
-    const data = currentRestaurantData;
-
-    detailTitle.textContent = data.restaurantName || id;
-    detailSubtitle.textContent = `${data.city || "-"} • ID: ${id}`;
-
-    const statusLabel = getStatusLabel(data);
-    const colors = getStatusBadgeColor(statusLabel);
-    detailStatusBadge.textContent = statusLabel;
-    detailStatusBadge.style.background = colors.bg;
-    detailStatusBadge.style.color = colors.fg;
-
-    if (data.subscriptionUntil) {
-      const days = daysLeft(data.subscriptionUntil);
-      const rest =
-        days !== null
-          ? ` (noch ${days} Tag${Math.abs(days) === 1 ? "" : "e"})`
-          : "";
-      detailAboInfo.textContent = `Abo bis: ${data.subscriptionUntil}${rest}`;
-    } else {
-      detailAboInfo.textContent = "Abo bis: –";
+    let restaurantName = prompt(
+      "Restaurant / Lokalname:",
+      data.restaurantName || ""
+    );
+    if (restaurantName === null) return;
+    restaurantName = restaurantName.trim();
+    if (!restaurantName) {
+      alert("Name darf nicht leer sein.");
+      return;
     }
 
-    // Info-Felder
-    detailNameInput.value = data.restaurantName || "";
-    detailOwnerInput.value = data.ownerName || "";
-    detailCityInput.value = data.city || "";
-    detailPhoneInput.value = data.phone || "";
-    detailTableCountInput.value =
-      data.tableCount != null ? String(data.tableCount) : "";
-    detailYearPriceInput.value =
-      data.yearPrice != null ? String(data.yearPrice) : "";
-    detailLogoUrlInput.value = data.logoUrl || "";
+    let ownerName = prompt("Inhaber / Kunde:", data.ownerName || "");
+    if (ownerName === null) ownerName = data.ownerName || "";
+    ownerName = ownerName.trim();
 
-    detailCodesInfo.textContent = `Kellner-Code: ${
-      data.waiterCode || "-"
-    } · Admin-Code: ${data.ownerCode || "-"}`;
+    let city = prompt("Stadt / Ort:", data.city || "");
+    if (city === null) city = data.city || "";
+    city = city.trim();
 
-    detailOpenAdminLink.href = `admin.html?r=${encodeURIComponent(id)}`;
-
-    detailInfoStatus.textContent = "";
-    detailInfoStatus.className = "status-text";
-
-    // Standard-Tab: Info
-    const allTabs = detailTabs.querySelectorAll(".detail-tab");
-    allTabs.forEach((t) =>
-      t.classList.toggle("active", t.dataset.tab === "info")
+    let tableCountStr = prompt(
+      "Anzahl Tische:",
+      data.tableCount != null ? String(data.tableCount) : ""
     );
-    tabInfo.style.display = "block";
-    tabMenu.style.display = "none";
-    tabOffers.style.display = "none";
+    if (tableCountStr === null)
+      tableCountStr =
+        data.tableCount != null ? String(data.tableCount) : "0";
+    const tableCount = tableCountStr.trim()
+      ? parseInt(tableCountStr.trim(), 10)
+      : 0;
 
-    restDetailCard.style.display = "block";
-    restDetailCard.scrollIntoView({ behavior: "smooth", block: "start" });
+    let yearPriceStr = prompt(
+      "Preis pro Jahr (€):",
+      data.yearPrice != null ? String(data.yearPrice) : ""
+    );
+    if (yearPriceStr === null)
+      yearPriceStr =
+        data.yearPrice != null ? String(data.yearPrice) : "0";
+    const yearPrice = yearPriceStr.trim()
+      ? parseFloat(yearPriceStr.trim().replace(",", "."))
+      : 0;
 
-    // Menü & Angebote laden
-    await loadDetailMenu();
-    await loadOffers();
-  } catch (err) {
-    console.error(err);
-    alert("Fehler beim Laden der Details: " + err.message);
-  }
-}
+    let phone = prompt("Telefon:", data.phone || "");
+    if (phone === null) phone = data.phone || "";
+    phone = phone.trim();
 
-/* ================================
-   DETAIL: Info speichern
-   ================================ */
+    let logoUrl = prompt("Logo-URL (optional):", data.logoUrl || "");
+    if (logoUrl === null) logoUrl = data.logoUrl || "";
+    logoUrl = logoUrl.trim();
 
-detailSaveBtn.addEventListener("click", async () => {
-  if (!currentRestaurantId) return;
-
-  detailInfoStatus.textContent = "";
-  detailInfoStatus.className = "status-text";
-
-  let restaurantName = (detailNameInput.value || "").trim();
-  let ownerName = (detailOwnerInput.value || "").trim();
-  let city = (detailCityInput.value || "").trim();
-  let phone = (detailPhoneInput.value || "").trim();
-  let tableCountStr = (detailTableCountInput.value || "").trim();
-  let yearPriceStr = (detailYearPriceInput.value || "").trim();
-  let logoUrl = (detailLogoUrlInput.value || "").trim();
-
-  if (!restaurantName) {
-    detailInfoStatus.textContent = "Name darf nicht leer sein.";
-    detailInfoStatus.classList.add("status-err");
-    return;
-  }
-
-  const tableCount = tableCountStr ? parseInt(tableCountStr, 10) : 0;
-  const yearPrice = yearPriceStr
-    ? parseFloat(yearPriceStr.replace(",", "."))
-    : 0;
-
-  try {
-    detailSaveBtn.disabled = true;
-    detailSaveBtn.textContent = "Speichere...";
-
-    const ref = doc(db, "restaurants", currentRestaurantId);
     await updateDoc(ref, {
       restaurantName,
       ownerName,
@@ -534,401 +533,17 @@ detailSaveBtn.addEventListener("click", async () => {
       logoUrl,
     });
 
-    detailInfoStatus.textContent = "Gespeichert.";
-    detailInfoStatus.classList.add("status-ok");
-
     await loadRestaurants();
-    await openDetailsForRestaurant(currentRestaurantId);
+    alert("Daten gespeichert.");
   } catch (err) {
     console.error(err);
-    detailInfoStatus.textContent = "Fehler: " + err.message;
-    detailInfoStatus.classList.add("status-err");
-  } finally {
-    detailSaveBtn.disabled = false;
-    detailSaveBtn.textContent = "Änderungen speichern";
+    alert("Fehler beim Bearbeiten: " + err.message);
   }
-});
-
-/* ================================
-   DETAIL: Menü-Verwaltung
-   ================================ */
-
-async function loadDetailMenu() {
-  detailMenuList.innerHTML = "<div class='info'>Lade Speisekarte...</div>";
-
-  if (!currentRestaurantId) return;
-
-  const menuCol = collection(
-    doc(db, "restaurants", currentRestaurantId),
-    "menuItems"
-  );
-  const snap = await getDocs(menuCol);
-
-  detailMenuList.innerHTML = "";
-
-  if (snap.empty) {
-    detailMenuList.innerHTML =
-      "<div class='info'>Noch keine Speisekarte angelegt.</div>";
-    return;
-  }
-
-  snap.forEach((docSnap) => {
-    const d = docSnap.data();
-    const id = docSnap.id;
-    const available = d.available !== false;
-    const price =
-      typeof d.price === "number" ? d.price.toFixed(2) + " €" : String(d.price || "-");
-    const desc = d.description || "";
-
-    const row = document.createElement("div");
-    row.className = "menu-admin-row";
-
-    row.innerHTML = `
-      <div class="list-item-row">
-        <span>
-          <strong>[${d.category || "Sonstiges"}]</strong> ${d.name || "Produkt"}<br/>
-          <span class="info">
-            ${price}${desc ? " • " + desc : ""} • Status: ${
-      available ? "aktiv" : "inaktiv"
-    }
-          </span>
-        </span>
-        <span style="display:flex; gap:6px;">
-          <button class="btn btn-ghost btn-small"
-                  data-menu-id="${id}"
-                  data-action="menu-toggle"
-                  data-available="${available ? "1" : "0"}">
-            ${available ? "Deaktivieren" : "Aktivieren"}
-          </button>
-          <button class="btn btn-ghost btn-small"
-                  data-menu-id="${id}"
-                  data-action="menu-edit">
-            Bearbeiten
-          </button>
-          <button class="btn btn-ghost btn-small"
-                  data-menu-id="${id}"
-                  data-action="menu-delete">
-            Löschen
-          </button>
-        </span>
-      </div>
-    `;
-
-    detailMenuList.appendChild(row);
-  });
 }
 
-detailMenuList.addEventListener("click", async (e) => {
-  const btn = e.target.closest("button[data-menu-id]");
-  if (!btn || !currentRestaurantId) return;
-
-  const id = btn.dataset.menuId;
-  const action = btn.dataset.action;
-
-  const menuRef = doc(
-    db,
-    "restaurants",
-    currentRestaurantId,
-    "menuItems",
-    id
-  );
-
-  if (action === "menu-toggle") {
-    const isActive = btn.dataset.available === "1";
-    await updateDoc(menuRef, { available: !isActive });
-    await loadDetailMenu();
-  } else if (action === "menu-edit") {
-    const snap = await getDoc(menuRef);
-    if (!snap.exists()) {
-      alert("Gericht nicht gefunden.");
-      return;
-    }
-    const d = snap.data();
-
-    let name = prompt("Name des Gerichts:", d.name || "");
-    if (name === null) return;
-    name = name.trim();
-    if (!name) {
-      alert("Name darf nicht leer sein.");
-      return;
-    }
-
-    let category = prompt("Kategorie:", d.category || "");
-    if (category === null) category = d.category || "";
-    category = category.trim();
-
-    let priceStr = prompt(
-      "Preis:",
-      d.price != null ? String(d.price) : ""
-    );
-    if (priceStr === null)
-      priceStr = d.price != null ? String(d.price) : "0";
-    const price = priceStr.trim()
-      ? parseFloat(priceStr.trim().replace(",", "."))
-      : 0;
-
-    let desc = prompt("Beschreibung:", d.description || "");
-    if (desc === null) desc = d.description || "";
-    desc = desc.trim();
-
-    await updateDoc(menuRef, {
-      name,
-      category,
-      price: isNaN(price) ? 0 : price,
-      description: desc,
-    });
-
-    await loadDetailMenu();
-  } else if (action === "menu-delete") {
-    if (!confirm("Dieses Gericht wirklich löschen?")) return;
-    await deleteDoc(menuRef);
-    await loadDetailMenu();
-  }
-});
-
-/* ================================
-   DETAIL: Angebote
-   ================================ */
-
-async function loadOffers() {
-  offersStatus.textContent = "";
-  offersStatus.className = "status-text";
-  offersList.innerHTML = "<div class='info'>Lade Angebote...</div>";
-
-  if (!currentRestaurantId || !currentRestaurantData) {
-    offersList.innerHTML = "";
-    return;
-  }
-
-  const enabled = currentRestaurantData.offersEnabled !== false;
-  offersEnabledInput.checked = enabled;
-
-  const offersCol = collection(
-    doc(db, "restaurants", currentRestaurantId),
-    "offers"
-  );
-  const snap = await getDocs(offersCol);
-
-  offersList.innerHTML = "";
-
-  if (snap.empty) {
-    offersList.innerHTML =
-      "<div class='info'>Noch keine Angebote angelegt.</div>";
-    return;
-  }
-
-  const offers = snap.docs.map((d) => {
-    const data = d.data();
-
-    let priceNum = 0;
-    if (typeof data.price === "number") {
-      priceNum = data.price;
-    } else if (typeof data.price === "string") {
-      const parsed = parseFloat(data.price.replace(",", "."));
-      if (!isNaN(parsed)) priceNum = parsed;
-    }
-
-    return {
-      id: d.id,
-      title: data.title || "",
-      text: data.text || "",
-      imageUrl: data.imageUrl || "",
-      active: data.active !== false,
-      sortOrder: data.sortOrder || 0,
-      price: priceNum,
-    };
-  });
-
-  offers.sort((a, b) => (a.sortOrder || 0) - (b.sortOrder || 0));
-
-  offers.forEach((o) => {
-    const card = document.createElement("div");
-    card.className = "card offer-admin-card";
-    const statusLabel = o.active ? "Aktiv" : "Inaktiv";
-    const colors = o.active
-      ? { bg: "#dcfce7", fg: "#15803d" }
-      : { bg: "#e5e7eb", fg: "#374151" };
-
-    const priceText =
-      o.price && !isNaN(o.price) && o.price > 0
-        ? ` • ${o.price.toFixed(2)} €`
-        : "";
-
-    card.innerHTML = `
-      <div class="list-item-row">
-        <span>
-          <strong>${o.title || "(ohne Titel)"}</strong><br/>
-          <span class="info">${o.text || ""}${priceText}</span>
-        </span>
-        <span class="badge" style="background:${colors.bg}; color:${colors.fg};">
-          ${statusLabel}
-        </span>
-      </div>
-      ${
-        o.imageUrl
-          ? `<img src="${o.imageUrl}" alt="Angebot" style="margin-top:6px;"/>`
-          : ""
-      }
-      <div class="list" style="margin-top:8px;">
-        <button class="btn btn-ghost btn-small"
-                data-offer-id="${o.id}"
-                data-action="offer-edit">
-          Bearbeiten
-        </button>
-        <button class="btn btn-ghost btn-small"
-                data-offer-id="${o.id}"
-                data-action="offer-toggle">
-          ${o.active ? "Deaktivieren" : "Aktivieren"}
-        </button>
-        <button class="btn btn-ghost btn-small"
-                data-offer-id="${o.id}"
-                data-action="offer-delete">
-          Löschen
-        </button>
-      </div>
-    `;
-
-    offersList.appendChild(card);
-  });
-}
-
-offersEnabledInput.addEventListener("change", async () => {
-  if (!currentRestaurantId) return;
-  const enabled = offersEnabledInput.checked;
-
-  try {
-    await updateDoc(doc(db, "restaurants", currentRestaurantId), {
-      offersEnabled: enabled,
-    });
-    currentRestaurantData.offersEnabled = enabled;
-    offersStatus.textContent = enabled
-      ? "Angebote aktiviert."
-      : "Angebote komplett deaktiviert.";
-    offersStatus.className = "status-text status-ok";
-  } catch (err) {
-    console.error(err);
-    offersStatus.textContent = "Fehler: " + err.message;
-    offersStatus.className = "status-text status-err";
-  }
-});
-
-addOfferBtn.addEventListener("click", async () => {
-  if (!currentRestaurantId) return;
-
-  let title = prompt("Titel des Angebots:");
-  if (title === null) return;
-  title = title.trim();
-
-  let text = prompt("Beschreibung / Text:");
-  if (text === null) text = "";
-  text = text.trim();
-
-  let imageUrl = prompt("Bild-URL (optional):");
-  if (imageUrl === null) imageUrl = "";
-  imageUrl = imageUrl.trim();
-
-  let priceStr = prompt("Preis (€, optional):", "");
-  let priceNum = 0;
-  if (priceStr !== null) {
-    priceStr = priceStr.trim();
-    if (priceStr) {
-      const parsed = parseFloat(priceStr.replace(",", "."));
-      if (!isNaN(parsed)) priceNum = parsed;
-    }
-  }
-
-  try {
-    const offersCol = collection(
-      doc(db, "restaurants", currentRestaurantId),
-      "offers"
-    );
-    await addDoc(offersCol, {
-      title,
-      text,
-      imageUrl,
-      price: priceNum,
-      active: true,
-      sortOrder: Date.now(),
-      createdAt: serverTimestamp(),
-    });
-
-    await loadOffers();
-  } catch (err) {
-    console.error(err);
-    alert("Fehler beim Anlegen des Angebots: " + err.message);
-  }
-});
-
-offersList.addEventListener("click", async (e) => {
-  const btn = e.target.closest("button[data-offer-id]");
-  if (!btn || !currentRestaurantId) return;
-
-  const offerId = btn.dataset.offerId;
-  const action = btn.dataset.action;
-
-  const offerRef = doc(
-    db,
-    "restaurants",
-    currentRestaurantId,
-    "offers",
-    offerId
-  );
-
-  if (action === "offer-delete") {
-    if (!confirm("Dieses Angebot wirklich löschen?")) return;
-    await deleteDoc(offerRef);
-    await loadOffers();
-  } else if (action === "offer-toggle") {
-    const snap = await getDoc(offerRef);
-    if (!snap.exists()) return;
-    const data = snap.data();
-    const active = data.active !== false;
-    await updateDoc(offerRef, { active: !active });
-    await loadOffers();
-  } else if (action === "offer-edit") {
-    const snap = await getDoc(offerRef);
-    if (!snap.exists()) return;
-    const data = snap.data();
-
-    let title = prompt("Titel des Angebots:", data.title || "");
-    if (title === null) return;
-    title = title.trim();
-
-    let text = prompt("Beschreibung / Text:", data.text || "");
-    if (text === null) text = data.text || "";
-    text = text.trim();
-
-    let imageUrl = prompt("Bild-URL (optional):", data.imageUrl || "");
-    if (imageUrl === null) imageUrl = data.imageUrl || "";
-    imageUrl = imageUrl.trim();
-
-    let priceStr = prompt(
-      "Preis (€, optional):",
-      data.price != null ? String(data.price) : ""
-    );
-    let priceNum = 0;
-    if (priceStr !== null) {
-      priceStr = priceStr.trim();
-      if (priceStr) {
-        const parsed = parseFloat(priceStr.replace(",", "."));
-        if (!isNaN(parsed)) priceNum = parsed;
-      }
-    }
-
-    await updateDoc(offerRef, {
-      title,
-      text,
-      imageUrl,
-      price: priceNum,
-    });
-
-    await loadOffers();
-  }
-});
-
-/* ================================
-   Filter & Suche
-   ================================ */
+/* =========================
+   FILTER & SUCHE
+   ========================= */
 
 function applyFilters() {
   const queryStr = (searchInput.value || "").toLowerCase();
@@ -952,6 +567,282 @@ function applyFilters() {
     card.style.display = visible ? "block" : "none";
   });
 }
+
+/* =========================
+   ANGEBOTE – HILFSFUNKTIONEN
+   ========================= */
+
+function resetOfferForm() {
+  currentOfferEditingId = null;
+  offerTitleInput.value = "";
+  offerPriceInput.value = "";
+  offerImageInput.value = "";
+  offerDescInput.value = "";
+  offerActiveInput.checked = true;
+  offerAddToCartInput.checked = true;
+  if (offerMenuItemSelect) {
+    offerMenuItemSelect.value = "";
+  }
+  offerStatus.textContent = "";
+  offerStatus.className = "status-text";
+}
+
+async function loadOfferMenuItems(restId) {
+  currentOfferMenuItems = [];
+  if (!offerMenuItemSelect) return;
+
+  offerMenuItemSelect.innerHTML =
+    '<option value="">Ohne Verknüpfung – freies Angebot / Werbung</option>';
+
+  const menuCol = collection(doc(db, "restaurants", restId), "menuItems");
+  const snap = await getDocs(menuCol);
+
+  snap.forEach((docSnap) => {
+    const d = docSnap.data();
+    const price =
+      typeof d.price === "number" ? d.price.toFixed(2) + " €" : "";
+    const label = `[${d.category || "Sonstiges"}] ${d.name || "Produkt"}${
+      price ? " – " + price : ""
+    }`;
+
+    currentOfferMenuItems.push({
+      id: docSnap.id,
+      ...d,
+    });
+
+    const opt = document.createElement("option");
+    opt.value = docSnap.id;
+    opt.textContent = label;
+    offerMenuItemSelect.appendChild(opt);
+  });
+}
+
+async function loadOffersForRestaurant(restId) {
+  offerList.innerHTML = "<div class='info'>Lade...</div>";
+
+  const offersCol = collection(doc(db, "restaurants", restId), "offers");
+  const snap = await getDocs(offersCol);
+
+  offerList.innerHTML = "";
+  if (snap.empty) {
+    offerList.innerHTML = "<div class='info'>Noch keine Angebote.</div>";
+    offerListCard.style.display = "block";
+    return;
+  }
+
+  snap.forEach((docSnap) => {
+    const d = docSnap.data();
+    const id = docSnap.id;
+    const active = d.active !== false;
+    const statusText = active ? "Aktiv" : "Inaktiv";
+    const priceText =
+      typeof d.price === "number" ? d.price.toFixed(2) + " €" : "";
+    const addToCartText = d.addToCart ? "Bestellbar" : "Nur Info";
+    const linkedText = d.menuItemId
+      ? "Verknüpft mit Speisekarte"
+      : "Eigenes Angebot";
+
+    const row = document.createElement("div");
+    row.className = "list-item-row";
+    row.innerHTML = `
+      <span>
+        <strong>${d.title || "(ohne Titel)"}</strong><br/>
+        <span class="info">
+          ${priceText ? priceText + " • " : ""}${addToCartText} • ${linkedText}<br/>
+          ${d.description || ""}
+        </span>
+      </span>
+      <span style="display:flex; flex-direction:column; gap:4px; align-items:flex-end;">
+        <span class="badge" style="margin-bottom:4px;">${statusText}</span>
+        <button class="btn btn-ghost btn-small"
+                data-offer-action="edit"
+                data-offer-id="${id}">
+          Bearbeiten
+        </button>
+        <button class="btn btn-ghost btn-small"
+                data-offer-action="toggle"
+                data-offer-id="${id}">
+          ${active ? "Deaktivieren" : "Aktivieren"}
+        </button>
+        <button class="btn btn-ghost btn-small"
+                data-offer-action="delete"
+                data-offer-id="${id}">
+          Löschen
+        </button>
+      </span>
+    `;
+    offerList.appendChild(row);
+  });
+
+  offerListCard.style.display = "block";
+}
+
+/* =========================
+   ANGEBOTE – EVENT HANDLING
+   ========================= */
+
+offerRestaurantSelect.addEventListener("change", async () => {
+  const restId = offerRestaurantSelect.value || null;
+  currentOfferRestaurantId = restId;
+  resetOfferForm();
+
+  offerEditorCard.style.display = restId ? "block" : "none";
+  offerListCard.style.display = restId ? "block" : "none";
+
+  if (!restId) return;
+
+  // Restaurant-Daten holen, um globalen Angebots-Schalter zu setzen
+  const ref = doc(db, "restaurants", restId);
+  const snap = await getDoc(ref);
+  const data = snap.exists() ? snap.data() : {};
+  offersEnabledInput.checked = data.offerActive !== false;
+
+  await loadOfferMenuItems(restId);
+  await loadOffersForRestaurant(restId);
+});
+
+offersEnabledInput.addEventListener("change", async () => {
+  if (!currentOfferRestaurantId) return;
+  try {
+    const ref = doc(db, "restaurants", currentOfferRestaurantId);
+    await updateDoc(ref, { offerActive: offersEnabledInput.checked });
+  } catch (err) {
+    console.error(err);
+    alert("Fehler beim Aktualisieren des Angebots-Status: " + err.message);
+  }
+});
+
+offerNewBtn.addEventListener("click", () => {
+  resetOfferForm();
+});
+
+offerSaveBtn.addEventListener("click", async () => {
+  offerStatus.textContent = "";
+  offerStatus.className = "status-text";
+
+  if (!currentOfferRestaurantId) {
+    offerStatus.textContent = "Bitte zuerst ein Lokal wählen.";
+    offerStatus.classList.add("status-err");
+    return;
+  }
+
+  const title = (offerTitleInput.value || "").trim();
+  const priceStr = (offerPriceInput.value || "").trim();
+  const imageUrl = (offerImageInput.value || "").trim();
+  const desc = (offerDescInput.value || "").trim();
+  const active = offerActiveInput.checked;
+  const addToCart = offerAddToCartInput.checked;
+  const menuItemId = offerMenuItemSelect.value || "";
+
+  if (!title) {
+    offerStatus.textContent = "Titel ist Pflicht.";
+    offerStatus.classList.add("status-err");
+    return;
+  }
+
+  let price = null;
+  if (priceStr) {
+    const parsed = parseFloat(priceStr.replace(",", "."));
+    if (isNaN(parsed)) {
+      offerStatus.textContent = "Preis ist keine gültige Zahl.";
+      offerStatus.classList.add("status-err");
+      return;
+    }
+    price = parsed;
+  }
+
+  const data = {
+    title,
+    description: desc,
+    imageUrl,
+    active,
+    addToCart,
+    menuItemId: menuItemId || null,
+  };
+  if (price !== null) data.price = price;
+  else data.price = null;
+
+  try {
+    offerSaveBtn.disabled = true;
+    offerSaveBtn.textContent = "Speichere...";
+
+    const offersCol = collection(
+      doc(db, "restaurants", currentOfferRestaurantId),
+      "offers"
+    );
+
+    if (currentOfferEditingId) {
+      await updateDoc(doc(offersCol, currentOfferEditingId), data);
+    } else {
+      const newRef = await addDoc(offersCol, data);
+      currentOfferEditingId = newRef.id;
+    }
+
+    offerStatus.textContent = "Angebot gespeichert.";
+    offerStatus.classList.add("status-ok");
+
+    await loadOffersForRestaurant(currentOfferRestaurantId);
+  } catch (err) {
+    console.error(err);
+    offerStatus.textContent = "Fehler: " + err.message;
+    offerStatus.classList.add("status-err");
+  } finally {
+    offerSaveBtn.disabled = false;
+    offerSaveBtn.textContent = "Angebot speichern";
+  }
+});
+
+offerList.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-offer-action]");
+  if (!btn || !currentOfferRestaurantId) return;
+
+  const action = btn.dataset.offerAction;
+  const id = btn.dataset.offerId;
+  const offerRef = doc(
+    db,
+    "restaurants",
+    currentOfferRestaurantId,
+    "offers",
+    id
+  );
+
+  try {
+    if (action === "delete") {
+      if (!confirm("Dieses Angebot wirklich löschen?")) return;
+      await deleteDoc(offerRef);
+      await loadOffersForRestaurant(currentOfferRestaurantId);
+    } else if (action === "toggle") {
+      const snap = await getDoc(offerRef);
+      if (!snap.exists()) return;
+      const d = snap.data();
+      const newActive = d.active === false;
+      await updateDoc(offerRef, { active: newActive });
+      await loadOffersForRestaurant(currentOfferRestaurantId);
+    } else if (action === "edit") {
+      const snap = await getDoc(offerRef);
+      if (!snap.exists()) return;
+      const d = snap.data();
+      currentOfferEditingId = id;
+      offerTitleInput.value = d.title || "";
+      offerPriceInput.value =
+        typeof d.price === "number" ? String(d.price) : "";
+      offerImageInput.value = d.imageUrl || "";
+      offerDescInput.value = d.description || "";
+      offerActiveInput.checked = d.active !== false;
+      offerAddToCartInput.checked = d.addToCart === true;
+      offerMenuItemSelect.value = d.menuItemId || "";
+      offerStatus.textContent = "Angebot im Bearbeitungsmodus.";
+      offerStatus.className = "status-text";
+    }
+  } catch (err) {
+    console.error(err);
+    alert("Fehler bei Angebot: " + err.message);
+  }
+});
+
+/* =========================
+   EVENTS & INIT
+   ========================= */
 
 createRestBtn.addEventListener("click", createRestaurant);
 searchInput.addEventListener("input", applyFilters);
