@@ -1,69 +1,475 @@
-<!DOCTYPE html>
-<html lang="de">
-<head>
-  <meta charset="UTF-8" />
-  <title>MENYRA – Admin</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f3f4f6" />
-  <link rel="stylesheet" href="styles.css" />
-</head>
-<body>
-  <main class="page">
-    <header class="header">
-      <div>
-        <div class="header-title">MENYRA</div>
-        <div class="header-sub">Superadmin – Kunden & QR-Codes</div>
+import { db } from "./firebase-config.js";
+import {
+  collection,
+  doc,
+  setDoc,
+  getDocs,
+  getDoc,
+  serverTimestamp,
+  updateDoc,
+} from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
+
+const restNameInput = document.getElementById("restNameInput");
+const ownerNameInput = document.getElementById("ownerNameInput");
+const restCityInput = document.getElementById("restCityInput");
+const tableCountInput = document.getElementById("tableCountInput");
+const yearPriceInput = document.getElementById("yearPriceInput");
+const phoneInput = document.getElementById("phoneInput");
+const logoUrlInput = document.getElementById("logoUrlInput");
+
+const createRestBtn = document.getElementById("createRestBtn");
+const adminStatus = document.getElementById("adminStatus");
+const restList = document.getElementById("restList");
+const searchInput = document.getElementById("searchInput");
+const filterActive = document.getElementById("filterActive");
+
+const BASE_URL = window.location.origin;
+
+function generateCode() {
+  return String(Math.floor(100000 + Math.random() * 900000)); // 6-stellig
+}
+
+function todayISO() {
+  const d = new Date();
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function addOneYearISO() {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() + 1);
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+function daysLeft(untilIso) {
+  if (!untilIso) return null;
+  const today = new Date(todayISO() + "T00:00:00");
+  const until = new Date(untilIso + "T00:00:00");
+  const diffMs = until - today;
+  const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+  return diffDays;
+}
+
+function isSubscriptionValid(data) {
+  if (!data.subscriptionUntil) return true;
+  const today = todayISO();
+  return data.subscriptionUntil >= today;
+}
+
+function getStatusLabel(data) {
+  if (data.active === false) return "Gesperrt";
+  if (!isSubscriptionValid(data)) return "Abo abgelaufen";
+  return "Aktiv";
+}
+
+function getStatusBadgeColor(label) {
+  switch (label) {
+    case "Aktiv":
+      return { bg: "#dcfce7", fg: "#15803d" };
+    case "Abo abgelaufen":
+      return { bg: "#fee2e2", fg: "#b91c1c" };
+    case "Gesperrt":
+      return { bg: "#e5e7eb", fg: "#374151" };
+    default:
+      return { bg: "#e5e7eb", fg: "#374151" };
+  }
+}
+
+async function createRestaurant() {
+  adminStatus.textContent = "";
+  adminStatus.className = "status-text";
+
+  const restaurantName = (restNameInput.value || "").trim();
+  const ownerName = (ownerNameInput.value || "").trim();
+  const city = (restCityInput.value || "").trim();
+  const tableCountStr = (tableCountInput.value || "").trim();
+  const yearPriceStr = (yearPriceInput.value || "").trim();
+  const phone = (phoneInput.value || "").trim();
+  const logoUrl = (logoUrlInput.value || "").trim();
+
+  if (!restaurantName) {
+    adminStatus.textContent = "Bitte Restaurant-/Lokalname eingeben.";
+    adminStatus.classList.add("status-err");
+    return;
+  }
+
+  let id = restaurantName
+    .toLowerCase()
+    .replace(/\s+/g, "-")
+    .replace(/[^a-z0-9\-]/g, "");
+
+  const tableCount = tableCountStr ? parseInt(tableCountStr, 10) : 0;
+  const yearPrice = yearPriceStr
+    ? parseFloat(yearPriceStr.replace(",", "."))
+    : 0;
+
+  const waiterCode = generateCode();
+  const ownerCode = generateCode();
+
+  const subscriptionStart = todayISO();
+  const subscriptionUntil = addOneYearISO();
+
+  try {
+    createRestBtn.disabled = true;
+    createRestBtn.textContent = "Speichere...";
+
+    const ref = doc(db, "restaurants", id);
+    await setDoc(ref, {
+      restaurantName,
+      ownerName,
+      city,
+      tableCount: isNaN(tableCount) ? 0 : tableCount,
+      yearPrice: isNaN(yearPrice) ? 0 : yearPrice,
+      phone,
+      logoUrl,
+      waiterCode,
+      ownerCode,
+      active: true,
+      createdAt: serverTimestamp(),
+      subscriptionStart,
+      subscriptionUntil,
+    });
+
+    adminStatus.textContent = `Kunde "${restaurantName}" angelegt. Kellner-Code: ${waiterCode}, Admin-Code: ${ownerCode}`;
+    adminStatus.classList.add("status-ok");
+
+    restNameInput.value = "";
+    ownerNameInput.value = "";
+    restCityInput.value = "";
+    tableCountInput.value = "";
+    yearPriceInput.value = "";
+    phoneInput.value = "";
+    logoUrlInput.value = "";
+
+    await loadRestaurants();
+  } catch (err) {
+    console.error(err);
+    adminStatus.textContent = "Fehler: " + err.message;
+    adminStatus.classList.add("status-err");
+  } finally {
+    createRestBtn.disabled = false;
+    createRestBtn.textContent = "Kunden/Lokal erstellen";
+  }
+}
+
+async function loadRestaurants() {
+  restList.innerHTML = "<div class='info'>Lade...</div>";
+  const snap = await getDocs(collection(db, "restaurants"));
+
+  restList.innerHTML = "";
+
+  snap.forEach((docSnap) => {
+    const data = docSnap.data();
+    const id = docSnap.id;
+    const tables = data.tableCount || 0;
+
+    // yearPrice sauber in Zahl umwandeln
+    let yearPriceNum = 0;
+    if (typeof data.yearPrice === "number") {
+      yearPriceNum = data.yearPrice;
+    } else if (typeof data.yearPrice === "string") {
+      const parsed = parseFloat(data.yearPrice.replace(",", "."));
+      if (!isNaN(parsed)) yearPriceNum = parsed;
+    }
+
+    let yearPriceDisplay = "";
+    if (yearPriceNum > 0) {
+      yearPriceDisplay = " • " + yearPriceNum.toFixed(2) + " €/Jahr";
+    }
+
+    const statusLabel = getStatusLabel(data);
+    const statusColors = getStatusBadgeColor(statusLabel);
+    const aboText = data.subscriptionUntil
+      ? (() => {
+          const days = daysLeft(data.subscriptionUntil);
+          const rest =
+            days !== null
+              ? ` (noch ${days} Tag${Math.abs(days) === 1 ? "" : "e"})`
+              : "";
+          return `Abo bis: ${data.subscriptionUntil}${rest}`;
+        })()
+      : "Abo bis: –";
+
+    const card = document.createElement("div");
+    card.className = "card";
+
+    const searchText = [
+      data.restaurantName || "",
+      data.ownerName || "",
+      data.city || "",
+      data.phone || "",
+      id || "",
+    ]
+      .join(" ")
+      .toLowerCase();
+
+    card.dataset.searchtext = searchText;
+    card.dataset.active = statusLabel === "Aktiv" ? "1" : "0";
+
+    card.innerHTML = `
+      <div class="list-item-row">
+        <span>
+          <strong>${data.restaurantName || id}</strong><br/>
+          <span class="info">
+            Inhaber: ${data.ownerName || "-"}${
+      data.phone ? " • " + data.phone : ""
+    }<br/>
+            Ort: ${data.city || "-"}<br/>
+            ID: ${id}${tables ? " • Tische: " + tables : ""}${yearPriceDisplay}<br/>
+            ${aboText}
+          </span>
+        </span>
+        <span class="badge" style="background:${statusColors.bg}; color:${statusColors.fg};">
+          ${statusLabel}
+        </span>
       </div>
-    </header>
 
-    <!-- Neues Lokal/Kunde anlegen -->
-    <section class="card">
-      <h2>Neuen Kunden anlegen</h2>
-      <p class="info">
-        Schritt 1: Lokal/Restaurant eintragen. Das Abo läuft automatisch
-        <strong>1 Jahr</strong> ab heute. QR-Codes & Admin/Kellner-Codes werden
-        automatisch erstellt.
-      </p>
-
-      <input class="input" id="restNameInput" placeholder="Restaurant / Lokalname" />
-      <input class="input" id="ownerNameInput" placeholder="Inhabername" />
-      <input class="input" id="restCityInput" placeholder="Ort (Stadt, z.B. Prishtina)" />
-      <input class="input" id="tableCountInput" placeholder="Anzahl Tische (z.B. 20)" />
-      <input class="input" id="yearPriceInput" placeholder="Preis pro Jahr in € (z.B. 370)" />
-      <input class="input" id="phoneInput" placeholder="Telefonnummer (optional)" />
-      <input class="input" id="logoUrlInput" placeholder="Logo URL (optional, für Gäste-Karte)" />
-
-      <button class="btn btn-primary" id="createRestBtn" style="margin-top:8px;">
-        Kunden/Lokal erstellen
-      </button>
-
-      <div class="status-text" id="adminStatus"></div>
-    </section>
-
-    <!-- Alle Kunden anzeigen -->
-    <section class="card">
-      <h2>Kunden & Lokale</h2>
-
-      <input class="input" id="searchInput" placeholder="Suche nach Lokal, Inhaber oder Ort..." />
-
-      <div class="list" style="margin-top:6px;">
-        <label class="info" style="display:flex; align-items:center; gap:6px;">
-          <input type="checkbox" id="filterActive" checked />
-          Nur aktive anzeigen
-        </label>
+      <div class="info" style="margin-top:6px;">
+        Kellner-Code: ${data.waiterCode || "-"} · Admin-Code: ${data.ownerCode || "-"}
       </div>
 
-      <div class="list" id="restList" style="margin-top:10px;"></div>
+      <div class="list" style="margin-top:8px;">
+        <button class="btn btn-ghost btn-small" 
+                data-action="show-qr" 
+                data-id="${id}" 
+                data-tables="${tables}">
+          QR & Links
+        </button>
+        <a class="btn btn-primary btn-small" href="admin.html?r=${encodeURIComponent(id)}">
+          Speisekarte
+        </a>
+        <button class="btn btn-ghost btn-small"
+                data-action="edit"
+                data-id="${id}">
+          Bearbeiten
+        </button>
+        <button class="btn btn-ghost btn-small"
+                data-action="toggle-active"
+                data-id="${id}">
+          ${data.active === false ? "Aktivieren" : "Deaktivieren"}
+        </button>
+      </div>
 
-      <p class="info">
-        Beispiele:<br />
-        Gäste (QR): <code>karte.html?r=ID&t=T1</code><br />
-        Kellner: <code>kamarieri.html</code> (LogIn per Kellner-Code)<br />
-        Admin: <code>admin.html</code> (LogIn per Admin-Code oder direkt mit <code>?r=ID</code>)
-      </p>
-    </section>
-  </main>
+      <div class="info" data-qr-block="${id}" style="display:none; margin-top:8px;"></div>
+    `;
 
-  <script type="module" src="menyra.js"></script>
-</body>
-</html>
+    restList.appendChild(card);
+  });
+
+  if (!restList.hasChildNodes()) {
+    restList.innerHTML =
+      "<div class='info'>Noch keine Kunden/Lokale angelegt.</div>";
+  }
+
+  applyFilters();
+}
+
+// QR-Block ein-/ausblenden und klickbare Links + QR-Codes erzeugen
+restList.addEventListener("click", async (e) => {
+  const qrBtn = e.target.closest("button[data-action='show-qr']");
+  if (qrBtn) {
+    const id = qrBtn.dataset.id;
+    const tables = parseInt(qrBtn.dataset.tables || "0", 10);
+    const block = restList.querySelector(`[data-qr-block="${id}"]`);
+    if (!block) return;
+
+    if (block.style.display === "none" || block.style.display === "") {
+      if (!block.dataset.loaded) {
+        let html = "";
+        if (!tables) {
+          html = "Keine Tische definiert.";
+        } else {
+          for (let i = 1; i <= tables; i++) {
+            const tableId = `T${i}`;
+            const link = `${BASE_URL}/karte.html?r=${encodeURIComponent(
+              id
+            )}&t=${encodeURIComponent(tableId)}`;
+            html += `
+              <div class="list-item-row" style="align-items:flex-start; margin-bottom:8px;">
+                <span>
+                  <strong>${tableId}</strong><br/>
+                  <a 
+                    href="${link}" 
+                    target="_blank" 
+                    class="info" 
+                    style="word-break:break-all; text-decoration:underline;">
+                    ${link}
+                  </a>
+                </span>
+                <img 
+                  src="https://api.qrserver.com/v1/create-qr-code/?size=130x130&data=${encodeURIComponent(
+                    link
+                  )}" 
+                  alt="QR ${tableId}" 
+                />
+              </div>
+            `;
+          }
+        }
+        block.innerHTML = html;
+        block.dataset.loaded = "1";
+      }
+      block.style.display = "block";
+    } else {
+      block.style.display = "none";
+    }
+    return;
+  }
+
+  const editBtn = e.target.closest("button[data-action='edit']");
+  if (editBtn) {
+    const id = editBtn.dataset.id;
+    await editRestaurant(id);
+    return;
+  }
+
+  const toggleBtn = e.target.closest("button[data-action='toggle-active']");
+  if (toggleBtn) {
+    const id = toggleBtn.dataset.id;
+    await toggleActive(id, toggleBtn);
+  }
+});
+
+async function toggleActive(id, btn) {
+  try {
+    btn.disabled = true;
+    btn.textContent = "Ändere...";
+
+    const ref = doc(db, "restaurants", id);
+    const card = btn.closest(".card");
+    const isActive = card?.dataset.active === "1";
+    const newActive = !isActive;
+
+    await updateDoc(ref, { active: newActive });
+
+    card.dataset.active = newActive ? "1" : "0";
+    const statusLabel = newActive ? "Aktiv" : "Gesperrt";
+    const colors = getStatusBadgeColor(statusLabel);
+    const badge = card.querySelector(".badge");
+    if (badge) {
+      badge.textContent = statusLabel;
+      badge.style.background = colors.bg;
+      badge.style.color = colors.fg;
+    }
+    btn.textContent = newActive ? "Deaktivieren" : "Aktivieren";
+
+    applyFilters();
+  } catch (err) {
+    console.error(err);
+    alert("Fehler beim Aktualisieren: " + err.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// Bearbeiten-Funktion über simple Popups
+async function editRestaurant(id) {
+  try {
+    const ref = doc(db, "restaurants", id);
+    const snap = await getDoc(ref);
+    if (!snap.exists()) {
+      alert("Kunde/Lokal nicht gefunden.");
+      return;
+    }
+    const data = snap.data();
+
+    let restaurantName = prompt(
+      "Restaurant / Lokalname:",
+      data.restaurantName || ""
+    );
+    if (restaurantName === null) return;
+    restaurantName = restaurantName.trim();
+    if (!restaurantName) {
+      alert("Name darf nicht leer sein.");
+      return;
+    }
+
+    let ownerName = prompt("Inhaber / Kunde:", data.ownerName || "");
+    if (ownerName === null) ownerName = data.ownerName || "";
+    ownerName = ownerName.trim();
+
+    let city = prompt("Stadt / Ort:", data.city || "");
+    if (city === null) city = data.city || "";
+    city = city.trim();
+
+    let tableCountStr = prompt(
+      "Anzahl Tische:",
+      data.tableCount != null ? String(data.tableCount) : ""
+    );
+    if (tableCountStr === null) tableCountStr =
+      data.tableCount != null ? String(data.tableCount) : "0";
+    const tableCount = tableCountStr.trim()
+      ? parseInt(tableCountStr.trim(), 10)
+      : 0;
+
+    let yearPriceStr = prompt(
+      "Preis pro Jahr (€):",
+      data.yearPrice != null ? String(data.yearPrice) : ""
+    );
+    if (yearPriceStr === null)
+      yearPriceStr =
+        data.yearPrice != null ? String(data.yearPrice) : "0";
+    const yearPrice = yearPriceStr.trim()
+      ? parseFloat(yearPriceStr.trim().replace(",", "."))
+      : 0;
+
+    let phone = prompt("Telefon:", data.phone || "");
+    if (phone === null) phone = data.phone || "";
+    phone = phone.trim();
+
+    let logoUrl = prompt("Logo-URL (optional):", data.logoUrl || "");
+    if (logoUrl === null) logoUrl = data.logoUrl || "";
+    logoUrl = logoUrl.trim();
+
+    await updateDoc(ref, {
+      restaurantName,
+      ownerName,
+      city,
+      tableCount: isNaN(tableCount) ? 0 : tableCount,
+      yearPrice: isNaN(yearPrice) ? 0 : yearPrice,
+      phone,
+      logoUrl,
+    });
+
+    await loadRestaurants();
+    alert("Daten gespeichert.");
+  } catch (err) {
+    console.error(err);
+    alert("Fehler beim Bearbeiten: " + err.message);
+  }
+}
+
+// Filter & Suche anwenden
+function applyFilters() {
+  const queryStr = (searchInput.value || "").toLowerCase();
+  const onlyActive = filterActive.checked;
+
+  const cards = restList.querySelectorAll(".card");
+  cards.forEach((card) => {
+    const text = card.dataset.searchtext || "";
+    const isActive = card.dataset.active !== "0";
+
+    let visible = true;
+
+    if (onlyActive && !isActive) {
+      visible = false;
+    }
+
+    if (queryStr && !text.includes(queryStr)) {
+      visible = false;
+    }
+
+    card.style.display = visible ? "block" : "none";
+  });
+}
+
+createRestBtn.addEventListener("click", createRestaurant);
+searchInput.addEventListener("input", applyFilters);
+filterActive.addEventListener("change", applyFilters);
+
+loadRestaurants();
