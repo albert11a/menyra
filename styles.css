@@ -156,7 +156,7 @@ body {
 .btn-primary {
   background: #ec4899;
   color: #fdf2f8;
-  box-shadow: 0 10px 22px rgba(236, 72, 153, 0.45);
+  box-shadow: none;
 }
 
 .btn-primary:hover {
@@ -716,3 +716,4 @@ img {
 .offer-flag-label input {
   margin-top: 3px;
 }
+
