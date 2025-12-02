@@ -9,8 +9,9 @@
 </head>
 <body>
   <main class="page page--karte">
-    <!-- Top: Restaurant-Card + Suche + Kategorien -->
+    <!-- Top: Restaurant-Card + Suche-Card + Kategorien -->
     <header class="karte-topbar">
+      <!-- Restaurant -->
       <section class="card restaurant-card">
         <div class="restaurant-header">
           <img id="restaurantLogo" class="rest-logo" style="display:none;" alt="Logo" />
@@ -21,20 +22,22 @@
         </div>
       </section>
 
-      <!-- Suche im Dribbble-Pill-Style -->
-      <div class="search-wrapper">
-        <div class="search-pill">
-          <input
-            id="searchInput"
-            class="search-input"
-            type="search"
-            placeholder="Kërko në meny..."
-          />
-          <button type="button" class="search-btn">
-            <span class="search-btn-icon"></span>
-          </button>
+      <!-- Suche in eigener weißen Card -->
+      <section class="card search-card">
+        <div class="search-wrapper">
+          <div class="search-pill">
+            <input
+              id="searchInput"
+              class="search-input"
+              type="search"
+              placeholder="Kërko në meny..."
+            />
+            <button type="button" class="search-btn">
+              <span class="search-btn-icon"></span>
+            </button>
+          </div>
         </div>
-      </div>
+      </section>
 
       <!-- Kategorie-Tabs -->
       <div class="category-tabs" id="categoryTabs"></div>
