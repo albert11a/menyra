@@ -353,7 +353,7 @@ clearCartBtn.addEventListener("click", () => {
 
 sendOrderBtn.addEventListener("click", sendOrder);
 
-// Suche
+// Suche (live)
 searchInput.addEventListener("input", () => {
   searchTerm = (searchInput.value || "").trim().toLowerCase();
   renderMenu();
