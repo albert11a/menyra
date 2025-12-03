@@ -816,6 +816,7 @@ img {
   display: block;
 }
 
+/* Nur QR / Admin-Bilder mit Rahmen, NICHT Detajet */
 .list-item-row img {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -889,10 +890,10 @@ img {
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;               /* KEIN vh – echte Viewportfläche */
+  bottom: 0;
   max-width: 480px;
-  margin: 0 auto;          /* zentriert auf größeren Screens */
-  background: #f3f4f6;     /* wie body/.page, damit keine Farbränder */
+  margin: 0 auto;
+  background: #f3f4f6;
   padding: 16px 16px 32px;
   box-sizing: border-box;
 
@@ -903,7 +904,7 @@ img {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
-  transform: translateX(100%);  /* Start: komplett rechts draußen */
+  transform: translateX(100%);
   transition: transform 0.28s ease;
   z-index: 61;
 }
@@ -923,24 +924,86 @@ img {
   color: #f9fafb;
 }
 
-/* Bildbereich */
+/* =========================
+   DETAJET – BILD-BEREICH / SLIDER (sauber)
+   ========================= */
+
+/* Bildcontainer auf Detajet-Seite:
+   - Abstand zum Kartenrand
+   - runde Ecken
+   - kein schwarzer Rand
+*/
 .drawer-image-wrap {
-  width: 100%;
-  border-radius: 18px;
+  position: relative;
+  margin: 8px 8px 12px 8px;   /* Abstand oben/links/rechts/unten */
+  border-radius: 16px;
   overflow: hidden;
-  background: #020617;
-  margin-bottom: 12px;
+  background: #ffffff;        /* gleich wie Card, kein dunkler Rahmen */
 }
 
-.drawer-image-wrap img {
+/* Slider-Struktur – immer nur EIN Bild sichtbar */
+.detail-slider {
   width: 100%;
   height: auto;
-  max-height: 260px;
-  object-fit: cover;
-  display: block;
 }
 
-/* Inhalt unter dem Bild */
+.detail-slider-viewport {
+  width: 100%;
+  overflow: hidden;           /* zeigt nur eine Slide */
+}
+
+.detail-slider-track {
+  display: flex;
+  transition: transform 0.35s ease;
+  will-change: transform;
+}
+
+/* Jede Slide nimmt 100% Breite ein */
+.detail-slide {
+  flex: 0 0 100%;
+}
+
+/* Bilder selbst – ohne Rahmen */
+.detail-slide img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+  border: none;
+  background: transparent;
+  border-radius: 0;           /* Rundung kommt vom Container */
+  box-shadow: none;
+  outline: none;
+}
+
+/* Pfeile im Bild, mittig vertikal */
+.detail-slider-arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 9999px;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.3rem;
+  background: rgba(0,0,0,0.35);  /* leicht transparent im Bild */
+  color: #ffffff;
+  z-index: 10;
+}
+
+.detail-slider-arrow--left {
+  left: 8px;
+}
+
+.detail-slider-arrow--right {
+  right: 8px;
+}
+
+/* Inhalt unter dem Bild (bleibt wie vorher) */
 .drawer--product .drawer-body {
   background: #020617;
   border-radius: 18px;
