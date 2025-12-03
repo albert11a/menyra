@@ -11,8 +11,17 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
-const restaurantId = params.get("r") || "test-restaurant";
-const tableId = params.get("t") || "T1";
+const restaurantId =
+  params.get("r") ||
+  params.get("restaurantId") ||
+  params.get("id") ||
+  "test-restaurant";
+const tableId =
+  params.get("t") ||
+  params.get("table") ||
+  params.get("tbl") ||
+  "T1";
+
 
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
@@ -921,3 +930,4 @@ window.addEventListener("pageshow", (event) => {
 cart = loadCartFromStorage();
 renderCart();
 loadRestaurantAndMenu();
+
