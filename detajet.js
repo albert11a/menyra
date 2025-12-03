@@ -1,4 +1,4 @@
-// detajet.js – Detailansicht für ein Produkt, nutzt globalen Cart + Porosia-Seite
+// detajet.js – Detailseite für ein Produkt, nutzt globalen Cart + Porosia-Seite
 
 import { db } from "./firebase-config.js";
 import {
@@ -6,38 +6,49 @@ import {
   getDoc,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
+// URL-Parameter lesen
 const params = new URLSearchParams(window.location.search);
 const restaurantId = params.get("r") || "test-restaurant";
 const tableId = params.get("t") || "T1";
 const itemId = params.get("item");
 
-// DOM
+// DOM-Referenzen
+const backBtn = document.getElementById("backBtn");
+const detailTableBadge = document.getElementById("detailTableBadge");
+
 const detailImageEl = document.getElementById("detailImage");
-const detailTitleEl = document.getElementById("detailTitle");
+const detailNameEl = document.getElementById("detailName");
 const detailPriceEl = document.getElementById("detailPrice");
 const detailLongDescEl = document.getElementById("detailLongDesc");
 const detailZutatenEl = document.getElementById("detailZutaten");
+
+const detailRatingEl = document.getElementById("detailRating");
+const detailLikeBtn = document.getElementById("detailLikeBtn");
 
 const detailQtyMinusBtn = document.getElementById("detailQtyMinus");
 const detailQtyPlusBtn = document.getElementById("detailQtyPlus");
 const detailQtyValueEl = document.getElementById("detailQtyValue");
 const detailAddBtn = document.getElementById("detailAddBtn");
+const detailViewCartBtn = document.getElementById("detailViewCartBtn");
 
-const headerRestaurantName = document.getElementById("detailRestaurantName");
-const headerTableLabel = document.getElementById("detailTableLabel");
-const backBtn = document.getElementById("detailBackBtn");
+// Mini-Cart in Detajet (unter der Card)
+const detailCartSection = document.getElementById("detailCartSection");
+const detailCartTableLabel = document.getElementById("detailCartTableLabel");
+const detailCartItemsEl = document.getElementById("detailCartItems");
+const detailCartTotalEl = document.getElementById("detailCartTotal");
 
-// FAB wie auf Karte
+// Floating Cart Button wie auf Karte
 const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
 
+// State
 let cart = [];
 let currentItem = null;
 let currentQty = 1;
 
 /* =========================
-   CART: LOCALSTORAGE
+   CART: LOCALSTORAGE (gleich wie in karte.js)
    ========================= */
 
 function getCartStorageKey() {
@@ -66,8 +77,14 @@ function loadCartFromStorage() {
 function saveCartToStorage() {
   try {
     localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
+
+/* =========================
+   CART-UI: FAB + Mini-Cart
+   ========================= */
 
 function updateCartBadge() {
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -82,7 +99,38 @@ function updateCartBadge() {
   } else {
     cartBadgeEl.style.display = "none";
     cartFab.classList.remove("visible", "cart-fab--has-items");
-    if (cartFabLabel) cartFabLabel.style.display = "none";
+    if (cartFabLabel) {
+      cartFabLabel.style.display = "none";
+    }
+  }
+}
+
+function renderMiniCart() {
+  if (!detailCartSection) return;
+
+  if (!cart.length) {
+    detailCartSection.style.display = "none";
+    return;
+  }
+
+  detailCartSection.style.display = "block";
+  detailCartItemsEl.innerHTML = "";
+  let total = 0;
+
+  cart.forEach((item) => {
+    total += item.price * item.qty;
+    const row = document.createElement("div");
+    row.className = "cart-item-row";
+    row.innerHTML = `
+      <span>${item.qty}× ${item.name}</span>
+      <span>${(item.price * item.qty).toFixed(2)} €</span>
+    `;
+    detailCartItemsEl.appendChild(row);
+  });
+
+  detailCartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
+  if (detailCartTableLabel) {
+    detailCartTableLabel.textContent = `Tavolina ${tableId}`;
   }
 }
 
@@ -103,37 +151,33 @@ function changeCart(item, deltaQty) {
   }
   saveCartToStorage();
   updateCartBadge();
+  renderMiniCart();
 }
 
 /* =========================
-   LOAD ITEM
+   PRODUKT LADEN
    ========================= */
 
 async function loadItem() {
+  // Tisch-Label im Header
+  if (detailTableBadge) {
+    detailTableBadge.textContent = `Tavolina ${tableId}`;
+  }
+
   if (!itemId) {
-    detailTitleEl.textContent = "Produkt nicht gefunden";
-    detailLongDescEl.textContent = "Keine ID in der URL.";
+    detailNameEl.textContent = "Produkti nuk u gjet";
+    detailLongDescEl.textContent = "Mungon ID e produktit në URL.";
     return;
   }
 
-  if (headerTableLabel) {
-    headerTableLabel.textContent = `Tisch ${tableId}`;
-  }
-
   try {
-    const restRef = doc(db, "restaurants", restaurantId);
-    const restSnap = await getDoc(restRef);
-    if (restSnap.exists() && headerRestaurantName) {
-      const data = restSnap.data();
-      headerRestaurantName.textContent = data.restaurantName || "Lokal";
-    }
-
+    // Produkt aus Firestore laden
     const itemRef = doc(db, "restaurants", restaurantId, "menuItems", itemId);
     const itemSnap = await getDoc(itemRef);
 
     if (!itemSnap.exists()) {
-      detailTitleEl.textContent = "Produkt nicht gefunden";
-      detailLongDescEl.textContent = "Bitte Personal informieren.";
+      detailNameEl.textContent = "Produkti nuk u gjet";
+      detailLongDescEl.textContent = "Ju lutem njoftoni stafin.";
       return;
     }
 
@@ -145,8 +189,12 @@ async function loadItem() {
       longDescription: d.longDescription || "",
       price: d.price || 0,
       imageUrl: d.imageUrl || null,
+      ratingCount: d.ratingCount || 0,
+      ratingSum: d.ratingSum || 0,
+      likeCount: d.likeCount || 0,
     };
 
+    // Bild
     if (currentItem.imageUrl) {
       detailImageEl.src = currentItem.imageUrl;
       detailImageEl.style.display = "block";
@@ -154,28 +202,72 @@ async function loadItem() {
       detailImageEl.style.display = "none";
     }
 
-    detailTitleEl.textContent = currentItem.name;
+    // Texte
+    detailNameEl.textContent = currentItem.name;
     detailPriceEl.textContent = currentItem.price.toFixed(2) + " €";
 
     const longText =
       currentItem.longDescription || currentItem.description || "";
-    detailLongDescEl.textContent = longText;
+    detailLongDescEl.textContent = longText || "—";
 
-    detailZutatenEl.textContent = currentItem.description || "";
+    detailZutatenEl.textContent =
+      currentItem.description || "—";
 
+    // Rating-Anzeige (nur read-only, keine Logik hier)
+    const { ratingCount, ratingSum } = currentItem;
+    if (ratingCount > 0) {
+      const avg = ratingSum / ratingCount;
+      detailRatingEl.textContent = `⭐ ${avg.toFixed(1)} · ${ratingCount} vlerësime`;
+    } else {
+      detailRatingEl.textContent = "Ende pa vlerësime";
+    }
+
+    // Start-Menge
     currentQty = 1;
     detailQtyValueEl.textContent = String(currentQty);
   } catch (err) {
     console.error(err);
-    detailTitleEl.textContent = "Fehler";
+    detailNameEl.textContent = "Gabim";
     detailLongDescEl.textContent = err.message;
   }
+}
+
+/* =========================
+   NAVIGATION
+   ========================= */
+
+function goToKarte() {
+  // Stabil: wenn History vorhanden → back, sonst direkt zur Karte
+  if (window.history.length > 1) {
+    history.back();
+  } else {
+    const url = new URL(window.location.href);
+    url.pathname = "karte.html";
+    url.searchParams.set("r", restaurantId);
+    url.searchParams.set("t", tableId);
+    window.location.href = url.toString();
+  }
+}
+
+function goToPorosia() {
+  if (!cart.length) return;
+  const url = new URL(window.location.href);
+  url.pathname = "porosia.html";
+  url.searchParams.set("r", restaurantId);
+  url.searchParams.set("t", tableId);
+  window.location.href = url.toString();
 }
 
 /* =========================
    EVENTS
    ========================= */
 
+// Zurück-Button
+if (backBtn) {
+  backBtn.addEventListener("click", goToKarte);
+}
+
+// Menge -
 detailQtyMinusBtn.addEventListener("click", () => {
   if (currentQty > 1) {
     currentQty -= 1;
@@ -183,45 +275,40 @@ detailQtyMinusBtn.addEventListener("click", () => {
   }
 });
 
+// Menge +
 detailQtyPlusBtn.addEventListener("click", () => {
   currentQty += 1;
   detailQtyValueEl.textContent = String(currentQty);
 });
 
+// Shto në porosi
 detailAddBtn.addEventListener("click", () => {
   if (!currentItem) return;
   changeCart(currentItem, currentQty);
 });
 
-// FAB → Porosia
-cartFab.addEventListener("click", () => {
-  if (!cart.length) return;
-  const url = new URL(window.location.href);
-  url.pathname = "porosia.html";
-  url.searchParams.set("r", restaurantId);
-  url.searchParams.set("t", tableId);
-  window.location.href = url.toString();
+// Shiko porosin Button in der Card
+detailViewCartBtn.addEventListener("click", () => {
+  goToPorosia();
 });
 
-// Zurück zur Karte – stabil für Browser-Back + Direktaufruf
-if (backBtn) {
-  backBtn.addEventListener("click", () => {
-    if (window.history.length > 1) {
-      history.back();
-    } else {
-      const url = new URL(window.location.href);
-      url.pathname = "karte.html";
-      url.searchParams.set("r", restaurantId);
-      url.searchParams.set("t", tableId);
-      window.location.href = url.toString();
-    }
+// FAB → Porosia
+cartFab.addEventListener("click", () => {
+  goToPorosia();
+});
+
+// Optional: Like-Button vorerst nur UI (keine Logik, damit alles leicht bleibt)
+if (detailLikeBtn) {
+  detailLikeBtn.addEventListener("click", () => {
+    // Später können wir hier Firestore-Likes ergänzen
   });
 }
 
-// Safari BFCache: beim Zurückkommen Cart neu laden
+// Safari BFCache: beim Zurückkommen von Porosia / Karte → Cart & Badge neu laden
 window.addEventListener("pageshow", () => {
   cart = loadCartFromStorage();
   updateCartBadge();
+  renderMiniCart();
 });
 
 /* =========================
@@ -230,4 +317,5 @@ window.addEventListener("pageshow", () => {
 
 cart = loadCartFromStorage();
 updateCartBadge();
+renderMiniCart();
 loadItem();
