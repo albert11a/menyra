@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes (ohne Drawer)
+// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, globalem Warenkorb (ohne Drawer)
 
 import { db } from "./firebase-config.js";
 import {
@@ -6,8 +6,6 @@ import {
   doc,
   getDoc,
   getDocs,
-  addDoc,
-  serverTimestamp,
   updateDoc,
   increment,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
@@ -66,6 +64,42 @@ let offersCurrentIndex = 0;
 let offersTimer = null;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
+// Button im Karton unten als "Shiko porosin" verwenden
+sendOrderBtn.textContent = "Shiko porosin";
+
+/* =========================
+   CART: LOCALSTORAGE
+   ========================= */
+
+function getCartStorageKey() {
+  return `menyra_cart_${restaurantId}_${tableId}`;
+}
+
+function loadCartFromStorage() {
+  try {
+    const raw = localStorage.getItem(getCartStorageKey());
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return [];
+    return parsed.map((item) => ({
+      id: item.id,
+      name: item.name,
+      price: Number(item.price) || 0,
+      qty: Number(item.qty) || 0,
+    })).filter((i) => i.qty > 0);
+  } catch (e) {
+    console.warn("Cart parse error", e);
+    return [];
+  }
+}
+
+function saveCartToStorage() {
+  try {
+    localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
+  } catch (e) {
+    console.warn("Cart save error", e);
+  }
+}
 
 /* =========================
    HELFER: ABO & STATUS
@@ -703,7 +737,6 @@ function renderMenu() {
     `;
     commentBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
-      // Kommentar → auch zu detajet.html
       const url = new URL(window.location.href);
       url.pathname = "detajet.html";
       url.searchParams.set("r", restaurantId);
@@ -751,7 +784,7 @@ function renderMenu() {
 }
 
 /* =========================
-   LIKES Firestore-Update (ohne Drawer)
+   LIKES Firestore-Update
    ========================= */
 
 async function toggleItemLike(item) {
@@ -778,24 +811,12 @@ async function toggleItemLike(item) {
     console.error(err);
   }
 
-  // Liste neu rendern, damit Like-Zahl aktualisiert wird
-  renderMenu();
+  renderMenu(); // Like-Zahl aktualisieren
 }
 
 /* =========================
    WARENKORB
    ========================= */
-
-function changeCart(item, delta) {
-  const index = cart.findIndex((c) => c.id === item.id);
-  if (index === -1 && delta > 0) {
-    cart.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
-  } else if (index >= 0) {
-    cart[index].qty += delta;
-    if (cart[index].qty <= 0) cart.splice(index, 1);
-  }
-  renderCart();
-}
 
 function updateCartBadge() {
   const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
@@ -803,7 +824,10 @@ function updateCartBadge() {
     cartBadgeEl.textContent = String(totalQty);
     cartBadgeEl.style.display = "flex";
     cartFab.classList.add("visible", "cart-fab--has-items");
-    if (cartFabLabel) cartFabLabel.style.display = "block";
+    if (cartFabLabel) {
+      cartFabLabel.textContent = "Shiko porosin";
+      cartFabLabel.style.display = "block";
+    }
   } else {
     cartBadgeEl.style.display = "none";
     cartFab.classList.remove("visible", "cart-fab--has-items");
@@ -815,6 +839,7 @@ function renderCart() {
   if (!cart.length) {
     cartSection.style.display = "none";
     updateCartBadge();
+    saveCartToStorage();
     return;
   }
 
@@ -835,65 +860,38 @@ function renderCart() {
 
   cartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
   updateCartBadge();
+  saveCartToStorage();
 }
 
-async function sendOrder() {
-  statusMsg.textContent = "";
-  statusMsg.className = "status-text";
-
-  if (!cart.length) {
-    statusMsg.textContent = "Bitte zuerst Produkte auswählen.";
-    statusMsg.classList.add("status-err");
-    return;
+function changeCart(item, delta) {
+  const index = cart.findIndex((c) => c.id === item.id);
+  if (index === -1 && delta > 0) {
+    cart.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+  } else if (index >= 0) {
+    cart[index].qty += delta;
+    if (cart[index].qty <= 0) cart.splice(index, 1);
   }
-
-  try {
-    sendOrderBtn.disabled = true;
-    sendOrderBtn.textContent = "Sende...";
-
-    const restaurantRef = doc(db, "restaurants", restaurantId);
-    const ordersCol = collection(restaurantRef, "orders");
-
-    await addDoc(ordersCol, {
-      table: tableId,
-      items: cart.map((c) => ({
-        id: c.id,
-        name: c.name,
-        price: c.price,
-        qty: c.qty,
-      })),
-      note: noteInput.value || "",
-      status: "new",
-      createdAt: serverTimestamp(),
-      source: "qr",
-    });
-
-    cart = [];
-    renderCart();
-    noteInput.value = "";
-    statusMsg.textContent = "Bestellung gesendet. Danke!";
-    statusMsg.classList.add("status-ok");
-  } catch (err) {
-    console.error(err);
-    statusMsg.textContent = "Fehler: " + err.message;
-    statusMsg.classList.add("status-err");
-  } finally {
-    sendOrderBtn.disabled = false;
-    sendOrderBtn.textContent = "Bestellung senden";
-  }
+  renderCart();
 }
 
 /* =========================
    EVENTS
    ========================= */
 
-// Cart inline
+// Cart inline „Leeren“
 clearCartBtn.addEventListener("click", () => {
   cart = [];
   renderCart();
 });
 
-sendOrderBtn.addEventListener("click", sendOrder);
+// Inline-Karten-Button unten → Porosia-Seite
+sendOrderBtn.addEventListener("click", () => {
+  const url = new URL(window.location.href);
+  url.pathname = "porosia.html";
+  url.searchParams.set("r", restaurantId);
+  url.searchParams.set("t", tableId);
+  window.location.href = url.toString();
+});
 
 // Suche (live) – nur für Speisekarte (Food)
 searchInput.addEventListener("input", () => {
@@ -901,13 +899,20 @@ searchInput.addEventListener("input", () => {
   renderMenu();
 });
 
-// Floating Cart Button → scrollt zum Warenkorb (kein Drawer mehr)
+// Floating Cart Button → Porosia-Seite
 cartFab.addEventListener("click", () => {
-  if (cartSection && cartSection.style.display !== "none") {
-    cartSection.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
+  if (!cart.length) return;
+  const url = new URL(window.location.href);
+  url.pathname = "porosia.html";
+  url.searchParams.set("r", restaurantId);
+  url.searchParams.set("t", tableId);
+  window.location.href = url.toString();
 });
 
-// INIT
+/* =========================
+   INIT
+   ========================= */
+
+cart = loadCartFromStorage();
+renderCart();          // zeigt ggf. direkt "Shiko porosin"
 loadRestaurantAndMenu();
-renderCart(); // sorgt dafür, dass FAB am Anfang versteckt ist
