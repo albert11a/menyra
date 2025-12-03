@@ -890,11 +890,7 @@ img {
   pointer-events: auto;
 }
 
-/* Drawer:
-   - Vollbild (innerhalb 480px Breite)
-   - slidet mit transform von rechts
-   - scrollt in sich selbst
-*/
+/* Drawer – Vollbild, slidet per transform */
 
 .drawer {
   position: fixed;
@@ -915,7 +911,6 @@ img {
   transition: transform 0.28s ease;
 }
 
-/* Sichtbar: schiebe vollständig ins Bild */
 .drawer--visible {
   transform: translateX(-50%);
 }
@@ -928,29 +923,34 @@ img {
 /* Produkt-Drawer */
 
 .drawer--product {
-  background: #0b1120;
+  background: #020617;
   color: #f9fafb;
 }
 
-/* Bildbereich im Produkt-Drawer – kompakter & scrollt mit */
+/* Bildbereich im Produkt-Drawer
+   -> Abstand von oben & Seiten, abgerundete Ecken, nicht full-bleed
+*/
 
 .drawer-image-wrap {
   width: 100%;
-  height: 220px;
-  overflow: hidden;
+  padding: 52px 16px 0;   /* oben Platz für Notch & X, seitlich 16px */
+  box-sizing: border-box;
   background: #020617;
+  margin-bottom: 12px;
 }
 
 .drawer-image-wrap img {
   width: 100%;
-  height: 100%;
+  height: auto;
+  max-height: 260px;
+  border-radius: 20px;
   object-fit: cover;
 }
 
 /* Innerer Body vom Produkt-Drawer */
 
 .drawer--product .drawer-body {
-  padding: 16px 16px 24px;
+  padding: 12px 16px 24px;
 }
 
 /* Titel/Preis unter Bild */
@@ -961,7 +961,7 @@ img {
   align-items: baseline;
   gap: 12px;
   margin-bottom: 6px;
-  margin-top: 8px;
+  margin-top: 4px;
 }
 
 .drawer-title-row h3 {
@@ -1133,7 +1133,7 @@ img {
   position: fixed;
   top: 12px;
   left: 50%;
-  transform: translateX(calc(-50% - 210px)); /* bei max-width:480px = linksbündig */
+  transform: translateX(calc(-50% - 210px)); /* bei max-width:480px ~ linksbündig */
   width: 28px;
   height: 28px;
   border-radius: 999px;
