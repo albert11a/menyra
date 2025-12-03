@@ -24,13 +24,31 @@
 
     <!-- Produkt-Card -->
     <section class="card" id="detailProductCard">
-      <!-- Bildbereich -->
+      <!-- Bildbereich mit Slider -->
       <div class="drawer-image-wrap">
-        <img
-          id="detailImage"
-          src=""
-          alt="Foto e produktit"
-        />
+        <div class="detail-slider" id="detailSliderWrapper">
+          <button
+            type="button"
+            class="detail-slider-arrow detail-slider-arrow--left"
+            id="detailSliderPrev"
+          >
+            ‹
+          </button>
+
+          <div class="detail-slider-viewport" id="detailSliderViewport">
+            <div class="detail-slider-track" id="detailSliderTrack">
+              <!-- Bilder werden per JS eingefügt -->
+            </div>
+          </div>
+
+          <button
+            type="button"
+            class="detail-slider-arrow detail-slider-arrow--right"
+            id="detailSliderNext"
+          >
+            ›
+          </button>
+        </div>
       </div>
 
       <!-- Titel + Preis -->
