@@ -40,6 +40,7 @@ const typeToggleButtons = document.querySelectorAll(".type-toggle-btn");
 const itemCategorySelect = document.getElementById("itemCategorySelect");
 const itemCategoryCustomInput = document.getElementById("itemCategoryCustomInput");
 const itemNameInput = document.getElementById("itemNameInput");
+const itemLongDescInput = document.getElementById("itemLongDescInput");
 const itemDescInput = document.getElementById("itemDescInput");
 const itemPriceInput = document.getElementById("itemPriceInput");
 const itemImageInput = document.getElementById("itemImageInput");
@@ -331,7 +332,12 @@ function renderItemList() {
     header.appendChild(priceEl);
     row.appendChild(header);
 
-    if (item.description) {
+    if (item.longDescription) {
+      const descEl = document.createElement("div");
+      descEl.className = "menu-item-desc";
+      descEl.textContent = item.longDescription;
+      row.appendChild(descEl);
+    } else if (item.description) {
       const descEl = document.createElement("div");
       descEl.className = "menu-item-desc";
       descEl.textContent = item.description;
@@ -379,7 +385,6 @@ function renderItemList() {
     groupTitle.textContent = label;
     itemList.appendChild(groupTitle);
 
-    // Kategorien alphabetisch sortiert
     const sortedCats = Array.from(map.keys()).sort((a, b) =>
       a.localeCompare(b, "de")
     );
@@ -414,6 +419,7 @@ function resetForm() {
 
   itemCategoryCustomInput.value = "";
   itemNameInput.value = "";
+  itemLongDescInput.value = "";
   itemDescInput.value = "";
   itemPriceInput.value = "";
   itemImageInput.value = "";
@@ -442,6 +448,7 @@ function startEditItem(item) {
   }
 
   itemNameInput.value = item.name || "";
+  itemLongDescInput.value = item.longDescription || "";
   itemDescInput.value = item.description || "";
   itemPriceInput.value =
     typeof item.price === "number" ? item.price.toString() : "";
@@ -461,6 +468,7 @@ async function saveItem() {
   const category = customCat || selectedCat;
 
   const name = (itemNameInput.value || "").trim();
+  const longDesc = (itemLongDescInput.value || "").trim();
   const desc = (itemDescInput.value || "").trim();
   const priceStr = (itemPriceInput.value || "").trim();
   const imageUrl = (itemImageInput.value || "").trim();
@@ -489,7 +497,8 @@ async function saveItem() {
     type: currentProductType, // "food" oder "drink"
     category,
     name,
-    description: desc,
+    description: desc,         // kurz = Zutaten
+    longDescription: longDesc, // lang
     price,
     imageUrl: imageUrl || null,
     available: true,
@@ -605,7 +614,7 @@ async function loadTodayOrders() {
 
       const title = document.createElement("span");
       title.style.fontSize = "0.85rem";
-      title.style.fontWeight = "600";
+      title.style.FontWeight = "600";
       const timeStr = order.createdAt
         ? order.createdAt.toLocaleTimeString("de-AT", {
             hour: "2-digit",
