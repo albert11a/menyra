@@ -128,13 +128,16 @@
         />
       </label>
 
+      <!-- NEU: Mehrere Bild-URLs -->
       <label style="display:block; margin-top:8px;">
-        <span style="font-size:0.8rem; display:block; margin-bottom:4px;">Bild-URL (optional)</span>
-        <input
-          id="itemImageInput"
-          class="input"
-          placeholder="https://…"
-        />
+        <span style="font-size:0.8rem; display:block; margin-bottom:4px;">
+          Bild-URLs (optional, eine pro Zeile)
+        </span>
+        <textarea
+          id="itemImagesInput"
+          class="input input-textarea"
+          placeholder="https://bild1.jpg&#10;https://bild2.jpg"
+        ></textarea>
       </label>
 
       <div class="cart-actions" style="margin-top:12px;">
