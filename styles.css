@@ -863,11 +863,10 @@ img {
 }
 
 /* ========================================
-/* ========================================
-   DETAIL & CART DRAWER – wie eigene Seite, aber gleiche Settings wie .page
+   DETAIL & CART DRAWER – Fullscreen, swipe von rechts
    ======================================== */
 
-/* Halbtransparenter Overlay über der Karte */
+/* Overlay über kompletter Viewport-Fläche */
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -884,49 +883,47 @@ img {
   pointer-events: auto;
 }
 
-/* Drawer: gleiche "Seite" wie .page, nur oben drauf + Slide von rechts */
+/* Drawer: klassischer Fullscreen-Overlay, zentriert wie .page */
 .drawer {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
-  bottom: 0;                 /* volle Höhe wie die Karte */
-  margin: 0 auto;
-  max-width: 480px;          /* exakt wie .page */
-  width: 100%;
-  background: #f3f4f6;       /* exakt wie .page und <body> */
-  padding: 16px 16px 32px;   /* exakt wie .page */
+  bottom: 0;               /* KEIN vh – echte Viewportfläche */
+  max-width: 480px;
+  margin: 0 auto;          /* zentriert auf größeren Screens */
+  background: #f3f4f6;     /* wie body/.page, damit keine Farbränder */
+  padding: 16px 16px 32px;
   box-sizing: border-box;
 
   display: flex;
   flex-direction: column;
   gap: 16px;
 
-  overflow-y: auto;          /* scrollt nur im Drawer */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
 
-  transform: translateX(100%); /* Start: rechts draußen */
+  transform: translateX(100%);  /* Start: komplett rechts draußen */
   transition: transform 0.28s ease;
   z-index: 61;
 }
 
-/* Drawer sichtbar → gleiche Fläche wie .page, keine Ränder */
+/* sichtbar → komplett im Bild, wie eigene Seite */
 .drawer--visible {
   transform: translateX(0);
 }
 
-/* Inhalt innerhalb des Drawers */
 .drawer-body {
   flex: 1;
   padding-bottom: 8px;
 }
 
-/* Produkt-Drawer: wir färben nur die Blöcke, nicht die ganze Seite schwarz */
+/* Produkt-Drawer – dunkler Inhalt als Card */
 .drawer--product {
   color: #f9fafb;
 }
 
-/* Bildbereich mit Abstand wie Karte */
+/* Bildbereich */
 .drawer-image-wrap {
   width: 100%;
   border-radius: 18px;
@@ -943,7 +940,7 @@ img {
   display: block;
 }
 
-/* Inhalt unter dem Bild (Card-Style innen) */
+/* Inhalt unter dem Bild */
 .drawer--product .drawer-body {
   background: #020617;
   border-radius: 18px;
@@ -1101,7 +1098,7 @@ img {
   justify-content: center;
 }
 
-/* Cart-Drawer (Bestellübersicht) – heller Card-Style wie Karte */
+/* Cart-Drawer (Bestellübersicht) – heller Card-Style */
 .drawer--cart .drawer-body {
   background: #ffffff;
   border-radius: 18px;
@@ -1114,9 +1111,9 @@ img {
   margin-bottom: 10px;
 }
 
-/* X-Button oben links im Drawer, relativ zum Drawer */
+/* X-Button im Drawer – oben links */
 .drawer-close-btn {
-  position: absolute;
+  position: fixed;
   top: 18px;
   left: 18px;
   width: 28px;
@@ -1133,10 +1130,9 @@ img {
   z-index: 62;
 }
 
-/* Auf kleineren Geräten: Drawer einfach 100% Breite, aber Logik bleibt gleich */
+/* Kleine Screens – Drawer nimmt automatisch volle Breite an */
 @media (max-width: 480px) {
   .drawer {
     max-width: 100%;
   }
 }
-
