@@ -43,7 +43,7 @@ const itemNameInput = document.getElementById("itemNameInput");
 const itemLongDescInput = document.getElementById("itemLongDescInput");
 const itemDescInput = document.getElementById("itemDescInput");
 const itemPriceInput = document.getElementById("itemPriceInput");
-const itemImageInput = document.getElementById("itemImageInput");
+const itemImagesInput = document.getElementById("itemImagesInput");
 const itemSaveBtn = document.getElementById("itemSaveBtn");
 const itemResetBtn = document.getElementById("itemResetBtn");
 const adminItemStatus = document.getElementById("adminItemStatus");
@@ -422,7 +422,7 @@ function resetForm() {
   itemLongDescInput.value = "";
   itemDescInput.value = "";
   itemPriceInput.value = "";
-  itemImageInput.value = "";
+  itemImagesInput.value = "";
 
   setProductType("food");
   itemSaveBtn.textContent = "Produkt speichern";
@@ -452,7 +452,16 @@ function startEditItem(item) {
   itemDescInput.value = item.description || "";
   itemPriceInput.value =
     typeof item.price === "number" ? item.price.toString() : "";
-  itemImageInput.value = item.imageUrl || "";
+
+  // Bilder: imageUrls[] oder fallback auf imageUrl
+  const images = Array.isArray(item.imageUrls) ? item.imageUrls : [];
+  if (images.length) {
+    itemImagesInput.value = images.join("\n");
+  } else if (item.imageUrl) {
+    itemImagesInput.value = item.imageUrl;
+  } else {
+    itemImagesInput.value = "";
+  }
 
   itemSaveBtn.textContent = "Produkt aktualisieren";
 }
@@ -471,7 +480,10 @@ async function saveItem() {
   const longDesc = (itemLongDescInput.value || "").trim();
   const desc = (itemDescInput.value || "").trim();
   const priceStr = (itemPriceInput.value || "").trim();
-  const imageUrl = (itemImageInput.value || "").trim();
+  const imagesRaw = (itemImagesInput.value || "")
+    .split("\n")
+    .map((s) => s.trim())
+    .filter((s) => s.length > 0);
 
   if (!category) {
     adminItemStatus.textContent = "Bitte eine Kategorie wählen oder eingeben.";
@@ -490,6 +502,8 @@ async function saveItem() {
     return;
   }
 
+  const primaryImageUrl = imagesRaw[0] || "";
+
   const restRef = doc(db, "restaurants", currentRestaurantId);
   const menuCol = collection(restRef, "menuItems");
 
@@ -500,7 +514,8 @@ async function saveItem() {
     description: desc,         // kurz = Zutaten
     longDescription: longDesc, // lang
     price,
-    imageUrl: imageUrl || null,
+    imageUrl: primaryImageUrl || null,
+    imageUrls: imagesRaw.length ? imagesRaw : [],
     available: true,
   };
 
