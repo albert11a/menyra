@@ -98,7 +98,7 @@ body {
   color: #475569;
 }
 
-/* Restaurant-Card (Shpija e Vjetër) */
+/* Restaurant-Card */
 
 .restaurant-card {
   padding: 14px 16px;
@@ -113,8 +113,8 @@ body {
 .rest-logo {
   width: 44px;
   height: 44px;
-  border-radius: 10px; /* NICHT mehr rund */
-  object-fit: contain; /* Logo komplett sichtbar */
+  border-radius: 10px;
+  object-fit: contain;
   border: 1px solid #e2e8f0;
 }
 
@@ -129,7 +129,7 @@ body {
   margin-top: 2px;
 }
 
-/* Search-Card (für Suchfeld) */
+/* Search-Card */
 
 .search-card {
   padding: 10px 14px;
@@ -175,6 +175,22 @@ body {
   font-size: 0.75rem;
 }
 
+/* Schwarzer Button für Detajet */
+
+.btn-dark {
+  background: #020617;
+  color: #f9fafb;
+  border-radius: 999px;
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  border: 1px solid #020617;
+}
+
+.btn-dark:hover {
+  background: #111827;
+  border-color: #111827;
+}
+
 /* ========================================
    INPUTS / FORM
    ======================================== */
@@ -193,7 +209,8 @@ body {
   margin-top: 8px;
 }
 
-/* Textarea-Variante (für Superadmin-Angebote) */
+/* Textarea-Variante */
+
 .input-textarea {
   border-radius: 14px;
   min-height: 90px;
@@ -258,7 +275,7 @@ body {
   gap: 10px;
 }
 
-/* Search wie Dribbble-Beispiel */
+/* Search */
 
 .search-wrapper {
   margin-top: 0;
@@ -286,7 +303,7 @@ body {
   color: #9ca3af;
 }
 
-/* Such-Button mit #643A71 */
+/* Such-Button #643A71 */
 
 .search-btn {
   width: 40px;
@@ -306,7 +323,6 @@ body {
   border-color: #4F2F59;
 }
 
-/* vereinfachtes, sauberes Lupe-Icon */
 .search-btn-icon {
   width: 16px;
   height: 16px;
@@ -333,8 +349,8 @@ body {
    ======================================== */
 
 .cart-fab {
-  width: 54px;
   height: 54px;
+  padding: 0 18px;
   border-radius: 999px;
   border: 1px solid #643A71;
   background: #643A71;
@@ -342,6 +358,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   cursor: pointer;
   position: fixed;
   right: 18px;
@@ -351,7 +368,7 @@ body {
   opacity: 0;
   transform: translateY(16px);
   pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease;
+  transition: opacity 0.25s ease, transform 0.25s ease, width 0.2s ease;
 }
 
 .cart-fab.visible {
@@ -367,6 +384,8 @@ body {
   box-sizing: border-box;
 }
 
+/* Minimaler "iOS"-Cart */
+
 .cart-fab-icon::before,
 .cart-fab-icon::after {
   content: "";
@@ -376,7 +395,6 @@ body {
   box-sizing: border-box;
 }
 
-/* Körbchen */
 .cart-fab-icon::before {
   left: 2px;
   right: 2px;
@@ -385,7 +403,6 @@ body {
   border-radius: 5px 5px 4px 4px;
 }
 
-/* Griff */
 .cart-fab-icon::after {
   width: 8px;
   height: 5px;
@@ -393,6 +410,18 @@ body {
   border-radius: 6px 6px 0 0;
   left: 6px;
   top: 0;
+}
+
+.cart-fab-label {
+  color: #ffffff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  white-space: nowrap;
+  display: none;
+}
+
+.cart-fab--has-items .cart-fab-label {
+  display: block;
 }
 
 .cart-fab-badge {
@@ -413,11 +442,10 @@ body {
 }
 
 /* ========================================
-   TABS-CONTAINER (jetzt ohne Hintergrund)
+   TABS-CONTAINER / CATEGORY-TABS
    ======================================== */
 
 .tabs-wrapper {
-  /* kein Hintergrund, kein Border – nur für Abstand zuständig */
   background: transparent;
   border-radius: 0;
   padding: 0;
@@ -439,8 +467,6 @@ body {
   gap: 6px;
 }
 
-/* Tabs selbst bleiben wie vorher "Pills" */
-
 .tabs-wrapper .category-tab {
   padding: 6px 10px;
   border-radius: 999px;
@@ -458,13 +484,13 @@ body {
 }
 
 /* ========================================
-   MENÜ / KATEGORIEN (karte.html)
+   MENÜ (Speisen)
    ======================================== */
 
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 30px;          /* Abstand zwischen Produkten */
+  gap: 30px;
   margin-top: 10px;
 }
 
@@ -477,8 +503,6 @@ body {
   flex-direction: column;
   gap: 4px;
 }
-
-/* Produktbild in Karte – normal */
 
 .menu-item-image {
   width: 100%;
@@ -512,12 +536,12 @@ body {
 .menu-item-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 10px;
-  margin-top: 20px;  /* Abstand Beschreibung → Buttons */
+  gap: 8px;
+  margin-top: 20px;
 }
 
 /* ========================================
-   GETRÄNKE-KARTE (2 Spalten über Speisekarte)
+   GETRÄNKE-KARTE (2 Spalten)
    ======================================== */
 
 #drinksSection h2 {
@@ -543,7 +567,6 @@ body {
   gap: 4px;
 }
 
-/* Getränkebild (2 in einer Reihe, gleich hoch) */
 .drink-image {
   width: 100%;
   border-radius: 10px;
@@ -573,7 +596,6 @@ body {
   color: #64748b;
 }
 
-/* Mehr Abstand Text → Buttons */
 .drink-actions {
   display: flex;
   justify-content: flex-end;
@@ -619,7 +641,6 @@ body {
   -webkit-overflow-scrolling: touch;
 }
 
-/* Scrollbar komplett weg */
 .offers-slider::-webkit-scrollbar {
   display: none;
 }
@@ -633,11 +654,9 @@ body {
   scroll-snap-align: center;
 }
 
-/* Angebotsbild – normal */
-
 .offer-image {
   width: 100%;
-  height: 180px; /* gleiche Höhe für alle */
+  height: 180px;
   border-radius: 14px;
   object-fit: cover;
   background: #1f2937;
@@ -665,7 +684,7 @@ body {
   font-size: 0.8rem;
   color: #e5e7eb;
   line-height: 1.5;
-  margin-bottom: 20px; /* viel Abstand vor Buttons */
+  margin-bottom: 20px;
 }
 
 .offer-actions {
@@ -682,7 +701,6 @@ body {
   margin-top: 6px;
 }
 
-/* Dots unter dem Slider */
 .offers-dots {
   margin-top: 14px;
   display: flex;
@@ -707,7 +725,7 @@ body {
 }
 
 /* ========================================
-   WARENKORB (Gäste-Ansicht)
+   WARENKORB (Gäste-Ansicht – inline Karte)
    ======================================== */
 
 .cart-card {
@@ -762,7 +780,7 @@ img {
 }
 
 /* ========================================
-   SUPERADMIN: Tabs (optional CSS)
+   SUPERADMIN: Tabs
    ======================================== */
 
 .tab-row {
@@ -789,7 +807,8 @@ img {
   color: #f9fafb;
 }
 
-/* Angebot-Flag-Label (Checkbox + Text) */
+/* Angebot-Flag-Label */
+
 .offer-flag-label {
   margin-top: 8px;
   font-size: 0.8rem;
@@ -801,4 +820,153 @@ img {
 
 .offer-flag-label input {
   margin-top: 3px;
+}
+
+/* ========================================
+   DETAIL & CART DRAWER (Sliding Panels)
+   ======================================== */
+
+.drawer-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.35);
+  backdrop-filter: blur(6px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+  z-index: 60;
+}
+
+.drawer-overlay--visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.drawer {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  width: min(420px, 100%);
+  height: 100%;
+  background: #f9fafb;
+  box-shadow: -24px 0 60px rgba(15, 23, 42, 0.45);
+  z-index: 61;
+  display: flex;
+  flex-direction: column;
+  transition: right 0.28s ease;
+}
+
+.drawer--visible {
+  right: 0;
+}
+
+.drawer--product {
+  background: #0b1120;
+  color: #f9fafb;
+}
+
+.drawer--product .drawer-body {
+  padding: 16px 16px 20px;
+}
+
+.drawer-image-wrap {
+  width: 100%;
+  aspect-ratio: 3 / 4;
+  overflow: hidden;
+  background: #020617;
+}
+
+.drawer-image-wrap img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.drawer-body {
+  overflow-y: auto;
+}
+
+.drawer-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.drawer-title-row h3 {
+  font-size: 1.05rem;
+  font-weight: 600;
+}
+
+.drawer-title-row span {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+.drawer-long-desc {
+  font-size: 0.8rem;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+
+.drawer-zutaten {
+  font-size: 0.78rem;
+  color: #cbd5f5;
+  margin-bottom: 14px;
+}
+
+.drawer-qty-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.drawer-qty-row span {
+  min-width: 24px;
+  text-align: center;
+  font-weight: 600;
+}
+
+.drawer-add-btn {
+  margin-left: auto;
+}
+
+/* Cart Drawer */
+
+.drawer--cart {
+  background: #ffffff;
+  color: #020617;
+  padding: 16px 16px 20px;
+}
+
+.drawer-cart-title {
+  font-size: 1.05rem;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+.drawer-close-btn {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  width: 28px;
+  height: 28px;
+  border-radius: 999px;
+  border: none;
+  background: rgba(15, 23, 42, 0.88);
+  color: #f9fafb;
+  font-size: 1.1rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Vollbreit auf ganz kleinen Screens */
+
+@media (max-width: 480px) {
+  .drawer {
+    width: 100%;
+  }
 }
