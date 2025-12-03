@@ -8,6 +8,7 @@ import {
   where,
   getDocs,
   getDoc,
+  orderBy,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const kRestLabel = document.getElementById("kRestLabel");
@@ -24,6 +25,10 @@ let unsubOrders = null;
 let allOrders = [];
 let statusFilter = "all";
 
+/* =========================
+   SESSION
+   ========================= */
+
 function saveWaiterSession(restaurantId) {
   localStorage.setItem("menyra_waiter_restaurantId", restaurantId);
 }
@@ -31,6 +36,10 @@ function saveWaiterSession(restaurantId) {
 function loadWaiterSession() {
   return localStorage.getItem("menyra_waiter_restaurantId");
 }
+
+/* =========================
+   ABO / STATUS
+   ========================= */
 
 function todayISO() {
   const d = new Date();
@@ -52,6 +61,10 @@ function isRestaurantOperational(data) {
   return true;
 }
 
+/* =========================
+   STATUS LABELS
+   ========================= */
+
 function mapStatusLabel(status) {
   if (status === "new") return "Neu";
   if (status === "in_progress") return "In Arbeit";
@@ -65,6 +78,10 @@ function getStatusColors(status) {
   if (status === "served") return { bg: "#e5e7eb", fg: "#374151" };
   return { bg: "#e5e7eb", fg: "#374151" };
 }
+
+/* =========================
+   LOGIN KELLNER
+   ========================= */
 
 async function loginWaiter(code) {
   waiterLoginStatus.textContent = "";
@@ -87,7 +104,8 @@ async function loginWaiter(code) {
     const snap = await getDocs(qRest);
 
     if (snap.empty) {
-      waiterLoginStatus.textContent = "Kein Lokal mit diesem Kellner-Code gefunden.";
+      waiterLoginStatus.textContent =
+        "Kein Lokal mit diesem Kellner-Code gefunden.";
       waiterLoginStatus.classList.add("status-err");
       return;
     }
@@ -103,6 +121,7 @@ async function loginWaiter(code) {
     }
 
     currentRestaurantId = docSnap.id;
+    console.log("[KAMARIERI] Login Restaurant:", currentRestaurantId);
     saveWaiterSession(currentRestaurantId);
 
     kRestLabel.textContent = data.restaurantName || currentRestaurantId;
@@ -120,8 +139,13 @@ async function loginWaiter(code) {
   }
 }
 
+/* =========================
+   ORDERS RENDERING
+   ========================= */
+
 function renderOrders(orders) {
   orderList.innerHTML = "";
+
   if (!orders.length) {
     orderList.innerHTML = "<div class='info'>Noch keine Bestellungen.</div>";
     return;
@@ -161,6 +185,7 @@ function renderOrders(orders) {
         <button class="btn btn-primary btn-small" data-id="${o.id}" data-status="served">Serviert</button>
       </div>
     `;
+
     orderList.appendChild(div);
   });
 }
@@ -173,46 +198,80 @@ function renderOrdersWithFilter() {
   renderOrders(filtered);
 }
 
+/* =========================
+   FIRESTORE LISTENER
+   ========================= */
+
 function startOrderListener() {
   if (!currentRestaurantId) return;
   if (unsubOrders) unsubOrders();
 
-  const ordersCol = collection(doc(db, "restaurants", currentRestaurantId), "orders");
-  unsubOrders = onSnapshot(ordersCol, (snap) => {
-    const orders = [];
-    snap.forEach((docSnap) => {
-      const data = docSnap.data();
-      const created = data.createdAt?.toDate?.() || null;
-      orders.push({
-        id: docSnap.id,
-        table: data.table || "?",
-        items: data.items || [],
-        status: data.status || "new",
-        createdAtText: created
-          ? created.toLocaleTimeString("de-AT", { hour: "2-digit", minute: "2-digit" })
-          : "",
+  console.log("[KAMARIERI] Starte Listener für Restaurant:", currentRestaurantId);
+
+  // → liest genau: restaurants/<currentRestaurantId>/orders
+  const ordersCol = collection(db, "restaurants", currentRestaurantId, "orders");
+  const q = query(ordersCol, orderBy("createdAt", "desc"));
+
+  unsubOrders = onSnapshot(
+    q,
+    (snap) => {
+      const orders = [];
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        const ts = data.createdAt;
+        let createdAtText = "";
+
+        if (ts && typeof ts.toDate === "function") {
+          createdAtText = ts.toDate().toLocaleTimeString("de-AT", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+
+        orders.push({
+          id: docSnap.id,
+          table: data.table || "?",
+          items: data.items || [],
+          status: data.status || "new",
+          createdAtText,
+        });
       });
-    });
 
-    orders.sort((a, b) => (a.createdAtText < b.createdAtText ? 1 : -1));
-    allOrders = orders;
-    renderOrdersWithFilter();
-  });
+      console.log("[KAMARIERI] Orders Snapshot:", orders);
+      allOrders = orders;
+      renderOrdersWithFilter();
+    },
+    (error) => {
+      console.error("[KAMARIERI] onSnapshot Fehler:", error);
+      orderList.innerHTML =
+        "<div class='info'>Fehler beim Laden der Bestellungen.</div>";
+    }
+  );
 
+  // Status-Buttons (Neu / In Arbeit / Serviert) → Status updaten
   orderList.addEventListener("click", async (e) => {
     const btn = e.target.closest("button[data-id]");
     if (!btn) return;
     const id = btn.dataset.id;
     const status = btn.dataset.status;
     const orderRef = doc(db, "restaurants", currentRestaurantId, "orders", id);
-    await updateDoc(orderRef, { status });
+    try {
+      await updateDoc(orderRef, { status });
+    } catch (err) {
+      console.error("[KAMARIERI] Status Update Error:", err);
+    }
   });
 }
+
+/* =========================
+   EVENTS
+   ========================= */
 
 waiterLoginBtn.addEventListener("click", () => {
   loginWaiter(waiterCodeInput.value.trim());
 });
 
+// Filter-Buttons: Alle / Neu / In Arbeit / Serviert
 statusFilterRow.addEventListener("click", (e) => {
   const btn = e.target.closest("button[data-filter]");
   if (!btn) return;
@@ -232,7 +291,10 @@ statusFilterRow.addEventListener("click", (e) => {
   renderOrdersWithFilter();
 });
 
-// Auto-Login falls schon bekannt
+/* =========================
+   AUTO-LOGIN (wenn Session da)
+   ========================= */
+
 const storedRestId = loadWaiterSession();
 if (storedRestId) {
   (async () => {
@@ -244,6 +306,7 @@ if (storedRestId) {
       if (!isRestaurantOperational(data)) return;
 
       currentRestaurantId = storedRestId;
+      console.log("[KAMARIERI] Auto-Login Restaurant:", currentRestaurantId);
       kRestLabel.textContent = data.restaurantName || currentRestaurantId;
       waiterLoginCard.style.display = "none";
       orderCard.style.display = "block";
