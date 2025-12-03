@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Logo, Suche, Kategorien, Offers-Slider & Floating Cart-FAB
+// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, Kommentare, Drawers
 
 import { db } from "./firebase-config.js";
 import {
@@ -8,6 +8,8 @@ import {
   getDocs,
   addDoc,
   serverTimestamp,
+  updateDoc,
+  increment,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -62,6 +64,14 @@ const detailQtyPlusBtn = document.getElementById("detailQtyPlus");
 const detailQtyValueEl = document.getElementById("detailQtyValue");
 const detailAddBtn = document.getElementById("detailAddBtn");
 const detailCloseBtn = document.getElementById("detailCloseBtn");
+const detailRatingSummaryEl = document.getElementById("detailRatingSummary");
+const detailLikeBtn = document.getElementById("detailLikeBtn");
+const detailLikeCountEl = document.getElementById("detailLikeCount");
+const detailCommentsListEl = document.getElementById("detailCommentsList");
+const detailRatingPillsEl = document.getElementById("detailRatingPills");
+const detailCommentInputEl = document.getElementById("detailCommentInput");
+const detailCommentSendBtn = document.getElementById("detailCommentSendBtn");
+const detailCartButton = document.getElementById("detailCartButton");
 
 // CART DRAWER
 const cartDrawerOverlay = document.getElementById("cartDrawerOverlay");
@@ -72,9 +82,9 @@ const cartDrawerTotalEl = document.getElementById("cartDrawerTotal");
 const cartDrawerClearBtn = document.getElementById("cartDrawerClearBtn");
 const cartDrawerSendBtn = document.getElementById("cartDrawerSendBtn");
 
-let allMenuItems = [];      // alle Produkte mit type
-let drinksItems = [];       // type === 'drink'
-let foodItems = [];         // type === 'food'
+let allMenuItems = []; // alle Produkte mit type, likes, rating etc.
+let drinksItems = [];
+let foodItems = [];
 
 let activeFoodCategory = "Alle";
 let activeDrinksCategory = null;
@@ -89,8 +99,21 @@ let offersTimer = null;
 // Detail-Drawer State
 let currentDetailItem = null;
 let currentDetailQty = 1;
+let currentDetailRating = 0;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
+
+/* =========================
+   BODY SCROLL LOCK
+   ========================= */
+
+function lockBodyScroll() {
+  document.body.classList.add("no-scroll");
+}
+
+function unlockBodyScroll() {
+  document.body.classList.remove("no-scroll");
+}
 
 /* =========================
    HELFER: ABO & STATUS
@@ -114,6 +137,26 @@ function isRestaurantOperational(data) {
   if (data.active === false) return false;
   if (!isSubscriptionValid(data)) return false;
   return true;
+}
+
+/* =========================
+   LIKES: LOCALSTORAGE
+   ========================= */
+
+function likeKey(itemId) {
+  return `menyra_like_${restaurantId}_${itemId}`;
+}
+
+function isItemLiked(itemId) {
+  return localStorage.getItem(likeKey(itemId)) === "1";
+}
+
+function setItemLiked(itemId, liked) {
+  if (liked) {
+    localStorage.setItem(likeKey(itemId), "1");
+  } else {
+    localStorage.removeItem(likeKey(itemId));
+  }
 }
 
 /* =========================
@@ -418,6 +461,10 @@ async function loadRestaurantAndMenu() {
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
           type: d.type || null,
+          likeCount: d.likeCount || 0,
+          commentCount: d.commentCount || 0,
+          ratingCount: d.ratingCount || 0,
+          ratingSum: d.ratingSum || 0,
         };
       })
       .filter((item) => item.available);
@@ -677,6 +724,40 @@ function renderMenu() {
     descEl.textContent = item.description;
     div.appendChild(descEl);
 
+    // Facebook-Style Like & Kommentar-Leiste
+    const socialRow = document.createElement("div");
+    socialRow.className = "menu-item-social";
+
+    const likeBtn = document.createElement("button");
+    likeBtn.type = "button";
+    likeBtn.className =
+      "social-btn social-btn-like" +
+      (isItemLiked(item.id) ? " social-btn-like--active" : "");
+    likeBtn.innerHTML = `
+      <span class="social-icon">👍</span>
+      <span class="social-count">${item.likeCount || 0}</span>
+    `;
+    likeBtn.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      await toggleItemLike(item);
+    });
+
+    const commentBtn = document.createElement("button");
+    commentBtn.type = "button";
+    commentBtn.className = "social-btn social-btn-comment";
+    commentBtn.innerHTML = `
+      <span class="social-icon">💬</span>
+      <span class="social-count">${item.commentCount || 0}</span>
+    `;
+    commentBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      openProductDetail(item, { focusComments: true });
+    });
+
+    socialRow.appendChild(likeBtn);
+    socialRow.appendChild(commentBtn);
+    div.appendChild(socialRow);
+
     const actions = document.createElement("div");
     actions.className = "menu-item-actions";
 
@@ -705,37 +786,286 @@ function renderMenu() {
 }
 
 /* =========================
+   DETAIL SOCIAL: RATING & LIKES
+   ========================= */
+
+function updateDetailSocial() {
+  if (!currentDetailItem) return;
+  const item = currentDetailItem;
+
+  // Likes
+  const liked = isItemLiked(item.id);
+  detailLikeBtn.classList.toggle("social-btn-like--active", liked);
+  detailLikeCountEl.textContent = (item.likeCount || 0).toString();
+
+  // Rating
+  const { ratingCount = 0, ratingSum = 0 } = item;
+  if (ratingCount > 0) {
+    const avg = ratingSum / ratingCount;
+    detailRatingSummaryEl.textContent = `⭐ ${avg.toFixed(1)} (${ratingCount})`;
+  } else {
+    detailRatingSummaryEl.textContent = "Ende pa vlerësime";
+  }
+}
+
+async function toggleItemLike(item) {
+  const likedBefore = isItemLiked(item.id);
+  const likedAfter = !likedBefore;
+  setItemLiked(item.id, likedAfter);
+
+  // Lokales Model aktualisieren
+  const modelItem = allMenuItems.find((i) => i.id === item.id);
+  if (modelItem) {
+    if (!modelItem.likeCount) modelItem.likeCount = 0;
+    modelItem.likeCount += likedAfter ? 1 : -1;
+    if (modelItem.likeCount < 0) modelItem.likeCount = 0;
+  }
+  item.likeCount = modelItem ? modelItem.likeCount : item.likeCount;
+
+  // Firestore updaten
+  try {
+    const restRef = doc(db, "restaurants", restaurantId);
+    const menuCol = collection(restRef, "menuItems");
+    const itemRef = doc(menuCol, item.id);
+    await updateDoc(itemRef, {
+      likeCount: increment(likedAfter ? 1 : -1),
+    });
+  } catch (err) {
+    console.error(err);
+  }
+
+  // Menüliste im Hintergrund aktualisieren
+  renderMenu();
+
+  // Detail-Drawer aktualisieren falls offen
+  if (currentDetailItem && currentDetailItem.id === item.id) {
+    currentDetailItem = allMenuItems.find((i) => i.id === item.id) || item;
+    updateDetailSocial();
+  }
+}
+
+/* =========================
+   KOMMENTARE & RATING
+   ========================= */
+
+function buildRatingPills() {
+  detailRatingPillsEl.innerHTML = "";
+  for (let r = 1; r <= 5; r++) {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "rating-pill";
+    btn.dataset.rating = String(r);
+    btn.textContent = r.toString();
+    btn.addEventListener("click", () => {
+      currentDetailRating = r;
+      updateRatingPillsUI();
+    });
+    detailRatingPillsEl.appendChild(btn);
+  }
+}
+
+function updateRatingPillsUI() {
+  const buttons = detailRatingPillsEl.querySelectorAll(".rating-pill");
+  buttons.forEach((btn) => {
+    const r = Number(btn.dataset.rating || "0");
+    btn.classList.toggle("rating-pill--active", r === currentDetailRating);
+  });
+}
+
+function renderCommentsList(comments) {
+  detailCommentsListEl.innerHTML = "";
+  if (!comments.length) {
+    const p = document.createElement("p");
+    p.className = "info";
+    p.textContent = "Ende pa komente.";
+    detailCommentsListEl.appendChild(p);
+    return;
+  }
+
+  comments.forEach((c) => {
+    const item = document.createElement("div");
+    item.className = "comment-item";
+
+    const meta = document.createElement("div");
+    meta.className = "comment-meta";
+
+    let metaText = "";
+    if (c.rating && typeof c.rating === "number") {
+      metaText += `⭐ ${c.rating.toFixed(1)}  ·  `;
+    }
+    if (c.createdAt && c.createdAt.toDate) {
+      const dt = c.createdAt.toDate();
+      metaText += dt.toLocaleDateString("de-AT", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "2-digit",
+      });
+    } else {
+      metaText += "Anonim";
+    }
+    meta.textContent = metaText;
+
+    const txt = document.createElement("div");
+    txt.className = "comment-text";
+    txt.textContent = c.text || "";
+
+    item.appendChild(meta);
+    item.appendChild(txt);
+    detailCommentsListEl.appendChild(item);
+  });
+}
+
+async function loadCommentsForItem(item) {
+  detailCommentsListEl.innerHTML = "<p class='info'>Duke u ngarkuar...</p>";
+
+  try {
+    const restRef = doc(db, "restaurants", restaurantId);
+    const menuCol = collection(restRef, "menuItems");
+    const itemRef = doc(menuCol, item.id);
+    const commentsCol = collection(itemRef, "comments");
+    const snap = await getDocs(commentsCol);
+
+    const comments = [];
+    snap.forEach((ds) => {
+      const d = ds.data();
+      comments.push({
+        id: ds.id,
+        ...d,
+      });
+    });
+
+    comments.sort((a, b) => {
+      const da =
+        a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
+      const db2 =
+        b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
+      return db2 - da;
+    });
+
+    renderCommentsList(comments);
+  } catch (err) {
+    console.error(err);
+    detailCommentsListEl.innerHTML =
+      "<p class='info'>Nuk mund të ngarkohen komentet.</p>";
+  }
+}
+
+async function postComment() {
+  if (!currentDetailItem) return;
+
+  const text = (detailCommentInputEl.value || "").trim();
+  const rating = currentDetailRating || null;
+
+  if (!text && !rating) {
+    return; // nichts zu speichern
+  }
+
+  detailCommentSendBtn.disabled = true;
+
+  try {
+    const restRef = doc(db, "restaurants", restaurantId);
+    const menuCol = collection(restRef, "menuItems");
+    const itemRef = doc(menuCol, currentDetailItem.id);
+    const commentsCol = collection(itemRef, "comments");
+
+    await addDoc(commentsCol, {
+      text,
+      rating,
+      createdAt: serverTimestamp(),
+    });
+
+    const updateData = {
+      commentCount: increment(1),
+    };
+    if (rating) {
+      updateData.ratingCount = increment(1);
+      updateData.ratingSum = increment(rating);
+    }
+
+    await updateDoc(itemRef, updateData);
+
+    // Lokal updaten
+    const modelItem = allMenuItems.find((i) => i.id === currentDetailItem.id);
+    if (modelItem) {
+      modelItem.commentCount = (modelItem.commentCount || 0) + 1;
+      if (rating) {
+        modelItem.ratingCount = (modelItem.ratingCount || 0) + 1;
+        modelItem.ratingSum = (modelItem.ratingSum || 0) + rating;
+      }
+      currentDetailItem = modelItem;
+    } else {
+      currentDetailItem.commentCount =
+        (currentDetailItem.commentCount || 0) + 1;
+      if (rating) {
+        currentDetailItem.ratingCount =
+          (currentDetailItem.ratingCount || 0) + 1;
+        currentDetailItem.ratingSum =
+          (currentDetailItem.ratingSum || 0) + rating;
+      }
+    }
+
+    detailCommentInputEl.value = "";
+    currentDetailRating = 0;
+    updateRatingPillsUI();
+    updateDetailSocial();
+    await loadCommentsForItem(currentDetailItem);
+    renderMenu();
+  } catch (err) {
+    console.error(err);
+  } finally {
+    detailCommentSendBtn.disabled = false;
+  }
+}
+
+/* =========================
    PRODUKT-DETAIL DRAWER
    ========================= */
 
-function openProductDetail(item) {
-  currentDetailItem = item;
+function openProductDetail(item, options = {}) {
+  const modelItem = allMenuItems.find((i) => i.id === item.id) || item;
+  currentDetailItem = modelItem;
   currentDetailQty = 1;
+  currentDetailRating = 0;
+  updateRatingPillsUI();
 
-  if (item.imageUrl) {
-    detailImageEl.src = item.imageUrl;
+  if (modelItem.imageUrl) {
+    detailImageEl.src = modelItem.imageUrl;
     detailImageEl.style.display = "block";
   } else {
     detailImageEl.style.display = "none";
   }
 
-  detailTitleEl.textContent = item.name;
-  detailPriceEl.textContent = item.price.toFixed(2) + " €";
+  detailTitleEl.textContent = modelItem.name;
+  detailPriceEl.textContent = modelItem.price.toFixed(2) + " €";
 
-  const longText = item.longDescription || item.description || "";
+  const longText = modelItem.longDescription || modelItem.description || "";
   detailLongDescEl.textContent = longText;
-  detailZutatenEl.textContent = item.description || "";
+  detailZutatenEl.textContent = modelItem.description || "";
 
-  detailQtyValueEl.textContent = currentDetailQty;
+  detailQtyValueEl.textContent = currentDetailQty.toString();
+
+  updateDetailSocial();
+  loadCommentsForItem(modelItem);
 
   productDetailOverlay.classList.add("drawer-overlay--visible");
   productDetailDrawer.classList.add("drawer--visible");
+  lockBodyScroll();
+
+  if (options.focusComments) {
+    setTimeout(() => {
+      const commentsTitle = document.querySelector(".drawer-comments-title");
+      if (commentsTitle) {
+        commentsTitle.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    }, 250);
+  }
 }
 
 function closeProductDetail() {
   currentDetailItem = null;
   productDetailOverlay.classList.remove("drawer-overlay--visible");
   productDetailDrawer.classList.remove("drawer--visible");
+  unlockBodyScroll();
 }
 
 /* =========================
@@ -823,11 +1153,13 @@ function openCartDrawer() {
   renderCartDrawer();
   cartDrawerOverlay.classList.add("drawer-overlay--visible");
   cartDrawer.classList.add("drawer--visible");
+  lockBodyScroll();
 }
 
 function closeCartDrawer() {
   cartDrawerOverlay.classList.remove("drawer-overlay--visible");
   cartDrawer.classList.remove("drawer--visible");
+  unlockBodyScroll();
 }
 
 async function sendOrder() {
@@ -903,13 +1235,13 @@ cartFab.addEventListener("click", () => {
 detailQtyMinusBtn.addEventListener("click", () => {
   if (currentDetailQty > 1) {
     currentDetailQty -= 1;
-    detailQtyValueEl.textContent = currentDetailQty;
+    detailQtyValueEl.textContent = currentDetailQty.toString();
   }
 });
 
 detailQtyPlusBtn.addEventListener("click", () => {
   currentDetailQty += 1;
-  detailQtyValueEl.textContent = currentDetailQty;
+  detailQtyValueEl.textContent = currentDetailQty.toString();
 });
 
 detailAddBtn.addEventListener("click", () => {
@@ -919,6 +1251,18 @@ detailAddBtn.addEventListener("click", () => {
 
 detailCloseBtn.addEventListener("click", closeProductDetail);
 productDetailOverlay.addEventListener("click", closeProductDetail);
+
+detailLikeBtn.addEventListener("click", async () => {
+  if (!currentDetailItem) return;
+  await toggleItemLike(currentDetailItem);
+});
+
+detailCommentSendBtn.addEventListener("click", postComment);
+
+detailCartButton.addEventListener("click", () => {
+  closeProductDetail();
+  openCartDrawer();
+});
 
 // Cart Drawer Events
 cartDrawerCloseBtn.addEventListener("click", closeCartDrawer);
@@ -933,6 +1277,7 @@ cartDrawerSendBtn.addEventListener("click", () => {
   sendOrder();
 });
 
-// Initial load
+// INIT
+buildRatingPills();
 loadRestaurantAndMenu();
 renderCart(); // sorgt dafür, dass FAB am Anfang versteckt ist
