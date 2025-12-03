@@ -872,6 +872,7 @@ img {
    DETAIL & CART DRAWER (Sliding Panels)
    ======================================== */
 
+/* Overlay bleibt gleich – full screen dunkel */
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -888,17 +889,22 @@ img {
   pointer-events: auto;
 }
 
+/* 🔥 Drawer jetzt echtes Vollbild & scrollt komplett (inkl. Bild) */
+
 .drawer {
   position: fixed;
   top: 0;
   right: -100%;
-  width: min(420px, 100%);
-  height: 100%;
+  left: 0;
+  width: 100%;
+  height: 100dvh;      /* modernes Vollbild, auch mit Notch */
   background: #f9fafb;
-  box-shadow: none; /* Schatten entfernt */
+  box-shadow: none;    /* kein Schatten rechts */
   z-index: 61;
   display: flex;
   flex-direction: column;
+  overflow-y: auto;    /* ganzer Drawer scrollt, Bild scrollt mit */
+  -webkit-overflow-scrolling: touch;
   transition: right 0.28s ease;
 }
 
@@ -907,8 +913,8 @@ img {
 }
 
 .drawer-body {
-  overflow-y: auto;
   flex: 1;
+  padding-bottom: 20px;
 }
 
 /* Produkt-Drawer */
@@ -918,13 +924,11 @@ img {
   color: #f9fafb;
 }
 
-.drawer--product .drawer-body {
-  padding: 16px 16px 20px;
-}
+/* Bildbereich jetzt niedriger & nicht mehr "überdominant" */
 
 .drawer-image-wrap {
   width: 100%;
-  aspect-ratio: 3 / 4;
+  height: 220px;           /* vorher großer Hochkant-Bereich – jetzt kompakter */
   overflow: hidden;
   background: #020617;
 }
@@ -935,13 +939,21 @@ img {
   object-fit: cover;
 }
 
+/* Innerer Body vom Produkt-Drawer */
+
+.drawer--product .drawer-body {
+  padding: 16px 16px 24px;
+}
+
+/* Titel/Preis unter Bild */
+
 .drawer-title-row {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
   gap: 12px;
   margin-bottom: 6px;
-  margin-top: 4px;
+  margin-top: 8px;
 }
 
 .drawer-title-row h3 {
@@ -1091,11 +1103,10 @@ img {
 .drawer--cart {
   background: #ffffff;
   color: #020617;
-  padding: 16px 16px 20px;
 }
 
 .drawer--cart .drawer-body {
-  padding: 36px 0 0;
+  padding: 56px 16px 24px;  /* oben Platz unter dem X */
 }
 
 .drawer-cart-title {
@@ -1107,7 +1118,7 @@ img {
 /* Close-Button oben links */
 
 .drawer-close-btn {
-  position: absolute;
+  position: fixed;
   top: 12px;
   left: 12px;
   width: 28px;
@@ -1121,6 +1132,7 @@ img {
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 62;
 }
 
 /* Vollbreit auf ganz kleinen Screens */
