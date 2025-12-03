@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="sq">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Detajet e produktit</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f3f4f6" />
+  <!-- nutzt dein bestehendes globales Design -->
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page page--karte">
+    <!-- Header: Back + Titel + Tavolina -->
+    <header class="header">
+      <button type="button" id="backBtn" class="btn btn-ghost">
+        ← Mbrapa
+      </button>
+      <div class="header-title">
+        Detajet
+      </div>
+      <span class="badge" id="detailTableBadge">
+        Tavolina
+      </span>
+    </header>
+
+    <!-- Produkt-Card -->
+    <section class="card" id="detailProductCard">
+      <!-- Bildbereich -->
+      <div class="drawer-image-wrap">
+        <img
+          id="detailImage"
+          src=""
+          alt="Foto e produktit"
+        />
+      </div>
+
+      <!-- Titel + Preis -->
+      <div class="drawer-title-row">
+        <h3 id="detailName">Emri i produktit</h3>
+        <span id="detailPrice">0.00 €</span>
+      </div>
+
+      <!-- Meta: Rating / Likes (optional später) -->
+      <div class="drawer-meta-row">
+        <div class="drawer-rating" id="detailRating">
+          ⭐️ 0.0 · 0 vlerësime
+        </div>
+        <button type="button" class="drawer-like-btn" id="detailLikeBtn">
+          ❤️ Pëlqeje
+        </button>
+      </div>
+
+      <!-- Përshkrimi i gjatë -->
+      <p class="drawer-long-desc" id="detailLongDesc">
+        Këtu do të shfaqet përshkrimi i plotë i produktit.
+      </p>
+
+      <!-- „Zutaten“ / Përbërësit -->
+      <p class="drawer-zutaten" id="detailZutaten">
+        Përbërësit: —
+      </p>
+
+      <!-- Menge + Add -->
+      <div class="drawer-qty-row">
+        <button type="button" class="btn btn-ghost" id="detailQtyMinus">
+          −
+        </button>
+        <span id="detailQtyValue">1</span>
+        <button type="button" class="btn btn-primary" id="detailQtyPlus">
+          +
+        </button>
+
+        <button
+          type="button"
+          class="btn btn-primary drawer-add-btn"
+          id="detailAddBtn"
+        >
+          Shto në porosi
+        </button>
+      </div>
+
+      <!-- Button: Shiko shportën (linkt auf porosi Ansicht / zurück zur kartë) -->
+      <button
+        type="button"
+        class="btn btn-primary drawer-cart-btn"
+        id="detailViewCartBtn"
+      >
+        Shiko porosin
+      </button>
+    </section>
+
+    <!-- Shporta mini-Card (opsionale, mund ta mbushim nga detajet.js) -->
+    <section class="cart-card" id="detailCartSection" style="display:none;">
+      <div class="cart-header">
+        <span>Porosia jote</span>
+        <span id="detailCartTableLabel" style="font-size:0.78rem; opacity:0.8;"></span>
+      </div>
+      <div class="cart-items" id="detailCartItems"></div>
+      <div class="cart-total" id="detailCartTotal"></div>
+    </section>
+  </main>
+
+  <!-- Optional: Floating Cart Button auch hier nutzbar -->
+  <button class="cart-fab" id="cartFab" type="button">
+    <span class="cart-fab-icon"></span>
+    <span class="cart-fab-badge" id="cartBadge">0</span>
+    <span class="cart-fab-label" id="cartFabLabel">Shiko porosin</span>
+  </button>
+
+  <!-- Hier kommt später die Logik: URL-Params lesen, Firestore-Load, Cart, etc. -->
+  <script type="module" src="detajet.js"></script>
+</body>
+</html>
