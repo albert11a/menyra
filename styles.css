@@ -26,7 +26,7 @@ body {
   color: #0f172a;
 }
 
-/* Body Scroll Lock für Drawer */
+/* Wenn du per JS body.classList.add('no-scroll') setzt bei offenem Drawer */
 body.no-scroll {
   overflow: hidden;
 }
@@ -538,7 +538,7 @@ body.no-scroll {
   color: #64748b;
 }
 
-/* Facebook-Style Social-Leiste */
+/* Social-Leiste (Like/Kommentar) */
 
 .menu-item-social {
   display: flex;
@@ -872,7 +872,8 @@ img {
    DETAIL & CART DRAWER (Sliding Panels)
    ======================================== */
 
-/* Overlay bleibt gleich – full screen dunkel */
+/* Overlay */
+
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -889,27 +890,34 @@ img {
   pointer-events: auto;
 }
 
-/* 🔥 Drawer jetzt echtes Vollbild & scrollt komplett (inkl. Bild) */
+/* Drawer:
+   - Vollbild (innerhalb 480px Breite)
+   - slidet mit transform von rechts
+   - scrollt in sich selbst
+*/
 
 .drawer {
   position: fixed;
   top: 0;
-  right: -100%;
-  left: 0;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(100%);
   width: 100%;
-  height: 100dvh;      /* modernes Vollbild, auch mit Notch */
+  max-width: 480px;
+  height: 100dvh;
   background: #f9fafb;
-  box-shadow: none;    /* kein Schatten rechts */
+  box-shadow: none;
   z-index: 61;
   display: flex;
   flex-direction: column;
-  overflow-y: auto;    /* ganzer Drawer scrollt, Bild scrollt mit */
+  overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  transition: right 0.28s ease;
+  transition: transform 0.28s ease;
 }
 
+/* Sichtbar: schiebe vollständig ins Bild */
 .drawer--visible {
-  right: 0;
+  transform: translateX(-50%);
 }
 
 .drawer-body {
@@ -924,11 +932,11 @@ img {
   color: #f9fafb;
 }
 
-/* Bildbereich jetzt niedriger & nicht mehr "überdominant" */
+/* Bildbereich im Produkt-Drawer – kompakter & scrollt mit */
 
 .drawer-image-wrap {
   width: 100%;
-  height: 220px;           /* vorher großer Hochkant-Bereich – jetzt kompakter */
+  height: 220px;
   overflow: hidden;
   background: #020617;
 }
@@ -966,7 +974,7 @@ img {
   font-weight: 600;
 }
 
-/* Meta: Rating + Like im Drawer */
+/* Meta: Rating + Like */
 
 .drawer-meta-row {
   display: flex;
@@ -987,6 +995,8 @@ img {
   padding: 4px 6px;
 }
 
+/* Beschreibung / Zutaten */
+
 .drawer-long-desc {
   font-size: 0.8rem;
   line-height: 1.5;
@@ -998,6 +1008,8 @@ img {
   color: #cbd5f5;
   margin-bottom: 14px;
 }
+
+/* Menge + Add */
 
 .drawer-qty-row {
   display: flex;
@@ -1106,7 +1118,7 @@ img {
 }
 
 .drawer--cart .drawer-body {
-  padding: 56px 16px 24px;  /* oben Platz unter dem X */
+  padding: 56px 16px 24px;  /* Platz unter dem X */
 }
 
 .drawer-cart-title {
@@ -1120,7 +1132,8 @@ img {
 .drawer-close-btn {
   position: fixed;
   top: 12px;
-  left: 12px;
+  left: 50%;
+  transform: translateX(calc(-50% - 210px)); /* bei max-width:480px = linksbündig */
   width: 28px;
   height: 28px;
   border-radius: 999px;
@@ -1135,10 +1148,16 @@ img {
   z-index: 62;
 }
 
-/* Vollbreit auf ganz kleinen Screens */
-
 @media (max-width: 480px) {
   .drawer {
-    width: 100%;
+    left: 0;
+    max-width: 100%;
+  }
+  .drawer--visible {
+    transform: translateX(0);
+  }
+  .drawer-close-btn {
+    left: 12px;
+    transform: none;
   }
 }
