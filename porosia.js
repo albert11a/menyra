@@ -9,9 +9,24 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
+// ===== URL PARAMS =====
 const params = new URLSearchParams(window.location.search);
-const restaurantId = params.get("r") || "test-restaurant";
-const tableId = params.get("t") || "T1";
+
+// Restaurant-ID robust lesen (unterstützt r, restaurantId, id)
+const restaurantId =
+  params.get("r") ||
+  params.get("restaurantId") ||
+  params.get("id") ||
+  "test-restaurant";
+
+// Tisch-ID robust lesen (unterstützt t, table, tbl)
+const tableId =
+  params.get("t") ||
+  params.get("table") ||
+  params.get("tbl") ||
+  "T1";
+
+console.log("[POROSIA] restaurantId =", restaurantId, "tableId =", tableId);
 
 // DOM
 const restaurantNameEl = document.getElementById("porosiaRestaurantName");
@@ -25,7 +40,7 @@ const sendBtn = document.getElementById("porosiaSendBtn");
 const statusEl = document.getElementById("porosiaStatus");
 const backBtn = document.getElementById("porosiaBackBtn");
 
-// FAB (gleiches Design wie auf Karte / Detajet)
+// FAB
 const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
@@ -176,7 +191,6 @@ async function loadRestaurantHeader() {
     restaurantNameEl.textContent = "Lokal";
   }
 
-  // Sprachlich anpassbar – ich nehme hier Albanisch
   tableLabelEl.textContent = `Tavolina ${tableId}`;
 }
 
@@ -217,7 +231,7 @@ async function sendOrder() {
     const restRef = doc(db, "restaurants", restaurantId);
     const ordersCol = collection(restRef, "orders");
 
-    await addDoc(ordersCol, {
+    const payload = {
       table: tableId,
       items: cart.map((c) => ({
         id: c.id,
@@ -229,7 +243,11 @@ async function sendOrder() {
       status: "new",
       createdAt: serverTimestamp(),
       source: "qr",
-    });
+    };
+
+    console.log("[POROSIA] addDoc to", `restaurants/${restaurantId}/orders`, payload);
+
+    await addDoc(ordersCol, payload);
 
     cart = [];
     renderCart();
@@ -263,7 +281,6 @@ if (backBtn) {
   });
 }
 
-// FAB → zurück zur Karte (Meny)
 cartFab.addEventListener("click", () => {
   goToKarte();
 });
