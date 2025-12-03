@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, globalem Warenkorb (ohne Drawer)
+// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, globalem Warenkorb
 
 import { db } from "./firebase-config.js";
 import {
@@ -11,17 +11,8 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
-const restaurantId =
-  params.get("r") ||
-  params.get("restaurantId") ||
-  params.get("id") ||
-  "test-restaurant";
-const tableId =
-  params.get("t") ||
-  params.get("table") ||
-  params.get("tbl") ||
-  "T1";
-
+const restaurantId = params.get("r") || "test-restaurant";
+const tableId = params.get("t") || "T1";
 
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
@@ -73,7 +64,6 @@ let offersCurrentIndex = 0;
 let offersTimer = null;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
-sendOrderBtn.textContent = "Shiko porosin";
 
 /* =========================
    CART: LOCALSTORAGE
@@ -717,7 +707,7 @@ function renderMenu() {
     descEl.textContent = item.description;
     div.appendChild(descEl);
 
-    // Social-Leiste (Likes & Kommentare öffnen Detajet-Seite)
+    // Social-Leiste (Likes & Kommentare → Detajet-Seite)
     const socialRow = document.createElement("div");
     socialRow.className = "menu-item-social";
 
@@ -916,9 +906,8 @@ cartFab.addEventListener("click", () => {
   window.location.href = url.toString();
 });
 
-// Wichtig: Safari BFCache – beim Zurückkommen aus Detajet/Porosia Cart neu laden
-window.addEventListener("pageshow", (event) => {
-  // Egal ob persisted oder nicht: wir syncen einfach
+// Safari BFCache – beim Zurückkommen aus Detajet/Porosia Cart neu laden
+window.addEventListener("pageshow", () => {
   cart = loadCartFromStorage();
   renderCart();
 });
@@ -930,4 +919,3 @@ window.addEventListener("pageshow", (event) => {
 cart = loadCartFromStorage();
 renderCart();
 loadRestaurantAndMenu();
-
