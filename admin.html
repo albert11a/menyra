@@ -94,12 +94,25 @@
         <input id="itemNameInput" class="input" placeholder="z.B. Burger Special" />
       </label>
 
+      <!-- NEU: lange Beschreibung -->
       <label style="display:block; margin-top:8px;">
-        <span style="font-size:0.8rem; display:block; margin-bottom:4px;">Beschreibung (optional)</span>
+        <span style="font-size:0.8rem; display:block; margin-bottom:4px;">
+          Beschreibung (lang, optional)
+        </span>
+        <textarea
+          id="itemLongDescInput"
+          class="input input-textarea"
+          placeholder="Lange Beschreibung, Story, Hinweise"
+        ></textarea>
+      </label>
+
+      <!-- Beschreibung kurz = Zutaten -->
+      <label style="display:block; margin-top:8px;">
+        <span style="font-size:0.8rem; display:block; margin-bottom:4px;">Zutaten (optional)</span>
         <textarea
           id="itemDescInput"
           class="input input-textarea"
-          placeholder="Kurzbeschreibung des Produkts"
+          placeholder="Zutaten, Allergene, Extras"
         ></textarea>
       </label>
 
