@@ -64,7 +64,6 @@ let offersCurrentIndex = 0;
 let offersTimer = null;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
-// Button im Karton unten als "Shiko porosin" verwenden
 sendOrderBtn.textContent = "Shiko porosin";
 
 /* =========================
@@ -81,14 +80,15 @@ function loadCartFromStorage() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: Number(item.price) || 0,
-      qty: Number(item.qty) || 0,
-    })).filter((i) => i.qty > 0);
-  } catch (e) {
-    console.warn("Cart parse error", e);
+    return parsed
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: Number(item.price) || 0,
+        qty: Number(item.qty) || 0,
+      }))
+      .filter((i) => i.qty > 0);
+  } catch {
     return [];
   }
 }
@@ -96,9 +96,7 @@ function loadCartFromStorage() {
 function saveCartToStorage() {
   try {
     localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
-  } catch (e) {
-    console.warn("Cart save error", e);
-  }
+  } catch {}
 }
 
 /* =========================
@@ -710,7 +708,7 @@ function renderMenu() {
     descEl.textContent = item.description;
     div.appendChild(descEl);
 
-    // Facebook-Style Like & Kommentar-Leiste
+    // Social-Leiste (Likes & Kommentare öffnen Detajet-Seite)
     const socialRow = document.createElement("div");
     socialRow.className = "menu-item-social";
 
@@ -909,10 +907,17 @@ cartFab.addEventListener("click", () => {
   window.location.href = url.toString();
 });
 
+// Wichtig: Safari BFCache – beim Zurückkommen aus Detajet/Porosia Cart neu laden
+window.addEventListener("pageshow", (event) => {
+  // Egal ob persisted oder nicht: wir syncen einfach
+  cart = loadCartFromStorage();
+  renderCart();
+});
+
 /* =========================
    INIT
    ========================= */
 
 cart = loadCartFromStorage();
-renderCart();          // zeigt ggf. direkt "Shiko porosin"
+renderCart();
 loadRestaurantAndMenu();
