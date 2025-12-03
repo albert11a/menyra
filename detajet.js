@@ -15,7 +15,6 @@ const itemId = params.get("item");
 const backBtn = document.getElementById("backBtn");
 const detailTableBadge = document.getElementById("detailTableBadge");
 
-const detailImageEl = document.getElementById("detailImage");
 const detailNameEl = document.getElementById("detailName");
 const detailPriceEl = document.getElementById("detailPrice");
 const detailLongDescEl = document.getElementById("detailLongDesc");
@@ -38,9 +37,19 @@ const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
 
+// Slider DOM
+const sliderWrapper = document.getElementById("detailSliderWrapper");
+const sliderViewport = document.getElementById("detailSliderViewport");
+const sliderTrack = document.getElementById("detailSliderTrack");
+const sliderPrevBtn = document.getElementById("detailSliderPrev");
+const sliderNextBtn = document.getElementById("detailSliderNext");
+
 let cart = [];
 let currentItem = null;
 let currentQty = 1;
+
+let sliderImages = [];
+let sliderIndex = 0;
 
 /* =========================
    CART: LOCALSTORAGE
@@ -140,6 +149,115 @@ function changeCart(item, deltaQty) {
 }
 
 /* =========================
+   BILD-SLIDER
+   ========================= */
+
+function updateSliderPosition() {
+  if (!sliderTrack || !sliderViewport) return;
+  const viewportWidth = sliderViewport.getBoundingClientRect().width;
+  sliderTrack.style.transform = `translateX(-${sliderIndex * viewportWidth}px)`;
+}
+
+function updateSliderArrows() {
+  const visible = sliderImages.length > 1;
+  if (sliderPrevBtn) sliderPrevBtn.style.display = visible ? "flex" : "none";
+  if (sliderNextBtn) sliderNextBtn.style.display = visible ? "flex" : "none";
+}
+
+function renderSliderImages(urls) {
+  if (!sliderWrapper || !sliderTrack) return;
+
+  sliderImages = Array.isArray(urls)
+    ? urls.filter((u) => typeof u === "string" && u.trim() !== "")
+    : [];
+
+  sliderTrack.innerHTML = "";
+
+  if (!sliderImages.length) {
+    sliderWrapper.style.display = "none";
+    return;
+  }
+
+  sliderWrapper.style.display = "block";
+
+  sliderImages.forEach((url) => {
+    const slide = document.createElement("div");
+    slide.className = "detail-slide";
+
+    const img = document.createElement("img");
+    img.src = url;
+    img.alt = currentItem ? currentItem.name : "Produktbild";
+    img.loading = "lazy";
+
+    slide.appendChild(img);
+    sliderTrack.appendChild(slide);
+  });
+
+  sliderIndex = 0;
+  updateSliderPosition();
+  updateSliderArrows();
+}
+
+function goToSlide(index) {
+  if (!sliderImages.length) return;
+  if (index < 0) index = sliderImages.length - 1;
+  if (index >= sliderImages.length) index = 0;
+  sliderIndex = index;
+  updateSliderPosition();
+}
+
+function goPrevSlide() {
+  goToSlide(sliderIndex - 1);
+}
+
+function goNextSlide() {
+  goToSlide(sliderIndex + 1);
+}
+
+// Touch-Swipe auf Handy
+function initSliderTouch() {
+  if (!sliderViewport) return;
+
+  let startX = 0;
+  let deltaX = 0;
+  let isDown = false;
+
+  sliderViewport.addEventListener("touchstart", (e) => {
+    if (!sliderImages.length) return;
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    deltaX = 0;
+    isDown = true;
+  });
+
+  sliderViewport.addEventListener("touchmove", (e) => {
+    if (!isDown) return;
+    deltaX = e.touches[0].clientX - startX;
+  });
+
+  sliderViewport.addEventListener("touchend", () => {
+    if (!isDown) return;
+    if (deltaX > 50) {
+      goPrevSlide();
+    } else if (deltaX < -50) {
+      goNextSlide();
+    }
+    isDown = false;
+    startX = 0;
+    deltaX = 0;
+  });
+}
+
+if (sliderPrevBtn) sliderPrevBtn.addEventListener("click", goPrevSlide);
+if (sliderNextBtn) sliderNextBtn.addEventListener("click", goNextSlide);
+initSliderTouch();
+
+// Bei Resize neu ausrichten (sonst verschiebt sich das Bild wieder ein wenig)
+window.addEventListener("resize", () => {
+  updateSliderPosition();
+});
+
+/* =========================
    LOAD ITEM
    ========================= */
 
@@ -165,6 +283,15 @@ async function loadItem() {
     }
 
     const d = itemSnap.data();
+
+    // Bilder: bevorzugt imageUrls[], fallback auf imageUrl
+    const gallery = Array.isArray(d.imageUrls)
+      ? d.imageUrls.filter((u) => typeof u === "string" && u.trim() !== "")
+      : [];
+    if (!gallery.length && d.imageUrl) {
+      gallery.push(d.imageUrl);
+    }
+
     currentItem = {
       id: itemSnap.id,
       name: d.name || "Produkt",
@@ -172,14 +299,10 @@ async function loadItem() {
       longDescription: d.longDescription || "",
       price: d.price || 0,
       imageUrl: d.imageUrl || null,
+      imageUrls: gallery,
     };
 
-    if (currentItem.imageUrl) {
-      detailImageEl.src = currentItem.imageUrl;
-      detailImageEl.style.display = "block";
-    } else {
-      detailImageEl.style.display = "none";
-    }
+    renderSliderImages(currentItem.imageUrls);
 
     detailNameEl.textContent = currentItem.name;
     detailPriceEl.textContent = currentItem.price.toFixed(2) + " €";
