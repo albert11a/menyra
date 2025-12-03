@@ -9,7 +9,7 @@
 </head>
 <body>
   <main class="page page--karte">
-    <!-- Top: Restaurant-Card + Sot ne fokus + Suche-Card -->
+    <!-- Top: Restaurant-Card + Sot ne fokus + Suche -->
     <header class="karte-topbar">
       <!-- Restaurant -->
       <section class="card restaurant-card">
@@ -22,20 +22,18 @@
         </div>
       </section>
 
-      <!-- ANGEBOTE / SOT NE FOKUS SLIDER (direkt unter Restaurant) -->
+      <!-- ANGEBOTE / SOT NE FOKUS SLIDER -->
       <section class="offers-card" id="offersSection" style="display:none;">
         <div class="offers-header-row">
           <div class="offers-label">SOT NE FOKUS</div>
         </div>
         <div class="offers-slider" id="offersSlider">
-          <!-- Slides kommen dynamisch aus Firestore -->
+          <!-- Slides dynamisch -->
         </div>
-        <div class="offers-dots" id="offersDots">
-          <!-- Dots kommen dynamisch -->
-        </div>
+        <div class="offers-dots" id="offersDots"></div>
       </section>
 
-      <!-- Suche in eigener weißen Card (unter Sot ne fokus) -->
+      <!-- Suche -->
       <section class="card search-card">
         <div class="search-wrapper">
           <div class="search-pill">
@@ -43,7 +41,7 @@
               id="searchInput"
               class="search-input"
               type="search"
-              placeholder="Kërko në menyn."
+              placeholder="Kërko në meny."
             />
             <button type="button" class="search-btn">
               <span class="search-btn-icon"></span>
@@ -53,20 +51,24 @@
       </section>
     </header>
 
-    <!-- TABS für Getränke (außerhalb der Getränke-Card) -->
-    <section class="tabs-wrapper tabs-wrapper--drinks" id="drinksTabsWrapper" style="display:none;">
-      <div class="category-tabs category-tabs--drinks" id="drinksTabs"></div>
+    <!-- DRINKS-TABS -->
+    <section
+      class="tabs-wrapper tabs-wrapper--drinks"
+      id="drinksTabsWrapper"
+      style="display:none;"
+    >
+      <div class="category-tabs" id="drinksTabs"></div>
     </section>
 
-    <!-- GETRÄNKE-KARTE -->
+    <!-- GETRÄNKE -->
     <section class="card" id="drinksSection" style="display:none;">
       <h2>Getränke</h2>
       <div class="drinks-list" id="drinksList"></div>
     </section>
 
-    <!-- TABS für Speisekarte (außerhalb der Speisekarten-Card) -->
+    <!-- FOOD-TABS -->
     <section class="tabs-wrapper tabs-wrapper--food" id="foodTabsWrapper">
-      <div class="category-tabs category-tabs--food" id="foodCategoryTabs"></div>
+      <div class="category-tabs" id="foodCategoryTabs"></div>
     </section>
 
     <!-- SPEISEKARTE -->
@@ -75,7 +77,7 @@
       <div class="menu-list" id="menuList"></div>
     </section>
 
-    <!-- WARENKORB (unten im Scroll) -->
+    <!-- WARENKORB (unten im Scroll – weiterhin vorhanden) -->
     <section class="cart-card" id="cartSection" style="display:none;">
       <div class="cart-header">
         <span>Deine Bestellung</span>
@@ -100,8 +102,49 @@
   <!-- Floating Cart Button unten rechts -->
   <button class="cart-fab" id="cartFab" type="button">
     <span class="cart-fab-icon"></span>
+    <span class="cart-fab-label" id="cartFabLabel">Shiko porosin</span>
     <span class="cart-fab-badge" id="cartBadge">0</span>
   </button>
+
+  <!-- PRODUKT-DETAIL DRAWER -->
+  <div class="drawer-overlay" id="productDetailOverlay"></div>
+  <aside class="drawer drawer--product" id="productDetailDrawer">
+    <button class="drawer-close-btn" id="detailCloseBtn">×</button>
+    <div class="drawer-image-wrap">
+      <img id="detailImage" alt="Produktbild" />
+    </div>
+    <div class="drawer-body">
+      <div class="drawer-title-row">
+        <h3 id="detailTitle"></h3>
+        <span id="detailPrice"></span>
+      </div>
+      <p class="drawer-long-desc" id="detailLongDesc"></p>
+      <p class="drawer-zutaten" id="detailZutaten"></p>
+      <div class="drawer-qty-row">
+        <button id="detailQtyMinus" class="btn btn-ghost btn-small">−</button>
+        <span id="detailQtyValue">1</span>
+        <button id="detailQtyPlus" class="btn btn-primary btn-small">+</button>
+        <button id="detailAddBtn" class="btn btn-primary drawer-add-btn">
+          Hinzufügen
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- WARENKORB DRAWER -->
+  <div class="drawer-overlay" id="cartDrawerOverlay"></div>
+  <aside class="drawer drawer--cart" id="cartDrawer">
+    <button class="drawer-close-btn" id="cartDrawerCloseBtn">×</button>
+    <div class="drawer-body">
+      <h3 class="drawer-cart-title">Porosia juaj</h3>
+      <div id="cartDrawerItems" class="cart-items"></div>
+      <div id="cartDrawerTotal" class="cart-total"></div>
+      <div class="cart-actions" style="margin-top:12px;">
+        <button class="btn btn-ghost" id="cartDrawerClearBtn">Leeren</button>
+        <button class="btn btn-primary" id="cartDrawerSendBtn">Bestellung senden</button>
+      </div>
+    </div>
+  </aside>
 
   <script type="module" src="karte.js"></script>
 </body>
