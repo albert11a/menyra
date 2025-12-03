@@ -863,11 +863,10 @@ img {
 }
 
 /* ========================================
-   DETAIL & CART DRAWER  (Vollbild, Slide von rechts)
+   DETAIL & CART DRAWER  (Vollbild, wie eigene HTML-Seite)
    ======================================== */
 
-/* Overlay */
-
+/* Halbtransparenter Overlay über der Karte */
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -884,25 +883,30 @@ img {
   pointer-events: auto;
 }
 
-/* Drawer selbst – immer Fullscreen mobil, keine Ränder */
-
+/* Drawer: immer Vollbild, gleiche Breite wie .page (max 480px) */
 .drawer {
   position: fixed;
-  inset: 0;
+  top: 0;
+  left: 0;
+  right: 0;
+  margin: 0 auto;            /* wie .page mittig */
+  max-width: 480px;
   width: 100%;
-  height: 100%;
-  max-width: 100%;
+  height: 100dvh;             /* volle Bildschirmhöhe, iOS-safe */
   background: #f9fafb;
   box-shadow: none;
   z-index: 61;
+
   display: flex;
   flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
-  transform: translateX(100%);
+
+  transform: translateX(100%);     /* Start: rechts draußen */
   transition: transform 0.28s ease;
 }
 
+/* Drawer sichtbar → komplett im Bild */
 .drawer--visible {
   transform: translateX(0);
 }
@@ -912,18 +916,17 @@ img {
   padding-bottom: 20px;
 }
 
-/* Produkt-Drawer */
-
+/* Produkt-Drawer: dunkler Hintergrund innen */
 .drawer--product {
   background: #020617;
   color: #f9fafb;
 }
 
-/* Bild im Produkt-Drawer – Abstand & abgerundet */
-
+/* Bildbereich im Produkt-Drawer:
+   Abstand zu Notch & Seiten, abgerundete Ecken, NICHT sticky */
 .drawer-image-wrap {
   width: 100%;
-  padding: 52px 16px 0;
+  padding: 52px 16px 0;    /* oben Luft für Statusbar + X, seitlich 16px */
   box-sizing: border-box;
   background: #020617;
   margin-bottom: 12px;
@@ -932,17 +935,17 @@ img {
 .drawer-image-wrap img {
   width: 100%;
   height: auto;
-  max-height: 260px;
+  max-height: 260px;       /* moderat hoch, nicht zu riesig */
   border-radius: 20px;
   object-fit: cover;
 }
 
-/* Inhalt Produkt-Drawer */
-
+/* Inhalt unter dem Bild */
 .drawer--product .drawer-body {
   padding: 12px 16px 24px;
 }
 
+/* Titel / Preis */
 .drawer-title-row {
   display: flex;
   justify-content: space-between;
@@ -962,6 +965,7 @@ img {
   font-weight: 600;
 }
 
+/* Rating & Like */
 .drawer-meta-row {
   display: flex;
   justify-content: space-between;
@@ -981,6 +985,7 @@ img {
   padding: 4px 6px;
 }
 
+/* Beschreibung / Zutaten */
 .drawer-long-desc {
   font-size: 0.8rem;
   line-height: 1.5;
@@ -993,6 +998,7 @@ img {
   margin-bottom: 14px;
 }
 
+/* Menge + Add-Button */
 .drawer-qty-row {
   display: flex;
   align-items: center;
@@ -1010,8 +1016,7 @@ img {
   margin-left: auto;
 }
 
-/* Kommentare im Drawer */
-
+/* Kommentare */
 .drawer-comments {
   margin-top: 4px;
 }
@@ -1084,23 +1089,21 @@ img {
   align-self: flex-end;
 }
 
-/* Cart-Button im Drawer */
-
+/* Shiko porosin Button im Drawer */
 .drawer-cart-btn {
   width: 100%;
   margin-top: 14px;
   justify-content: center;
 }
 
-/* Cart-Drawer */
-
+/* Cart-Drawer (Bestellübersicht) */
 .drawer--cart {
   background: #ffffff;
   color: #020617;
 }
 
 .drawer--cart .drawer-body {
-  padding: 60px 16px 24px;
+  padding: 60px 16px 24px; /* oben Platz für X */
 }
 
 .drawer-cart-title {
@@ -1109,12 +1112,12 @@ img {
   margin-bottom: 10px;
 }
 
-/* Close-Button – relativ zum Drawer, oben links */
-
+/* X-Button oben links – immer im Drawer, nicht im Body */
 .drawer-close-btn {
-  position: absolute;
+  position: fixed;
   top: 16px;
-  left: 16px;
+  left: 50%;
+  transform: translateX(calc(-50% + -208px)); /* bei 480px Breite → links */
   width: 28px;
   height: 28px;
   border-radius: 999px;
@@ -1127,4 +1130,16 @@ img {
   align-items: center;
   justify-content: center;
   z-index: 62;
+}
+
+/* Auf kleinen Geräten: Drawer nimmt 100% Breite, X einfach 16px von links */
+@media (max-width: 480px) {
+  .drawer {
+    max-width: 100%;
+  }
+
+  .drawer-close-btn {
+    left: 16px;
+    transform: none;
+  }
 }
