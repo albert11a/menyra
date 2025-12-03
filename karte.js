@@ -18,7 +18,7 @@ const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
 
-// Tabs & Listen
+// TABS & LISTEN
 const drinksSection = document.getElementById("drinksSection");
 const drinksTabsWrapper = document.getElementById("drinksTabsWrapper");
 const drinksTabsEl = document.getElementById("drinksTabs");
@@ -28,12 +28,12 @@ const foodTabsWrapper = document.getElementById("foodTabsWrapper");
 const foodCategoryTabsEl = document.getElementById("foodCategoryTabs");
 const menuListEl = document.getElementById("menuList");
 
-// Offers
+// OFFERS
 const offersSection = document.getElementById("offersSection");
 const offersSliderEl = document.getElementById("offersSlider");
 const offersDotsEl = document.getElementById("offersDots");
 
-// Warenkorb
+// WARENKORB (inline Card)
 const cartSection = document.getElementById("cartSection");
 const cartItemsEl = document.getElementById("cartItems");
 const cartTotalEl = document.getElementById("cartTotal");
@@ -43,14 +43,38 @@ const noteInput = document.getElementById("noteInput");
 const statusMsg = document.getElementById("statusMsg");
 const cartTableLabel = document.getElementById("cartTableLabel");
 
-// Suche & FAB
+// SUCHE & FAB
 const searchInput = document.getElementById("searchInput");
 const cartFab = document.getElementById("cartFab");
+const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
 
+// PRODUKT-DETAIL DRAWER
+const productDetailOverlay = document.getElementById("productDetailOverlay");
+const productDetailDrawer = document.getElementById("productDetailDrawer");
+const detailImageEl = document.getElementById("detailImage");
+const detailTitleEl = document.getElementById("detailTitle");
+const detailPriceEl = document.getElementById("detailPrice");
+const detailLongDescEl = document.getElementById("detailLongDesc");
+const detailZutatenEl = document.getElementById("detailZutaten");
+const detailQtyMinusBtn = document.getElementById("detailQtyMinus");
+const detailQtyPlusBtn = document.getElementById("detailQtyPlus");
+const detailQtyValueEl = document.getElementById("detailQtyValue");
+const detailAddBtn = document.getElementById("detailAddBtn");
+const detailCloseBtn = document.getElementById("detailCloseBtn");
+
+// CART DRAWER
+const cartDrawerOverlay = document.getElementById("cartDrawerOverlay");
+const cartDrawer = document.getElementById("cartDrawer");
+const cartDrawerCloseBtn = document.getElementById("cartDrawerCloseBtn");
+const cartDrawerItemsEl = document.getElementById("cartDrawerItems");
+const cartDrawerTotalEl = document.getElementById("cartDrawerTotal");
+const cartDrawerClearBtn = document.getElementById("cartDrawerClearBtn");
+const cartDrawerSendBtn = document.getElementById("cartDrawerSendBtn");
+
 let allMenuItems = [];      // alle Produkte mit type
-let drinksItems = [];       // nur type === 'drink'
-let foodItems = [];         // nur type === 'food'
+let drinksItems = [];       // type === 'drink'
+let foodItems = [];         // type === 'food'
 
 let activeFoodCategory = "Alle";
 let activeDrinksCategory = null;
@@ -61,6 +85,10 @@ let cart = [];
 let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
+
+// Detail-Drawer State
+let currentDetailItem = null;
+let currentDetailQty = 1;
 
 cartTableLabel.textContent = `Tisch ${tableId}`;
 
@@ -126,7 +154,6 @@ function startOffersAutoSlide() {
 }
 
 async function loadOffersForRestaurant(restaurantRef, restData) {
-  // Global-Schalter im Restaurant: offerActive
   if (restData.offerActive === false) {
     offersSection.style.display = "none";
     clearOffersTimer();
@@ -139,7 +166,7 @@ async function loadOffersForRestaurant(restaurantRef, restData) {
   const offers = [];
   snap.forEach((docSnap) => {
     const d = docSnap.data();
-    if (d.active === false) return; // nur aktive zeigen
+    if (d.active === false) return;
     offers.push({
       id: docSnap.id,
       ...d,
@@ -164,7 +191,6 @@ function renderOffersSlider(offers) {
   const slidesFrag = document.createDocumentFragment();
 
   offers.forEach((offer, index) => {
-    // Menü-Item auflösen, falls verknüpft
     let linkedMenuItem = null;
     if (offer.menuItemId) {
       linkedMenuItem =
@@ -187,7 +213,6 @@ function renderOffersSlider(offers) {
 
     const addToCart = offer.addToCart === true;
 
-    // Slide erstellen
     const slide = document.createElement("div");
     slide.className = "offer-slide";
 
@@ -199,7 +224,6 @@ function renderOffersSlider(offers) {
       img.className = "offer-image";
       slide.appendChild(img);
     } else {
-      // Fallback-Hintergrund wenn kein Bild
       const placeholder = document.createElement("div");
       placeholder.className = "offer-image";
       slide.appendChild(placeholder);
@@ -227,7 +251,6 @@ function renderOffersSlider(offers) {
     slide.appendChild(descEl);
 
     if (addToCart && (linkedMenuItem || typeof price === "number")) {
-      // Bestellbares Angebot
       const actions = document.createElement("div");
       actions.className = "offer-actions";
 
@@ -239,7 +262,6 @@ function renderOffersSlider(offers) {
       plusBtn.className = "btn btn-primary";
       plusBtn.textContent = "Hinzufügen";
 
-      // Item bestimmen, das in den Warenkorb geht
       const targetItem = linkedMenuItem
         ? linkedMenuItem
         : {
@@ -259,7 +281,6 @@ function renderOffersSlider(offers) {
       actions.appendChild(plusBtn);
       slide.appendChild(actions);
     } else {
-      // Nur Info/Werbung
       const infoOnly = document.createElement("div");
       infoOnly.className = "offer-info-only";
       infoOnly.textContent =
@@ -269,7 +290,6 @@ function renderOffersSlider(offers) {
 
     slidesFrag.appendChild(slide);
 
-    // Dot für Slider
     const dot = document.createElement("button");
     dot.className = "offers-dot" + (index === 0 ? " active" : "");
     dot.dataset.index = String(index);
@@ -287,7 +307,6 @@ function renderOffersSlider(offers) {
   offersCurrentIndex = 0;
   startOffersAutoSlide();
 
-  // Aktiven Dot beim manuellen Scrollen updaten
   offersSliderEl.addEventListener("scroll", () => {
     if (!offersSlides.length) return;
     const center = offersSliderEl.scrollLeft + offersSliderEl.clientWidth / 2;
@@ -312,7 +331,6 @@ function renderOffersSlider(offers) {
    ========================= */
 
 function inferTypeForItem(item) {
-  // Fallback nur für alte Daten ohne type
   if (item.type === "food" || item.type === "drink") return item.type;
 
   const cat = (item.category || "").toLowerCase();
@@ -364,7 +382,6 @@ async function loadRestaurantAndMenu() {
 
     const data = restaurantSnap.data();
     restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
-    // Fixer Text statt Stadt/ID
     restaurantMetaEl.textContent = "Mirësevini në menynë digjitale";
 
     if (data.logoUrl) {
@@ -385,7 +402,6 @@ async function loadRestaurantAndMenu() {
       return;
     }
 
-    // Speisekarte laden
     const menuCol = collection(restaurantRef, "menuItems");
     const snap = await getDocs(menuCol);
 
@@ -396,16 +412,16 @@ async function loadRestaurantAndMenu() {
           id: docSnap.id,
           name: d.name || "Produkt",
           description: d.description || "",
+          longDescription: d.longDescription || "",
           price: d.price || 0,
           category: d.category || "Sonstiges",
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
-          type: d.type || null, // kommt jetzt vom Admin
+          type: d.type || null,
         };
       })
       .filter((item) => item.available);
 
-    // Typ für alte Produkte nachrüsten
     items = items.map((item) => ({
       ...item,
       type: inferTypeForItem(item),
@@ -420,7 +436,6 @@ async function loadRestaurantAndMenu() {
     renderFoodCategories();
     renderMenu();
 
-    // Angebote-Slider laden
     await loadOffersForRestaurant(restaurantRef, data);
   } catch (err) {
     console.error(err);
@@ -437,7 +452,7 @@ async function loadRestaurantAndMenu() {
 }
 
 /* =========================
-   GETRÄNKE-TABS & -LISTE (2 Spalten)
+   GETRÄNKE-TABS & -LISTE
    ========================= */
 
 function getDrinkCategories() {
@@ -464,7 +479,6 @@ function renderDrinksTabs() {
   if (drinksSection) drinksSection.style.display = "block";
   drinksTabsEl.innerHTML = "";
 
-  // Standard: wenn keine aktive Kategorie gesetzt/gültig → erste nehmen
   if (!activeDrinksCategory || !cats.includes(activeDrinksCategory)) {
     activeDrinksCategory = cats[0];
   }
@@ -511,7 +525,6 @@ function renderDrinks() {
     const div = document.createElement("div");
     div.className = "drink-item";
 
-    // Bild (optional)
     if (item.imageUrl) {
       const img = document.createElement("img");
       img.src = item.imageUrl;
@@ -536,7 +549,6 @@ function renderDrinks() {
     header.appendChild(priceEl);
     div.appendChild(header);
 
-    // Beschreibung optional
     if (item.description && item.description.trim() !== "") {
       const descEl = document.createElement("div");
       descEl.className = "drink-desc";
@@ -566,7 +578,7 @@ function renderDrinks() {
 }
 
 /* =========================
-   SPEISEKARTE-TABS & -LISTE (nur food)
+   SPEISEKARTE-TABS & -LISTE
    ========================= */
 
 function getFoodCategories() {
@@ -583,15 +595,8 @@ function renderFoodCategories() {
   foodCategoryTabsEl.innerHTML = "";
 
   const cats = getFoodCategories();
+  foodTabsWrapper.style.display = "block";
 
-  if (!cats.length) {
-    // Keine Speise-Kategorien -> nur "Alle"
-    foodTabsWrapper.style.display = "block";
-  } else {
-    foodTabsWrapper.style.display = "block";
-  }
-
-  // "Alle" Button
   const allBtn = document.createElement("button");
   allBtn.className =
     "category-tab" + (activeFoodCategory === "Alle" ? " active" : "");
@@ -620,7 +625,6 @@ function renderFoodCategories() {
 function renderMenu() {
   menuListEl.innerHTML = "";
 
-  // Nur Speisen
   let items = foodItems;
 
   if (activeFoodCategory !== "Alle") {
@@ -630,7 +634,7 @@ function renderMenu() {
   if (searchTerm) {
     const q = searchTerm;
     items = items.filter((i) => {
-      const text = `${i.name} ${i.description}`.toLowerCase();
+      const text = `${i.name} ${i.description} ${i.longDescription}`.toLowerCase();
       return text.includes(q);
     });
   }
@@ -681,12 +685,18 @@ function renderMenu() {
     minusBtn.textContent = "−";
     minusBtn.addEventListener("click", () => changeCart(item, -1));
 
+    const detailsBtn = document.createElement("button");
+    detailsBtn.className = "btn btn-dark";
+    detailsBtn.textContent = "Detajet";
+    detailsBtn.addEventListener("click", () => openProductDetail(item));
+
     const plusBtn = document.createElement("button");
     plusBtn.className = "btn btn-primary";
     plusBtn.textContent = "Hinzufügen";
     plusBtn.addEventListener("click", () => changeCart(item, 1));
 
     actions.appendChild(minusBtn);
+    actions.appendChild(detailsBtn);
     actions.appendChild(plusBtn);
     div.appendChild(actions);
 
@@ -695,7 +705,41 @@ function renderMenu() {
 }
 
 /* =========================
-   WARENKORB
+   PRODUKT-DETAIL DRAWER
+   ========================= */
+
+function openProductDetail(item) {
+  currentDetailItem = item;
+  currentDetailQty = 1;
+
+  if (item.imageUrl) {
+    detailImageEl.src = item.imageUrl;
+    detailImageEl.style.display = "block";
+  } else {
+    detailImageEl.style.display = "none";
+  }
+
+  detailTitleEl.textContent = item.name;
+  detailPriceEl.textContent = item.price.toFixed(2) + " €";
+
+  const longText = item.longDescription || item.description || "";
+  detailLongDescEl.textContent = longText;
+  detailZutatenEl.textContent = item.description || "";
+
+  detailQtyValueEl.textContent = currentDetailQty;
+
+  productDetailOverlay.classList.add("drawer-overlay--visible");
+  productDetailDrawer.classList.add("drawer--visible");
+}
+
+function closeProductDetail() {
+  currentDetailItem = null;
+  productDetailOverlay.classList.remove("drawer-overlay--visible");
+  productDetailDrawer.classList.remove("drawer--visible");
+}
+
+/* =========================
+   WARENKORB + CART DRAWER
    ========================= */
 
 function changeCart(item, delta) {
@@ -714,10 +758,12 @@ function updateCartBadge() {
   if (totalQty > 0) {
     cartBadgeEl.textContent = String(totalQty);
     cartBadgeEl.style.display = "flex";
-    cartFab.classList.add("visible"); // Fade-In
+    cartFab.classList.add("visible", "cart-fab--has-items");
+    if (cartFabLabel) cartFabLabel.style.display = "block";
   } else {
     cartBadgeEl.style.display = "none";
-    cartFab.classList.remove("visible"); // Fade-Out
+    cartFab.classList.remove("visible", "cart-fab--has-items");
+    if (cartFabLabel) cartFabLabel.style.display = "none";
   }
 }
 
@@ -725,6 +771,7 @@ function renderCart() {
   if (!cart.length) {
     cartSection.style.display = "none";
     updateCartBadge();
+    renderCartDrawer();
     return;
   }
 
@@ -745,6 +792,42 @@ function renderCart() {
 
   cartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
   updateCartBadge();
+  renderCartDrawer();
+}
+
+function renderCartDrawer() {
+  cartDrawerItemsEl.innerHTML = "";
+  if (!cart.length) {
+    cartDrawerItemsEl.innerHTML = "<p class='info'>Noch keine Artikel.</p>";
+    cartDrawerTotalEl.textContent = "";
+    return;
+  }
+
+  let total = 0;
+  cart.forEach((item) => {
+    total += item.price * item.qty;
+    const row = document.createElement("div");
+    row.className = "cart-item-row";
+    row.innerHTML = `
+      <span>${item.qty}× ${item.name}</span>
+      <span>${(item.price * item.qty).toFixed(2)} €</span>
+    `;
+    cartDrawerItemsEl.appendChild(row);
+  });
+
+  cartDrawerTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
+}
+
+function openCartDrawer() {
+  if (!cart.length) return;
+  renderCartDrawer();
+  cartDrawerOverlay.classList.add("drawer-overlay--visible");
+  cartDrawer.classList.add("drawer--visible");
+}
+
+function closeCartDrawer() {
+  cartDrawerOverlay.classList.remove("drawer-overlay--visible");
+  cartDrawer.classList.remove("drawer--visible");
 }
 
 async function sendOrder() {
@@ -797,6 +880,7 @@ async function sendOrder() {
    EVENTS
    ========================= */
 
+// Cart inline
 clearCartBtn.addEventListener("click", () => {
   cart = [];
   renderCart();
@@ -810,11 +894,43 @@ searchInput.addEventListener("input", () => {
   renderMenu();
 });
 
-// Floating Cart Button: scrollt zum Warenkorb
+// Floating Cart Button → Drawer
 cartFab.addEventListener("click", () => {
-  if (cartSection.style.display !== "none") {
-    cartSection.scrollIntoView({ behavior: "smooth", block: "end" });
+  openCartDrawer();
+});
+
+// Produkt-Detail Drawer Events
+detailQtyMinusBtn.addEventListener("click", () => {
+  if (currentDetailQty > 1) {
+    currentDetailQty -= 1;
+    detailQtyValueEl.textContent = currentDetailQty;
   }
+});
+
+detailQtyPlusBtn.addEventListener("click", () => {
+  currentDetailQty += 1;
+  detailQtyValueEl.textContent = currentDetailQty;
+});
+
+detailAddBtn.addEventListener("click", () => {
+  if (!currentDetailItem) return;
+  changeCart(currentDetailItem, currentDetailQty);
+});
+
+detailCloseBtn.addEventListener("click", closeProductDetail);
+productDetailOverlay.addEventListener("click", closeProductDetail);
+
+// Cart Drawer Events
+cartDrawerCloseBtn.addEventListener("click", closeCartDrawer);
+cartDrawerOverlay.addEventListener("click", closeCartDrawer);
+cartDrawerClearBtn.addEventListener("click", () => {
+  cart = [];
+  renderCart();
+  closeCartDrawer();
+});
+cartDrawerSendBtn.addEventListener("click", () => {
+  closeCartDrawer();
+  sendOrder();
 });
 
 // Initial load
