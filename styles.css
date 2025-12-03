@@ -26,7 +26,7 @@ body {
   color: #0f172a;
 }
 
-/* Wenn du per JS body.classList.add('no-scroll') setzt bei offenem Drawer */
+/* Optional: wenn per JS genutzt */
 body.no-scroll {
   overflow: hidden;
 }
@@ -214,8 +214,6 @@ body.no-scroll {
   margin-top: 8px;
 }
 
-/* Textarea-Variante */
-
 .input-textarea {
   border-radius: 14px;
   min-height: 90px;
@@ -389,8 +387,6 @@ body.no-scroll {
   box-sizing: border-box;
 }
 
-/* Minimaler "iOS"-Cart */
-
 .cart-fab-icon::before,
 .cart-fab-icon::after {
   content: "";
@@ -538,7 +534,7 @@ body.no-scroll {
   color: #64748b;
 }
 
-/* Social-Leiste (Like/Kommentar) */
+/* Social-Leiste */
 
 .menu-item-social {
   display: flex;
@@ -771,7 +767,7 @@ body.no-scroll {
 }
 
 /* ========================================
-   WARENKORB (Gäste-Ansicht – inline Karte)
+   WARENKORB (Gäste-Ansicht – inline)
    ======================================== */
 
 .cart-card {
@@ -853,8 +849,6 @@ img {
   color: #f9fafb;
 }
 
-/* Angebot-Flag-Label */
-
 .offer-flag-label {
   margin-top: 8px;
   font-size: 0.8rem;
@@ -869,7 +863,7 @@ img {
 }
 
 /* ========================================
-   DETAIL & CART DRAWER (Sliding Panels)
+   DETAIL & CART DRAWER  (Vollbild, Slide von rechts)
    ======================================== */
 
 /* Overlay */
@@ -890,17 +884,14 @@ img {
   pointer-events: auto;
 }
 
-/* Drawer – Vollbild, slidet per transform */
+/* Drawer selbst – immer Fullscreen mobil, keine Ränder */
 
 .drawer {
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(100%);
+  inset: 0;
   width: 100%;
-  max-width: 480px;
-  height: 100dvh;
+  height: 100%;
+  max-width: 100%;
   background: #f9fafb;
   box-shadow: none;
   z-index: 61;
@@ -908,11 +899,12 @@ img {
   flex-direction: column;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+  transform: translateX(100%);
   transition: transform 0.28s ease;
 }
 
 .drawer--visible {
-  transform: translateX(-50%);
+  transform: translateX(0);
 }
 
 .drawer-body {
@@ -927,13 +919,11 @@ img {
   color: #f9fafb;
 }
 
-/* Bildbereich im Produkt-Drawer
-   -> Abstand von oben & Seiten, abgerundete Ecken, nicht full-bleed
-*/
+/* Bild im Produkt-Drawer – Abstand & abgerundet */
 
 .drawer-image-wrap {
   width: 100%;
-  padding: 52px 16px 0;   /* oben Platz für Notch & X, seitlich 16px */
+  padding: 52px 16px 0;
   box-sizing: border-box;
   background: #020617;
   margin-bottom: 12px;
@@ -947,13 +937,11 @@ img {
   object-fit: cover;
 }
 
-/* Innerer Body vom Produkt-Drawer */
+/* Inhalt Produkt-Drawer */
 
 .drawer--product .drawer-body {
   padding: 12px 16px 24px;
 }
-
-/* Titel/Preis unter Bild */
 
 .drawer-title-row {
   display: flex;
@@ -974,8 +962,6 @@ img {
   font-weight: 600;
 }
 
-/* Meta: Rating + Like */
-
 .drawer-meta-row {
   display: flex;
   justify-content: space-between;
@@ -995,8 +981,6 @@ img {
   padding: 4px 6px;
 }
 
-/* Beschreibung / Zutaten */
-
 .drawer-long-desc {
   font-size: 0.8rem;
   line-height: 1.5;
@@ -1008,8 +992,6 @@ img {
   color: #cbd5f5;
   margin-bottom: 14px;
 }
-
-/* Menge + Add */
 
 .drawer-qty-row {
   display: flex;
@@ -1102,7 +1084,7 @@ img {
   align-self: flex-end;
 }
 
-/* Drawer interner Cart-Button */
+/* Cart-Button im Drawer */
 
 .drawer-cart-btn {
   width: 100%;
@@ -1118,7 +1100,7 @@ img {
 }
 
 .drawer--cart .drawer-body {
-  padding: 56px 16px 24px;  /* Platz unter dem X */
+  padding: 60px 16px 24px;
 }
 
 .drawer-cart-title {
@@ -1127,18 +1109,17 @@ img {
   margin-bottom: 10px;
 }
 
-/* Close-Button oben links */
+/* Close-Button – relativ zum Drawer, oben links */
 
 .drawer-close-btn {
-  position: fixed;
-  top: 12px;
-  left: 50%;
-  transform: translateX(calc(-50% - 210px)); /* bei max-width:480px ~ linksbündig */
+  position: absolute;
+  top: 16px;
+  left: 16px;
   width: 28px;
   height: 28px;
   border-radius: 999px;
   border: none;
-  background: rgba(15, 23, 42, 0.88);
+  background: rgba(15, 23, 42, 0.9);
   color: #f9fafb;
   font-size: 1.1rem;
   line-height: 1;
@@ -1146,18 +1127,4 @@ img {
   align-items: center;
   justify-content: center;
   z-index: 62;
-}
-
-@media (max-width: 480px) {
-  .drawer {
-    left: 0;
-    max-width: 100%;
-  }
-  .drawer--visible {
-    transform: translateX(0);
-  }
-  .drawer-close-btn {
-    left: 12px;
-    transform: none;
-  }
 }
