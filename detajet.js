@@ -50,12 +50,14 @@ function loadCartFromStorage() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: Number(item.price) || 0,
-      qty: Number(item.qty) || 0,
-    })).filter((i) => i.qty > 0);
+    return parsed
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: Number(item.price) || 0,
+        qty: Number(item.qty) || 0,
+      }))
+      .filter((i) => i.qty > 0);
   } catch {
     return [];
   }
@@ -114,7 +116,6 @@ async function loadItem() {
     return;
   }
 
-  // Tisch-Label
   if (headerTableLabel) {
     headerTableLabel.textContent = `Tisch ${tableId}`;
   }
@@ -146,7 +147,6 @@ async function loadItem() {
       imageUrl: d.imageUrl || null,
     };
 
-    // UI füllen
     if (currentItem.imageUrl) {
       detailImageEl.src = currentItem.imageUrl;
       detailImageEl.style.display = "block";
@@ -203,17 +203,26 @@ cartFab.addEventListener("click", () => {
   window.location.href = url.toString();
 });
 
-// Zurück zur Karte
+// Zurück zur Karte – stabil für Browser-Back + Direktaufruf
 if (backBtn) {
   backBtn.addEventListener("click", () => {
-    // zurück zur Karte mit gleichem Tisch/Lokal
-    const url = new URL(window.location.href);
-    url.pathname = "karte.html";
-    url.searchParams.set("r", restaurantId);
-    url.searchParams.set("t", tableId);
-    window.location.href = url.toString();
+    if (window.history.length > 1) {
+      history.back();
+    } else {
+      const url = new URL(window.location.href);
+      url.pathname = "karte.html";
+      url.searchParams.set("r", restaurantId);
+      url.searchParams.set("t", tableId);
+      window.location.href = url.toString();
+    }
   });
 }
+
+// Safari BFCache: beim Zurückkommen Cart neu laden
+window.addEventListener("pageshow", () => {
+  cart = loadCartFromStorage();
+  updateCartBadge();
+});
 
 /* =========================
    INIT
