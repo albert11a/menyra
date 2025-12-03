@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, Kommentare, Drawers
+// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes (ohne Drawer)
 
 import { db } from "./firebase-config.js";
 import {
@@ -51,38 +51,7 @@ const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
 
-// PRODUKT-DETAIL DRAWER
-const productDetailOverlay = document.getElementById("productDetailOverlay");
-const productDetailDrawer = document.getElementById("productDetailDrawer");
-const detailImageEl = document.getElementById("detailImage");
-const detailTitleEl = document.getElementById("detailTitle");
-const detailPriceEl = document.getElementById("detailPrice");
-const detailLongDescEl = document.getElementById("detailLongDesc");
-const detailZutatenEl = document.getElementById("detailZutaten");
-const detailQtyMinusBtn = document.getElementById("detailQtyMinus");
-const detailQtyPlusBtn = document.getElementById("detailQtyPlus");
-const detailQtyValueEl = document.getElementById("detailQtyValue");
-const detailAddBtn = document.getElementById("detailAddBtn");
-const detailCloseBtn = document.getElementById("detailCloseBtn");
-const detailRatingSummaryEl = document.getElementById("detailRatingSummary");
-const detailLikeBtn = document.getElementById("detailLikeBtn");
-const detailLikeCountEl = document.getElementById("detailLikeCount");
-const detailCommentsListEl = document.getElementById("detailCommentsList");
-const detailRatingPillsEl = document.getElementById("detailRatingPills");
-const detailCommentInputEl = document.getElementById("detailCommentInput");
-const detailCommentSendBtn = document.getElementById("detailCommentSendBtn");
-const detailCartButton = document.getElementById("detailCartButton");
-
-// CART DRAWER
-const cartDrawerOverlay = document.getElementById("cartDrawerOverlay");
-const cartDrawer = document.getElementById("cartDrawer");
-const cartDrawerCloseBtn = document.getElementById("cartDrawerCloseBtn");
-const cartDrawerItemsEl = document.getElementById("cartDrawerItems");
-const cartDrawerTotalEl = document.getElementById("cartDrawerTotal");
-const cartDrawerClearBtn = document.getElementById("cartDrawerClearBtn");
-const cartDrawerSendBtn = document.getElementById("cartDrawerSendBtn");
-
-let allMenuItems = []; // alle Produkte mit type, likes, rating etc.
+let allMenuItems = []; // alle Produkte mit type, likes etc.
 let drinksItems = [];
 let foodItems = [];
 
@@ -96,24 +65,7 @@ let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
 
-// Detail-Drawer State
-let currentDetailItem = null;
-let currentDetailQty = 1;
-let currentDetailRating = 0;
-
 cartTableLabel.textContent = `Tisch ${tableId}`;
-
-/* =========================
-   BODY SCROLL LOCK
-   ========================= */
-
-function lockBodyScroll() {
-  document.body.classList.add("no-scroll");
-}
-
-function unlockBodyScroll() {
-  document.body.classList.remove("no-scroll");
-}
 
 /* =========================
    HELFER: ABO & STATUS
@@ -751,7 +703,13 @@ function renderMenu() {
     `;
     commentBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
-      openProductDetail(item, { focusComments: true });
+      // Kommentar → auch zu detajet.html
+      const url = new URL(window.location.href);
+      url.pathname = "detajet.html";
+      url.searchParams.set("r", restaurantId);
+      url.searchParams.set("t", tableId);
+      url.searchParams.set("item", item.id);
+      window.location.href = url.toString();
     });
 
     socialRow.appendChild(likeBtn);
@@ -769,7 +727,14 @@ function renderMenu() {
     const detailsBtn = document.createElement("button");
     detailsBtn.className = "btn btn-dark";
     detailsBtn.textContent = "Detajet";
-    detailsBtn.addEventListener("click", () => openProductDetail(item));
+    detailsBtn.addEventListener("click", () => {
+      const url = new URL(window.location.href);
+      url.pathname = "detajet.html";
+      url.searchParams.set("r", restaurantId);
+      url.searchParams.set("t", tableId);
+      url.searchParams.set("item", item.id);
+      window.location.href = url.toString();
+    });
 
     const plusBtn = document.createElement("button");
     plusBtn.className = "btn btn-primary";
@@ -786,34 +751,14 @@ function renderMenu() {
 }
 
 /* =========================
-   DETAIL SOCIAL: RATING & LIKES
+   LIKES Firestore-Update (ohne Drawer)
    ========================= */
-
-function updateDetailSocial() {
-  if (!currentDetailItem) return;
-  const item = currentDetailItem;
-
-  // Likes
-  const liked = isItemLiked(item.id);
-  detailLikeBtn.classList.toggle("social-btn-like--active", liked);
-  detailLikeCountEl.textContent = (item.likeCount || 0).toString();
-
-  // Rating
-  const { ratingCount = 0, ratingSum = 0 } = item;
-  if (ratingCount > 0) {
-    const avg = ratingSum / ratingCount;
-    detailRatingSummaryEl.textContent = `⭐ ${avg.toFixed(1)} (${ratingCount})`;
-  } else {
-    detailRatingSummaryEl.textContent = "Ende pa vlerësime";
-  }
-}
 
 async function toggleItemLike(item) {
   const likedBefore = isItemLiked(item.id);
   const likedAfter = !likedBefore;
   setItemLiked(item.id, likedAfter);
 
-  // Lokales Model aktualisieren
   const modelItem = allMenuItems.find((i) => i.id === item.id);
   if (modelItem) {
     if (!modelItem.likeCount) modelItem.likeCount = 0;
@@ -822,7 +767,6 @@ async function toggleItemLike(item) {
   }
   item.likeCount = modelItem ? modelItem.likeCount : item.likeCount;
 
-  // Firestore updaten
   try {
     const restRef = doc(db, "restaurants", restaurantId);
     const menuCol = collection(restRef, "menuItems");
@@ -834,242 +778,12 @@ async function toggleItemLike(item) {
     console.error(err);
   }
 
-  // Menüliste im Hintergrund aktualisieren
+  // Liste neu rendern, damit Like-Zahl aktualisiert wird
   renderMenu();
-
-  // Detail-Drawer aktualisieren falls offen
-  if (currentDetailItem && currentDetailItem.id === item.id) {
-    currentDetailItem = allMenuItems.find((i) => i.id === item.id) || item;
-    updateDetailSocial();
-  }
 }
 
 /* =========================
-   KOMMENTARE & RATING
-   ========================= */
-
-function buildRatingPills() {
-  detailRatingPillsEl.innerHTML = "";
-  for (let r = 1; r <= 5; r++) {
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "rating-pill";
-    btn.dataset.rating = String(r);
-    btn.textContent = r.toString();
-    btn.addEventListener("click", () => {
-      currentDetailRating = r;
-      updateRatingPillsUI();
-    });
-    detailRatingPillsEl.appendChild(btn);
-  }
-}
-
-function updateRatingPillsUI() {
-  const buttons = detailRatingPillsEl.querySelectorAll(".rating-pill");
-  buttons.forEach((btn) => {
-    const r = Number(btn.dataset.rating || "0");
-    btn.classList.toggle("rating-pill--active", r === currentDetailRating);
-  });
-}
-
-function renderCommentsList(comments) {
-  detailCommentsListEl.innerHTML = "";
-  if (!comments.length) {
-    const p = document.createElement("p");
-    p.className = "info";
-    p.textContent = "Ende pa komente.";
-    detailCommentsListEl.appendChild(p);
-    return;
-  }
-
-  comments.forEach((c) => {
-    const item = document.createElement("div");
-    item.className = "comment-item";
-
-    const meta = document.createElement("div");
-    meta.className = "comment-meta";
-
-    let metaText = "";
-    if (c.rating && typeof c.rating === "number") {
-      metaText += `⭐ ${c.rating.toFixed(1)}  ·  `;
-    }
-    if (c.createdAt && c.createdAt.toDate) {
-      const dt = c.createdAt.toDate();
-      metaText += dt.toLocaleDateString("de-AT", {
-        day: "2-digit",
-        month: "2-digit",
-        year: "2-digit",
-      });
-    } else {
-      metaText += "Anonim";
-    }
-    meta.textContent = metaText;
-
-    const txt = document.createElement("div");
-    txt.className = "comment-text";
-    txt.textContent = c.text || "";
-
-    item.appendChild(meta);
-    item.appendChild(txt);
-    detailCommentsListEl.appendChild(item);
-  });
-}
-
-async function loadCommentsForItem(item) {
-  detailCommentsListEl.innerHTML = "<p class='info'>Duke u ngarkuar...</p>";
-
-  try {
-    const restRef = doc(db, "restaurants", restaurantId);
-    const menuCol = collection(restRef, "menuItems");
-    const itemRef = doc(menuCol, item.id);
-    const commentsCol = collection(itemRef, "comments");
-    const snap = await getDocs(commentsCol);
-
-    const comments = [];
-    snap.forEach((ds) => {
-      const d = ds.data();
-      comments.push({
-        id: ds.id,
-        ...d,
-      });
-    });
-
-    comments.sort((a, b) => {
-      const da =
-        a.createdAt && a.createdAt.toDate ? a.createdAt.toDate().getTime() : 0;
-      const db2 =
-        b.createdAt && b.createdAt.toDate ? b.createdAt.toDate().getTime() : 0;
-      return db2 - da;
-    });
-
-    renderCommentsList(comments);
-  } catch (err) {
-    console.error(err);
-    detailCommentsListEl.innerHTML =
-      "<p class='info'>Nuk mund të ngarkohen komentet.</p>";
-  }
-}
-
-async function postComment() {
-  if (!currentDetailItem) return;
-
-  const text = (detailCommentInputEl.value || "").trim();
-  const rating = currentDetailRating || null;
-
-  if (!text && !rating) {
-    return; // nichts zu speichern
-  }
-
-  detailCommentSendBtn.disabled = true;
-
-  try {
-    const restRef = doc(db, "restaurants", restaurantId);
-    const menuCol = collection(restRef, "menuItems");
-    const itemRef = doc(menuCol, currentDetailItem.id);
-    const commentsCol = collection(itemRef, "comments");
-
-    await addDoc(commentsCol, {
-      text,
-      rating,
-      createdAt: serverTimestamp(),
-    });
-
-    const updateData = {
-      commentCount: increment(1),
-    };
-    if (rating) {
-      updateData.ratingCount = increment(1);
-      updateData.ratingSum = increment(rating);
-    }
-
-    await updateDoc(itemRef, updateData);
-
-    // Lokal updaten
-    const modelItem = allMenuItems.find((i) => i.id === currentDetailItem.id);
-    if (modelItem) {
-      modelItem.commentCount = (modelItem.commentCount || 0) + 1;
-      if (rating) {
-        modelItem.ratingCount = (modelItem.ratingCount || 0) + 1;
-        modelItem.ratingSum = (modelItem.ratingSum || 0) + rating;
-      }
-      currentDetailItem = modelItem;
-    } else {
-      currentDetailItem.commentCount =
-        (currentDetailItem.commentCount || 0) + 1;
-      if (rating) {
-        currentDetailItem.ratingCount =
-          (currentDetailItem.ratingCount || 0) + 1;
-        currentDetailItem.ratingSum =
-          (currentDetailItem.ratingSum || 0) + rating;
-      }
-    }
-
-    detailCommentInputEl.value = "";
-    currentDetailRating = 0;
-    updateRatingPillsUI();
-    updateDetailSocial();
-    await loadCommentsForItem(currentDetailItem);
-    renderMenu();
-  } catch (err) {
-    console.error(err);
-  } finally {
-    detailCommentSendBtn.disabled = false;
-  }
-}
-
-/* =========================
-   PRODUKT-DETAIL DRAWER
-   ========================= */
-
-function openProductDetail(item, options = {}) {
-  const modelItem = allMenuItems.find((i) => i.id === item.id) || item;
-  currentDetailItem = modelItem;
-  currentDetailQty = 1;
-  currentDetailRating = 0;
-  updateRatingPillsUI();
-
-  if (modelItem.imageUrl) {
-    detailImageEl.src = modelItem.imageUrl;
-    detailImageEl.style.display = "block";
-  } else {
-    detailImageEl.style.display = "none";
-  }
-
-  detailTitleEl.textContent = modelItem.name;
-  detailPriceEl.textContent = modelItem.price.toFixed(2) + " €";
-
-  const longText = modelItem.longDescription || modelItem.description || "";
-  detailLongDescEl.textContent = longText;
-  detailZutatenEl.textContent = modelItem.description || "";
-
-  detailQtyValueEl.textContent = currentDetailQty.toString();
-
-  updateDetailSocial();
-  loadCommentsForItem(modelItem);
-
-  productDetailOverlay.classList.add("drawer-overlay--visible");
-  productDetailDrawer.classList.add("drawer--visible");
-  lockBodyScroll();
-
-  if (options.focusComments) {
-    setTimeout(() => {
-      const commentsTitle = document.querySelector(".drawer-comments-title");
-      if (commentsTitle) {
-        commentsTitle.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-    }, 250);
-  }
-}
-
-function closeProductDetail() {
-  currentDetailItem = null;
-  productDetailOverlay.classList.remove("drawer-overlay--visible");
-  productDetailDrawer.classList.remove("drawer--visible");
-  unlockBodyScroll();
-}
-
-/* =========================
-   WARENKORB + CART DRAWER
+   WARENKORB
    ========================= */
 
 function changeCart(item, delta) {
@@ -1101,7 +815,6 @@ function renderCart() {
   if (!cart.length) {
     cartSection.style.display = "none";
     updateCartBadge();
-    renderCartDrawer();
     return;
   }
 
@@ -1122,44 +835,6 @@ function renderCart() {
 
   cartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
   updateCartBadge();
-  renderCartDrawer();
-}
-
-function renderCartDrawer() {
-  cartDrawerItemsEl.innerHTML = "";
-  if (!cart.length) {
-    cartDrawerItemsEl.innerHTML = "<p class='info'>Noch keine Artikel.</p>";
-    cartDrawerTotalEl.textContent = "";
-    return;
-  }
-
-  let total = 0;
-  cart.forEach((item) => {
-    total += item.price * item.qty;
-    const row = document.createElement("div");
-    row.className = "cart-item-row";
-    row.innerHTML = `
-      <span>${item.qty}× ${item.name}</span>
-      <span>${(item.price * item.qty).toFixed(2)} €</span>
-    `;
-    cartDrawerItemsEl.appendChild(row);
-  });
-
-  cartDrawerTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
-}
-
-function openCartDrawer() {
-  if (!cart.length) return;
-  renderCartDrawer();
-  cartDrawerOverlay.classList.add("drawer-overlay--visible");
-  cartDrawer.classList.add("drawer--visible");
-  lockBodyScroll();
-}
-
-function closeCartDrawer() {
-  cartDrawerOverlay.classList.remove("drawer-overlay--visible");
-  cartDrawer.classList.remove("drawer--visible");
-  unlockBodyScroll();
 }
 
 async function sendOrder() {
@@ -1226,58 +901,13 @@ searchInput.addEventListener("input", () => {
   renderMenu();
 });
 
-// Floating Cart Button → Drawer
+// Floating Cart Button → scrollt zum Warenkorb (kein Drawer mehr)
 cartFab.addEventListener("click", () => {
-  openCartDrawer();
-});
-
-// Produkt-Detail Drawer Events
-detailQtyMinusBtn.addEventListener("click", () => {
-  if (currentDetailQty > 1) {
-    currentDetailQty -= 1;
-    detailQtyValueEl.textContent = currentDetailQty.toString();
+  if (cartSection && cartSection.style.display !== "none") {
+    cartSection.scrollIntoView({ behavior: "smooth", block: "start" });
   }
 });
 
-detailQtyPlusBtn.addEventListener("click", () => {
-  currentDetailQty += 1;
-  detailQtyValueEl.textContent = currentDetailQty.toString();
-});
-
-detailAddBtn.addEventListener("click", () => {
-  if (!currentDetailItem) return;
-  changeCart(currentDetailItem, currentDetailQty);
-});
-
-detailCloseBtn.addEventListener("click", closeProductDetail);
-productDetailOverlay.addEventListener("click", closeProductDetail);
-
-detailLikeBtn.addEventListener("click", async () => {
-  if (!currentDetailItem) return;
-  await toggleItemLike(currentDetailItem);
-});
-
-detailCommentSendBtn.addEventListener("click", postComment);
-
-detailCartButton.addEventListener("click", () => {
-  closeProductDetail();
-  openCartDrawer();
-});
-
-// Cart Drawer Events
-cartDrawerCloseBtn.addEventListener("click", closeCartDrawer);
-cartDrawerOverlay.addEventListener("click", closeCartDrawer);
-cartDrawerClearBtn.addEventListener("click", () => {
-  cart = [];
-  renderCart();
-  closeCartDrawer();
-});
-cartDrawerSendBtn.addEventListener("click", () => {
-  closeCartDrawer();
-  sendOrder();
-});
-
 // INIT
-buildRatingPills();
 loadRestaurantAndMenu();
 renderCart(); // sorgt dafür, dass FAB am Anfang versteckt ist
