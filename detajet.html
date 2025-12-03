@@ -5,14 +5,13 @@
   <title>MENYRA – Detajet e produktit</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta name="theme-color" content="#f3f4f6" />
-  <!-- nutzt dein bestehendes globales Design -->
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <main class="page page--karte">
     <!-- Header: Back + Titel + Tavolina -->
     <header class="header">
-      <button type="button" id="backBtn" class="btn btn-ghost">
+      <button type="button" id="backBtn" class="btn btn-ghost btn-small">
         ← Mbrapa
       </button>
       <div class="header-title">
@@ -40,7 +39,7 @@
         <span id="detailPrice">0.00 €</span>
       </div>
 
-      <!-- Meta: Rating / Likes (optional später) -->
+      <!-- Meta (vorerst statisch – kann später mit Rating/Like verdrahtet werden) -->
       <div class="drawer-meta-row">
         <div class="drawer-rating" id="detailRating">
           ⭐️ 0.0 · 0 vlerësime
@@ -79,7 +78,7 @@
         </button>
       </div>
 
-      <!-- Button: Shiko shportën (linkt auf porosi Ansicht / zurück zur kartë) -->
+      <!-- Button: Shiko shportën -->
       <button
         type="button"
         class="btn btn-primary drawer-cart-btn"
@@ -89,7 +88,7 @@
       </button>
     </section>
 
-    <!-- Shporta mini-Card (opsionale, mund ta mbushim nga detajet.js) -->
+    <!-- Mini-Übersicht der aktuellen Porosi (optional) -->
     <section class="cart-card" id="detailCartSection" style="display:none;">
       <div class="cart-header">
         <span>Porosia jote</span>
@@ -100,14 +99,13 @@
     </section>
   </main>
 
-  <!-- Optional: Floating Cart Button auch hier nutzbar -->
+  <!-- Floating Cart Button wie auf Karte -->
   <button class="cart-fab" id="cartFab" type="button">
     <span class="cart-fab-icon"></span>
     <span class="cart-fab-badge" id="cartBadge">0</span>
     <span class="cart-fab-label" id="cartFabLabel">Shiko porosin</span>
   </button>
 
-  <!-- Hier kommt später die Logik: URL-Params lesen, Firestore-Load, Cart, etc. -->
   <script type="module" src="detajet.js"></script>
 </body>
 </html>
