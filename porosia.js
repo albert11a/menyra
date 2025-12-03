@@ -1,4 +1,4 @@
-// porosia.js – Finale Bestellübersicht + Bestellung senden
+// porosia.js – Finale Bestellübersicht + Bestellung senden (nutzt globalen Cart)
 
 import { db } from "./firebase-config.js";
 import {
@@ -25,7 +25,7 @@ const sendBtn = document.getElementById("porosiaSendBtn");
 const statusEl = document.getElementById("porosiaStatus");
 const backBtn = document.getElementById("porosiaBackBtn");
 
-// FAB (Badge bleibt konsistent)
+// FAB (gleiches Design wie auf Karte / Detajet)
 const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
@@ -33,7 +33,7 @@ const cartBadgeEl = document.getElementById("cartBadge");
 let cart = [];
 
 /* =========================
-   CART STORAGE
+   CART STORAGE (gleich wie karte.js / detajet.js)
    ========================= */
 
 function getCartStorageKey() {
@@ -46,12 +46,14 @@ function loadCartFromStorage() {
     if (!raw) return [];
     const parsed = JSON.parse(raw);
     if (!Array.isArray(parsed)) return [];
-    return parsed.map((item) => ({
-      id: item.id,
-      name: item.name,
-      price: Number(item.price) || 0,
-      qty: Number(item.qty) || 0,
-    })).filter((i) => i.qty > 0);
+    return parsed
+      .map((item) => ({
+        id: item.id,
+        name: item.name,
+        price: Number(item.price) || 0,
+        qty: Number(item.qty) || 0,
+      }))
+      .filter((i) => i.qty > 0);
   } catch {
     return [];
   }
@@ -60,7 +62,9 @@ function loadCartFromStorage() {
 function saveCartToStorage() {
   try {
     localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 /* =========================
@@ -80,7 +84,9 @@ function updateCartBadge() {
   } else {
     cartBadgeEl.style.display = "none";
     cartFab.classList.remove("visible", "cart-fab--has-items");
-    if (cartFabLabel) cartFabLabel.style.display = "none";
+    if (cartFabLabel) {
+      cartFabLabel.style.display = "none";
+    }
   }
 }
 
@@ -167,9 +173,27 @@ async function loadRestaurantHeader() {
     }
   } catch (err) {
     console.error(err);
+    restaurantNameEl.textContent = "Lokal";
   }
 
-  tableLabelEl.textContent = `Tisch ${tableId}`;
+  // Sprachlich anpassbar – ich nehme hier Albanisch
+  tableLabelEl.textContent = `Tavolina ${tableId}`;
+}
+
+/* =========================
+   NAVIGATION
+   ========================= */
+
+function goToKarte() {
+  if (window.history.length > 1) {
+    history.back();
+  } else {
+    const url = new URL(window.location.href);
+    url.pathname = "karte.html";
+    url.searchParams.set("r", restaurantId);
+    url.searchParams.set("t", tableId);
+    window.location.href = url.toString();
+  }
 }
 
 /* =========================
@@ -235,21 +259,13 @@ sendBtn.addEventListener("click", sendOrder);
 
 if (backBtn) {
   backBtn.addEventListener("click", () => {
-    const url = new URL(window.location.href);
-    url.pathname = "karte.html";
-    url.searchParams.set("r", restaurantId);
-    url.searchParams.set("t", tableId);
-    window.location.href = url.toString();
+    goToKarte();
   });
 }
 
-// FAB auf dieser Seite könnte z.B. zurück zur Karte springen
+// FAB → zurück zur Karte (Meny)
 cartFab.addEventListener("click", () => {
-  const url = new URL(window.location.href);
-  url.pathname = "karte.html";
-  url.searchParams.set("r", restaurantId);
-  url.searchParams.set("t", tableId);
-  window.location.href = url.toString();
+  goToKarte();
 });
 
 /* =========================
@@ -260,9 +276,8 @@ cart = loadCartFromStorage();
 renderCart();
 loadRestaurantHeader();
 
-// Safari BFCache – beim Zurückspringen Porosia-Seite aktualisieren
+// Safari BFCache – wenn User zurück auf Porosia kommt, alles neu syncen
 window.addEventListener("pageshow", () => {
   cart = loadCartFromStorage();
   renderCart();
 });
-
