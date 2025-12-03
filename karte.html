@@ -118,16 +118,50 @@
         <h3 id="detailTitle"></h3>
         <span id="detailPrice"></span>
       </div>
+
+      <div class="drawer-meta-row">
+        <div class="drawer-rating" id="detailRatingSummary">Ende pa vlerësime</div>
+        <button class="social-btn drawer-like-btn" id="detailLikeBtn" type="button">
+          <span class="social-icon-like">👍</span>
+          <span class="social-count" id="detailLikeCount">0</span>
+        </button>
+      </div>
+
       <p class="drawer-long-desc" id="detailLongDesc"></p>
       <p class="drawer-zutaten" id="detailZutaten"></p>
+
       <div class="drawer-qty-row">
-        <button id="detailQtyMinus" class="btn btn-ghost btn-small">−</button>
+        <button id="detailQtyMinus" class="btn btn-ghost btn-small" type="button">−</button>
         <span id="detailQtyValue">1</span>
-        <button id="detailQtyPlus" class="btn btn-primary btn-small">+</button>
-        <button id="detailAddBtn" class="btn btn-primary drawer-add-btn">
+        <button id="detailQtyPlus" class="btn btn-primary btn-small" type="button">+</button>
+        <button id="detailAddBtn" class="btn btn-primary drawer-add-btn" type="button">
           Hinzufügen
         </button>
       </div>
+
+      <div class="drawer-comments">
+        <h4 class="drawer-comments-title">Komentet</h4>
+        <div id="detailCommentsList" class="comments-list"></div>
+        <div class="comment-form">
+          <div class="rating-pills" id="detailRatingPills"></div>
+          <textarea
+            id="detailCommentInput"
+            class="input input-textarea comment-input"
+            placeholder="Shkruaj një koment..."
+          ></textarea>
+          <button
+            id="detailCommentSendBtn"
+            class="btn btn-primary comment-send-btn"
+            type="button"
+          >
+            Posto komentin
+          </button>
+        </div>
+      </div>
+
+      <button id="detailCartButton" class="btn btn-primary drawer-cart-btn" type="button">
+        Shiko porosin
+      </button>
     </div>
   </aside>
 
@@ -140,8 +174,10 @@
       <div id="cartDrawerItems" class="cart-items"></div>
       <div id="cartDrawerTotal" class="cart-total"></div>
       <div class="cart-actions" style="margin-top:12px;">
-        <button class="btn btn-ghost" id="cartDrawerClearBtn">Leeren</button>
-        <button class="btn btn-primary" id="cartDrawerSendBtn">Bestellung senden</button>
+        <button class="btn btn-ghost" id="cartDrawerClearBtn" type="button">Leeren</button>
+        <button class="btn btn-primary" id="cartDrawerSendBtn" type="button">
+          Bestellung senden
+        </button>
       </div>
     </div>
   </aside>
