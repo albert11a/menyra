@@ -259,3 +259,10 @@ cartFab.addEventListener("click", () => {
 cart = loadCartFromStorage();
 renderCart();
 loadRestaurantHeader();
+
+// Safari BFCache – beim Zurückspringen Porosia-Seite aktualisieren
+window.addEventListener("pageshow", () => {
+  cart = loadCartFromStorage();
+  renderCart();
+});
+
