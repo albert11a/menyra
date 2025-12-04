@@ -491,7 +491,7 @@ body.no-scroll {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 45px;          /* +15px mehr Abstand zwischen den Cards */
+  gap: 45px;          /* Abstand zwischen vollständigen Cards (Speisekarte) */
   margin-top: 10px;
 }
 
@@ -538,7 +538,7 @@ body.no-scroll {
   grid-column: 1 / -1;
   font-size: 0.78rem;
   color: #64748b;
-  margin-top: 14px;    /* mehr Abstand Titel → Text */
+  margin-top: 14px;    /* Abstand Titel → Text */
   margin-bottom: 18px; /* leerer Abstand Text → Footer */
 }
 
@@ -548,8 +548,9 @@ body.no-scroll {
   align-self: center;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
   font-size: 0.78rem;
+  margin-top: 4px; /* kleiner Abstand Beschreibung → Likes */
 }
 
 .social-btn {
@@ -612,10 +613,10 @@ body.no-scroll {
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 0;
+  margin-top: 14px;    /* Abstand: Likes → Buttons (Speisekarte) */
 }
 
-/* Mengen-Kapsel – gleiche Höhe wie Buttons */
+/* Mengen-Kapsel – gleiche Höhe wie Buttons (wird auch bei Drinks benutzt) */
 .qty-control {
   display: inline-flex;
   align-items: center;
@@ -653,7 +654,7 @@ body.no-scroll {
 }
 
 /* ========================================
-   GETRÄNKE-KARTE (2 Spalten + Stepper in einer Reihe)
+   GETRÄNKE-KARTE (2 Spalten, iOS-Style)
    ======================================== */
 
 #drinksSection h2 {
@@ -662,128 +663,228 @@ body.no-scroll {
   margin-bottom: 6px;
 }
 
-/* Grid: 2 Spalten – wie bisher */
+/* Grid: 2 Spalten */
 .drinks-list {
-  margin-top: 10px;
+  margin-top: 8px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  gap: 14px; /* Abstand zwischen Getränkekarten */
 }
 
+/* Card-Layout – hier wird die Karte „länger“:
+   -> padding-bottom anpassen, wenn du noch mehr Luft unten willst */
 .drink-item {
   background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  padding: 8px;
+  border-radius: 18px;
+  padding: 10px 10px 18px;
+  border: 1px solid rgba(148, 163, 184, 0.30);
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 8px;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04); /* sehr dezent */
 }
 
+/* Topbar mit Herz + Counter
+   -> margin-bottom steuert Abstand Like-Reihe → Bild */
+.drink-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  margin-bottom: 6px; /* HIER Abstand Like → Bild anpassen */
+}
+
+/* Bild */
 .drink-image {
   width: 100%;
-  border-radius: 10px;
+  border-radius: 14px;
   object-fit: cover;
   aspect-ratio: 3 / 4;
-  margin-bottom: 6px;
+  display: block;
 }
 
+/* Titel + Preis
+   -> margin-top Abstand Bild → Titel */
 .drink-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  gap: 4px;
+  margin-top: 8px;          /* HIER Abstand Bild → Titel anpassen */
 }
 
 .drink-name {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
+  color: #0f172a;
 }
 
 .drink-price {
-  font-size: 0.9rem;
+  font-size: 0.82rem;
   font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
 }
 
+/* Beschreibung */
 .drink-desc {
-  font-size: 0.76rem;
+  margin-top: 6px;          /* Titel → Beschreibung */
+  font-size: 0.75rem;
   color: #64748b;
+  line-height: 1.38;
 }
 
-/* Aktionen bei Getränken: Stepper + Hinzufügen-Button
-   → bleiben immer in EINER Reihe */
-.drink-actions {
+/* Footer: links Menge, rechts „Wähle“ 
+   -> margin-top Abstand Text → Footer */
+.drink-footer {
+  margin-top: 16px;         /* HIER Abstand Beschreibung → Footer anpassen */
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 8px;
-  margin-top: 18px; /* << Abstand zwischen Text und Buttons (Getränke) */
-  flex-wrap: nowrap; /* NICHT umbrechen → alles in einer Zeile */
+  gap: 10px;
 }
 
-/* Stepper-Kapsel: − 1 +  (extra kompakt) */
-.drink-stepper {
+/* Like-Bereich (Herz + Zahl) – Re-Use aus Demo */
+
+.like-wrap {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
   gap: 6px;
-  padding: 3px 9px;
+}
+
+/* Weißer Kreis, kein Border, dezenter iOS-Shadow */
+.icon-circle {
+  position: relative;
+  width: 32px;
+  height: 32px;
   border-radius: 999px;
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  height: 30px;                /* gleiche Höhe wie .drink-add-btn */
-  font-size: 0.76rem;
-  flex-shrink: 1;              /* darf etwas kleiner werden, wenn wenig Platz */
-  min-width: 0;                /* verhindert unnötige Mindestbreite */
-}
-
-/* Minus/Plus im Stepper */
-.drink-stepper-btn {
   border: none;
-  background: transparent;
-  font-size: 0.85rem;
-  cursor: pointer;
-  padding: 0 2px;
-  min-width: 12px;
-}
-
-/* Anzahl in der Mitte */
-.drink-qty-value {
-  min-width: 16px;
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Hinzufügen-Button – gleiche Höhe wie Stepper */
-.drink-add-btn {
-  flex-shrink: 0;
-  padding: 0 12px;
-  height: 30px;               /* exakt gleiche Höhe wie .drink-stepper */
+  background: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
+  transition:
+    transform 0.14s ease-out,
+    box-shadow 0.16s ease-out,
+    background 0.16s ease-out;
+}
+
+.icon-circle:hover {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.icon-circle:active {
+  transform: scale(0.94);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+.icon-circle__inner {
+  width: 17px;
+  height: 17px;
+  display: block;
+}
+
+/* Herz-Pfad – modern, dünn, iOS-like */
+.heart-path {
+  fill: none;
+  stroke: #cbd5e1;
+  stroke-width: 1.8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition:
+    fill 0.18s ease-out,
+    stroke 0.18s ease-out,
+    transform 0.18s ease-out;
+  transform-origin: center;
+}
+
+/* Count neben Herz */
+.like-count {
   font-size: 0.78rem;
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  color: #6b7280;
+  min-width: 18px;
 }
 
-/* Kleines Tuning für sehr schmale Handys,
-   alles bleibt aber in EINER Reihe */
-@media (max-width: 380px) {
-  .drink-stepper {
-    padding: 2px 7px;
-    gap: 4px;
-    height: 28px;
-    font-size: 0.74rem;
-  }
-
-  .drink-add-btn {
-    height: 28px;
-    padding: 0 10px;
-    font-size: 0.76rem;
-  }
+/* Aktiver Like-Zustand – Apple-Red Style */
+.like-wrap.is-liked .icon-circle {
+  background: #fff1f2;
+  box-shadow: 0 4px 10px rgba(255, 59, 48, 0.20);
 }
 
+.like-wrap.is-liked .heart-path {
+  fill: #ff3b30;
+  stroke: #ff3b30;
+  transform: scale(1.03);
+}
 
+.like-wrap.is-liked .like-count {
+  color: #b91c1c;
+}
+
+/* kleine Tap-Animation */
+.like-wrap.is-animating .heart-path {
+  animation: drinkHeartTap 0.26s ease-out;
+}
+
+.like-wrap.is-animating .icon-circle {
+  animation: drinkButtonTap 0.26s ease-out;
+}
+
+@keyframes drinkHeartTap {
+  0%   { transform: scale(0.82); }
+  50%  { transform: scale(1.18); }
+  100% { transform: scale(1); }
+}
+
+@keyframes drinkButtonTap {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+/* Rechter Button – „Wähle“, keine Border */
+.btn-add-round {
+  border: none;
+  border-radius: 999px;
+  padding: 0 14px;
+  height: 32px;
+  background: #6c66e6;                    /* moderner Indigo-Ton */
+  color: #f9fafb;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
+  transition:
+    background 0.18s ease-out,
+    transform 0.14s ease-out,
+    box-shadow 0.18s ease-out;
+  -webkit-tap-highlight-color: transparent;
+  white-space: nowrap;
+}
+
+.btn-add-round span {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.btn-add-round:hover {
+  background: #4338ca;
+  box-shadow: 0 5px 12px rgba(15, 23, 42, 0.20);
+  transform: translateY(-1px);
+}
+
+.btn-add-round:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14);
+}
 
 /* ========================================
    ANGEBOTS-KARTE (Slider "Sot ne fokus")
@@ -1343,151 +1444,3 @@ img {
     max-width: 100%;
   }
 }
-
-
-
-
-
-
-
-/* ========================================
-   MENYRA UPDATE – Speisekarte & Getränke
-   ======================================== */
-
-/* Abstand zwischen den Speisekarte-Karten untereinander */
-.menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 45px; /* Abstand zwischen vollständigen Cards (Speisekarte) */
-  margin-top: 10px;
-}
-
-/* Beschreibung in Speisekarte – mehr Luft nach unten */
-.menu-item-desc {
-  font-size: 0.78rem;
-  color: #64748b;
-  margin-top: 4px;
-  margin-bottom: 14px; /* Abstand: Beschreibung → Likes/Buttons (Speisekarte) */
-}
-
-/* Likes / Kommentare – leichter Abstand nach oben */
-.menu-item-social {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 4px;     /* kleiner Abstand Beschreibung → Likes */
-}
-
-/* Buttonreihe in Speisekarte – mehr Abstand zu Likes */
-.menu-item-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 14px;    /* Abstand: Likes → Buttons (Speisekarte) */
-}
-
-/* ========================================
-   Getränke – Layout + Mengensteuerung
-   ======================================== */
-
-.drinks-list {
-  margin-top: 10px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px; /* Abstand zwischen Getränkekarten */
-}
-
-.drink-item {
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  padding: 8px;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.drink-image {
-  width: 100%;
-  border-radius: 10px;
-  object-fit: cover;
-  aspect-ratio: 3 / 4;
-  margin-bottom: 6px;
-}
-
-.drink-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.drink-name {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.drink-price {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.drink-desc {
-  font-size: 0.76rem;
-  color: #64748b;
-}
-
-/* Aktionen bei Getränken – hier ist der Mengen-Stepper */
-.drink-actions {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  margin-top: 18px; /* Abstand: Titel/Beschreibung → Stepper (Getränke) */
-}
-
-/* Buttons + Zahl im Stepper */
-.drink-qty-btn {
-  border-radius: 999px;
-  min-width: 30px;
-  padding-inline: 0;
-}
-
-.drink-qty-value {
-  min-width: 24px;
-  text-align: center;
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* ========================================
-   Likes – nur optische Feinheit
-   ======================================== */
-
-.social-btn {
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.76rem;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 3px 6px;
-  border-radius: 999px;
-}
-
-.social-btn:hover {
-  background: #e5e7eb;
-}
-
-.social-btn-like--active {
-  color: #ef4444; /* Herz aktiv = rot */
-}
-
-.social-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
