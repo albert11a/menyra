@@ -491,32 +491,37 @@ body.no-scroll {
 .menu-list {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 45px;          /* +15px mehr Abstand zwischen den Cards */
   margin-top: 10px;
 }
 
+/* Card als Grid: oben Bild, darunter Titel/Preis, Text,
+   unten eine Zeile: links Likes, rechts Buttons */
 .menu-item {
   background: #ffffff;
   border-radius: 14px;
-  padding: 10px 12px;
+  padding: 10px 12px 14px;
   border: 1px solid #e2e8f0;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-auto-rows: auto;
+  row-gap: 4px;
 }
 
 .menu-item-image {
+  grid-column: 1 / -1;
   width: 100%;
   max-height: 160px;
   border-radius: 12px;
   object-fit: cover;
-  margin-bottom: 6px;
 }
 
 .menu-item-header {
+  grid-column: 1 / -1;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  margin-top: 18px; /* mehr Abstand zum Bild */
 }
 
 .menu-item-name {
@@ -530,18 +535,21 @@ body.no-scroll {
 }
 
 .menu-item-desc {
+  grid-column: 1 / -1;
   font-size: 0.78rem;
   color: #64748b;
+  margin-top: 14px;    /* mehr Abstand Titel → Text */
+  margin-bottom: 18px; /* leerer Abstand Text → Footer */
 }
 
-/* Social-Leiste */
-
+/* Social-Leiste (links im Footer) */
 .menu-item-social {
+  grid-column: 1 / 2;
+  align-self: center;
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 8px;
-  font-size: 0.76rem;
+  font-size: 0.78rem;
 }
 
 .social-btn {
@@ -549,41 +557,103 @@ body.no-scroll {
   background: transparent;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  font-size: 0.76rem;
+  gap: 6px;
+  font-size: 0.78rem;
   color: #6b7280;
   cursor: pointer;
-  padding: 3px 6px;
+  padding: 4px 9px;
   border-radius: 999px;
+  transition: background 0.12s ease, transform 0.08s ease, color 0.12s ease;
 }
 
 .social-btn:hover {
   background: #e5e7eb;
+  transform: translateY(-1px);
 }
 
-.social-btn-like--active {
-  color: #1877F2;
-}
-
-.social-btn .social-icon {
+.social-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   font-size: 0.9rem;
 }
 
-.social-btn .social-count {
+.social-count {
   font-weight: 500;
 }
 
-/* Aktionen */
+/* Like-Farben */
+.social-btn-like .social-icon {
+  background: rgba(239, 68, 68, 0.08);
+  color: #ef4444;
+}
 
+.social-btn-comment .social-icon {
+  background: rgba(59, 130, 246, 0.08);
+  color: #2563eb;
+}
+
+.social-btn-like--active {
+  color: #ef4444;
+}
+
+.social-btn-like--active .social-icon {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+/* Aktionen (rechts im Footer) */
 .menu-item-actions {
+  grid-column: 2 / 3;
+  justify-self: end;
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
   gap: 8px;
-  margin-top: 20px;
+  margin-top: 0;
+}
+
+/* Mengen-Kapsel – gleiche Höhe wie Buttons */
+.qty-control {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  overflow: hidden;
+  background: #f9fafb;
+  height: 34px;
+}
+
+.qty-btn {
+  border: none;
+  background: transparent;
+  width: 30px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  cursor: pointer;
+  color: #111827;
+}
+
+.qty-btn:active {
+  background: #e5e7eb;
+}
+
+.qty-value {
+  min-width: 30px;
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #111827;
+  padding: 0 4px;
 }
 
 /* ========================================
-   GETRÄNKE-KARTE (2 Spalten)
+   GETRÄNKE-KARTE (2 Spalten + Stepper in einer Reihe)
    ======================================== */
 
 #drinksSection h2 {
@@ -592,11 +662,12 @@ body.no-scroll {
   margin-bottom: 6px;
 }
 
+/* Grid: 2 Spalten – wie bisher */
 .drinks-list {
-  margin-top: 8px;
+  margin-top: 10px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 16px;
 }
 
 .drink-item {
@@ -638,12 +709,81 @@ body.no-scroll {
   color: #64748b;
 }
 
+/* Aktionen bei Getränken: Stepper + Hinzufügen-Button
+   → bleiben immer in EINER Reihe */
 .drink-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 6px;
-  margin-top: 14px;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px; /* << Abstand zwischen Text und Buttons (Getränke) */
+  flex-wrap: nowrap; /* NICHT umbrechen → alles in einer Zeile */
 }
+
+/* Stepper-Kapsel: − 1 +  (extra kompakt) */
+.drink-stepper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  height: 30px;                /* gleiche Höhe wie .drink-add-btn */
+  font-size: 0.76rem;
+  flex-shrink: 1;              /* darf etwas kleiner werden, wenn wenig Platz */
+  min-width: 0;                /* verhindert unnötige Mindestbreite */
+}
+
+/* Minus/Plus im Stepper */
+.drink-stepper-btn {
+  border: none;
+  background: transparent;
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 0 2px;
+  min-width: 12px;
+}
+
+/* Anzahl in der Mitte */
+.drink-qty-value {
+  min-width: 16px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* Hinzufügen-Button – gleiche Höhe wie Stepper */
+.drink-add-btn {
+  flex-shrink: 0;
+  padding: 0 12px;
+  height: 30px;               /* exakt gleiche Höhe wie .drink-stepper */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.78rem;
+}
+
+/* Kleines Tuning für sehr schmale Handys,
+   alles bleibt aber in EINER Reihe */
+@media (max-width: 380px) {
+  .drink-stepper {
+    padding: 2px 7px;
+    gap: 4px;
+    height: 28px;
+    font-size: 0.74rem;
+  }
+
+  .drink-add-btn {
+    height: 28px;
+    padding: 0 10px;
+    font-size: 0.76rem;
+  }
+}
+
+
 
 /* ========================================
    ANGEBOTS-KARTE (Slider "Sot ne fokus")
@@ -816,7 +956,6 @@ img {
   display: block;
 }
 
-/* Nur QR / Admin-Bilder mit Rahmen, NICHT Detajet */
 .list-item-row img {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
@@ -909,7 +1048,6 @@ img {
   z-index: 61;
 }
 
-/* sichtbar → komplett im Bild, wie eigene Seite */
 .drawer--visible {
   transform: translateX(0);
 }
@@ -924,86 +1062,84 @@ img {
   color: #f9fafb;
 }
 
-/* =========================
-   DETAJET – BILD-BEREICH / SLIDER (sauber)
-   ========================= */
+/* DETAJET BILD-BEREICH / SLIDER */
 
-/* Bildcontainer auf Detajet-Seite:
-   - Abstand zum Kartenrand
-   - runde Ecken
-   - kein schwarzer Rand
-*/
 .drawer-image-wrap {
   position: relative;
-  margin: 8px 8px 12px 8px;   /* Abstand oben/links/rechts/unten */
-  border-radius: 16px;
+  margin: -10px -14px 12px;
+  padding: 0;
+  border-radius: 18px;
   overflow: hidden;
-  background: #ffffff;        /* gleich wie Card, kein dunkler Rahmen */
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Slider-Struktur – immer nur EIN Bild sichtbar */
 .detail-slider {
   width: 100%;
-  height: auto;
+  height: 100%;
 }
 
 .detail-slider-viewport {
   width: 100%;
-  overflow: hidden;           /* zeigt nur eine Slide */
+  overflow: hidden;
 }
 
 .detail-slider-track {
   display: flex;
+  width: 100%;
   transition: transform 0.35s ease;
   will-change: transform;
 }
 
-/* Jede Slide nimmt 100% Breite ein */
 .detail-slide {
   flex: 0 0 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Bilder selbst – ohne Rahmen */
 .detail-slide img {
   display: block;
   width: 100%;
   height: auto;
   object-fit: cover;
+  border-radius: 0;
   border: none;
   background: transparent;
-  border-radius: 0;           /* Rundung kommt vom Container */
   box-shadow: none;
   outline: none;
 }
 
-/* Pfeile im Bild, mittig vertikal */
 .detail-slider-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 40px;
-  height: 40px;
-  border-radius: 9999px;
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
   border: none;
-  cursor: pointer;
+  background: rgba(0, 0, 0, 0.35);
+  color: #ffffff;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.3rem;
-  background: rgba(0,0,0,0.35);  /* leicht transparent im Bild */
-  color: #ffffff;
-  z-index: 10;
+  font-size: 1.2rem;
+  cursor: pointer;
+  z-index: 5;
 }
 
 .detail-slider-arrow--left {
-  left: 8px;
+  left: 10px;
 }
 
 .detail-slider-arrow--right {
-  right: 8px;
+  right: 10px;
 }
 
-/* Inhalt unter dem Bild (bleibt wie vorher) */
+/* Inhalt unter dem Bild */
+
 .drawer--product .drawer-body {
   background: #020617;
   border-radius: 18px;
@@ -1198,4 +1334,151 @@ img {
   .drawer {
     max-width: 100%;
   }
+}
+
+
+
+
+
+
+
+/* ========================================
+   MENYRA UPDATE – Speisekarte & Getränke
+   ======================================== */
+
+/* Abstand zwischen den Speisekarte-Karten untereinander */
+.menu-list {
+  display: flex;
+  flex-direction: column;
+  gap: 45px; /* Abstand zwischen vollständigen Cards (Speisekarte) */
+  margin-top: 10px;
+}
+
+/* Beschreibung in Speisekarte – mehr Luft nach unten */
+.menu-item-desc {
+  font-size: 0.78rem;
+  color: #64748b;
+  margin-top: 4px;
+  margin-bottom: 14px; /* Abstand: Beschreibung → Likes/Buttons (Speisekarte) */
+}
+
+/* Likes / Kommentare – leichter Abstand nach oben */
+.menu-item-social {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;     /* kleiner Abstand Beschreibung → Likes */
+}
+
+/* Buttonreihe in Speisekarte – mehr Abstand zu Likes */
+.menu-item-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 14px;    /* Abstand: Likes → Buttons (Speisekarte) */
+}
+
+/* ========================================
+   Getränke – Layout + Mengensteuerung
+   ======================================== */
+
+.drinks-list {
+  margin-top: 10px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px; /* Abstand zwischen Getränkekarten */
+}
+
+.drink-item {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.drink-image {
+  width: 100%;
+  border-radius: 10px;
+  object-fit: cover;
+  aspect-ratio: 3 / 4;
+  margin-bottom: 6px;
+}
+
+.drink-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.drink-name {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.drink-price {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.drink-desc {
+  font-size: 0.76rem;
+  color: #64748b;
+}
+
+/* Aktionen bei Getränken – hier ist der Mengen-Stepper */
+.drink-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  margin-top: 18px; /* Abstand: Titel/Beschreibung → Stepper (Getränke) */
+}
+
+/* Buttons + Zahl im Stepper */
+.drink-qty-btn {
+  border-radius: 999px;
+  min-width: 30px;
+  padding-inline: 0;
+}
+
+.drink-qty-value {
+  min-width: 24px;
+  text-align: center;
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #111827;
+}
+
+/* ========================================
+   Likes – nur optische Feinheit
+   ======================================== */
+
+.social-btn {
+  border: none;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.76rem;
+  color: #6b7280;
+  cursor: pointer;
+  padding: 3px 6px;
+  border-radius: 999px;
+}
+
+.social-btn:hover {
+  background: #e5e7eb;
+}
+
+.social-btn-like--active {
+  color: #ef4444; /* Herz aktiv = rot */
+}
+
+.social-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
