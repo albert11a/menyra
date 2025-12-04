@@ -527,6 +527,10 @@ function renderDrinksTabs() {
   });
 }
 
+/**
+ * GETRÄNKE-RENDER –
+ * Like oben (Herz + Count), unten links Menge, unten rechts "Wähle"
+ */
 function renderDrinks() {
   if (!drinksSection || !drinksListEl) return;
 
@@ -552,18 +556,61 @@ function renderDrinks() {
   }
 
   items.forEach((item) => {
-    const div = document.createElement("div");
-    div.className = "drink-item";
+    const card = document.createElement("div");
+    card.className = "drink-item";
+    card.dataset.itemId = item.id;
 
+    /* ========= TOPBAR: Herz + Count oben ========= */
+    const topbar = document.createElement("div");
+    topbar.className = "drink-topbar";
+
+    const likeWrap = document.createElement("div");
+    likeWrap.className =
+      "like-wrap" + (isItemLiked(item.id) ? " is-liked" : "");
+    likeWrap.dataset.itemId = item.id;
+
+    const likeBtn = document.createElement("button");
+    likeBtn.type = "button";
+    likeBtn.className = "icon-circle";
+    likeBtn.setAttribute("aria-label", "Like");
+
+    const iconInner = document.createElement("span");
+    iconInner.className = "icon-circle__inner";
+    iconInner.innerHTML = `
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path
+          class="heart-path"
+          d="M12.001 4.529c2.349-2.532 6.533-2.036 8.426.758 1.222 1.79 1.347 4.582-.835 7.086-1.803 2.08-4.822 4.403-7.296 5.876a1.25 1.25 0 0 1-1.292 0c-2.474-1.473-5.493-3.797-7.296-5.876-2.182-2.504-2.057-5.296-.835-7.086 1.893-2.794 6.077-3.29 8.428-.758z"
+        />
+      </svg>
+    `;
+    likeBtn.appendChild(iconInner);
+
+    const countSpan = document.createElement("span");
+    countSpan.className = "like-count";
+    countSpan.textContent = String(item.likeCount || 0);
+
+    likeWrap.appendChild(likeBtn);
+    likeWrap.appendChild(countSpan);
+    topbar.appendChild(likeWrap);
+    card.appendChild(topbar);
+
+    likeBtn.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      await toggleItemLike(item, likeWrap);
+    });
+
+    /* ========= BILD ========= */
     if (item.imageUrl) {
       const img = document.createElement("img");
       img.src = item.imageUrl;
       img.alt = item.name;
       img.loading = "lazy";
       img.className = "drink-image";
-      div.appendChild(img);
+      card.appendChild(img);
     }
 
+    /* ========= TITEL + PREIS ========= */
     const header = document.createElement("div");
     header.className = "drink-header";
 
@@ -577,64 +624,76 @@ function renderDrinks() {
 
     header.appendChild(nameEl);
     header.appendChild(priceEl);
-    div.appendChild(header);
+    card.appendChild(header);
 
+    /* ========= BESCHREIBUNG (optional) ========= */
     if (item.description && item.description.trim() !== "") {
       const descEl = document.createElement("div");
       descEl.className = "drink-desc";
       descEl.textContent = item.description;
-      div.appendChild(descEl);
+      card.appendChild(descEl);
     }
 
-    // === Aktionen: Stepper (- qty +) + Hinzufügen-Button ===
-    const actions = document.createElement("div");
-    actions.className = "drink-actions";
+    /* ========= FOOTER: Menge links, Button rechts ========= */
+    const footer = document.createElement("div");
+    footer.className = "drink-footer";
 
-    // Stepper-Kapsel
-    const stepper = document.createElement("div");
-    stepper.className = "drink-stepper";
+    // Menge-Control (nur lokal für diesen Klick)
+    const qtyControl = document.createElement("div");
+    qtyControl.className = "qty-control";
 
     const minusBtn = document.createElement("button");
     minusBtn.type = "button";
-    minusBtn.className = "drink-stepper-btn";
+    minusBtn.className = "qty-btn";
     minusBtn.textContent = "−";
 
-    const qtySpan = document.createElement("span");
-    qtySpan.className = "drink-qty-value";
-    const cartItem = cart.find((c) => c.id === item.id);
-    qtySpan.textContent = cartItem ? cartItem.qty : 0;
+    const qtyValue = document.createElement("span");
+    qtyValue.className = "qty-value";
+
+    let currentQty = 1;
+    qtyValue.textContent = String(currentQty);
 
     const plusBtn = document.createElement("button");
     plusBtn.type = "button";
-    plusBtn.className = "drink-stepper-btn";
+    plusBtn.className = "qty-btn";
     plusBtn.textContent = "+";
 
-    minusBtn.addEventListener("click", () => {
-      changeCart(item, -1);
-    });
-    plusBtn.addEventListener("click", () => {
-      changeCart(item, 1);
+    minusBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      if (currentQty > 1) {
+        currentQty -= 1;
+        qtyValue.textContent = String(currentQty);
+      }
     });
 
-    stepper.appendChild(minusBtn);
-    stepper.appendChild(qtySpan);
-    stepper.appendChild(plusBtn);
+    plusBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      currentQty += 1;
+      qtyValue.textContent = String(currentQty);
+    });
 
-    // Hinzufügen-Button
+    qtyControl.appendChild(minusBtn);
+    qtyControl.appendChild(qtyValue);
+    qtyControl.appendChild(plusBtn);
+
+    // Rechter Button „Wähle“
     const addBtn = document.createElement("button");
     addBtn.type = "button";
-    addBtn.className = "btn btn-primary btn-small drink-add-btn";
-    addBtn.textContent = "Hinzufügen";
-    addBtn.addEventListener("click", () => {
-      changeCart(item, 1);
+    addBtn.className = "btn-add-round";
+    const addSpan = document.createElement("span");
+    addSpan.textContent = "Wähle"; // ohne "+"
+    addBtn.appendChild(addSpan);
+
+    addBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      changeCart(item, currentQty);
     });
 
-    actions.appendChild(stepper);
-    actions.appendChild(addBtn);
+    footer.appendChild(qtyControl);
+    footer.appendChild(addBtn);
+    card.appendChild(footer);
 
-    div.appendChild(actions);
-
-    drinksListEl.appendChild(div);
+    drinksListEl.appendChild(card);
   });
 }
 
@@ -810,7 +869,7 @@ function renderMenu() {
    LIKES Firestore-Update
    ========================= */
 
-async function toggleItemLike(item) {
+async function toggleItemLike(item, likeWrapEl = null) {
   const likedBefore = isItemLiked(item.id);
   const likedAfter = !likedBefore;
   setItemLiked(item.id, likedAfter);
@@ -823,6 +882,28 @@ async function toggleItemLike(item) {
   }
   item.likeCount = modelItem ? modelItem.likeCount : item.likeCount;
 
+  // Optional: direkt den Drink-Card-Like updaten + animieren
+  if (likeWrapEl) {
+    likeWrapEl.classList.remove("is-animating");
+    void likeWrapEl.offsetWidth;
+    likeWrapEl.classList.add("is-animating");
+
+    if (likedAfter) {
+      likeWrapEl.classList.add("is-liked");
+    } else {
+      likeWrapEl.classList.remove("is-liked");
+    }
+
+    const countEl = likeWrapEl.querySelector(".like-count");
+    if (countEl) {
+      countEl.textContent = String(item.likeCount || 0);
+    }
+
+    setTimeout(() => {
+      likeWrapEl.classList.remove("is-animating");
+    }, 280);
+  }
+
   try {
     const restRef = doc(db, "restaurants", restaurantId);
     const menuCol = collection(restRef, "menuItems");
@@ -834,7 +915,8 @@ async function toggleItemLike(item) {
     console.error(err);
   }
 
-  renderMenu(); // Like-Zahl aktualisieren
+  // Speisekarte (Food) neu zeichnen, damit dort Like-Zahlen stimmen
+  renderMenu();
 }
 
 /* =========================
@@ -889,13 +971,13 @@ function renderCart() {
 function changeCart(item, delta) {
   const index = cart.findIndex((c) => c.id === item.id);
   if (index === -1 && delta > 0) {
-    cart.push({ id: item.id, name: item.name, price: item.price, qty: 1 });
+    cart.push({ id: item.id, name: item.name, price: item.price, qty: delta });
   } else if (index >= 0) {
     cart[index].qty += delta;
     if (cart[index].qty <= 0) cart.splice(index, 1);
   }
   renderCart();
-  renderDrinks(); // Getränkemengen im Stepper aktualisieren
+  renderDrinks(); // Drink-Cards neu rendern (Likes & ggf. Menge-UI frisch)
 }
 
 /* =========================
