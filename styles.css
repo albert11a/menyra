@@ -1062,37 +1062,41 @@ img {
   color: #f9fafb;
 }
 
-/* DETAJET BILD-BEREICH / SLIDER */
+/* ============================================
+   DETAJET – Bildanzeige mit schönem Abstand
+   ============================================ */
 
+/* Container für das Produktbild in detajet.html */
 .drawer-image-wrap {
   position: relative;
-  margin: -10px -14px 12px;
+  /* Abstand zum Kartenrand: hier kannst du später selbst spielen */
+  margin: 4px 4px 16px;      /* links/rechts Abstand + unten etwas Luft */
   padding: 0;
-  border-radius: 18px;
-  overflow: hidden;
-  background: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  border-radius: 16px;       /* gleiche Rundung wie Card */
+  overflow: hidden;          /* Bild bleibt sauber in der Rundung */
+  background: #f9fafb;       /* leichter Hintergrund, keine dunklen Ränder */
 }
 
+/* Falls du einen Slider benutzt: allgemeiner Wrapper */
 .detail-slider {
   width: 100%;
-  height: 100%;
+  height: auto;
 }
 
+/* Viewport → nur EIN Bild sichtbar */
 .detail-slider-viewport {
   width: 100%;
   overflow: hidden;
 }
 
+/* Track für Slides (Slide-Effekt) */
 .detail-slider-track {
   display: flex;
-  width: 100%;
   transition: transform 0.35s ease;
   will-change: transform;
 }
 
+/* Jede Slide nimmt 100 % Breite ein */
 .detail-slide {
   flex: 0 0 100%;
   display: flex;
@@ -1100,24 +1104,27 @@ img {
   justify-content: center;
 }
 
+/* Das eigentliche Bild in Detajet */
+.drawer-image-wrap img,
 .detail-slide img {
   display: block;
   width: 100%;
   height: auto;
+  max-height: 260px;       /* kannst du anpassen, wenn du es höher willst */
   object-fit: cover;
-  border-radius: 0;
   border: none;
-  background: transparent;
+  border-radius: 0;        /* Rundung kommt vom Container */
   box-shadow: none;
   outline: none;
 }
 
+/* Pfeile im Bild (falls du Slider nutzt) */
 .detail-slider-arrow {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
   border-radius: 999px;
   border: none;
   background: rgba(0, 0, 0, 0.35);
@@ -1127,7 +1134,7 @@ img {
   justify-content: center;
   font-size: 1.2rem;
   cursor: pointer;
-  z-index: 5;
+  z-index: 10;
 }
 
 .detail-slider-arrow--left {
@@ -1137,6 +1144,7 @@ img {
 .detail-slider-arrow--right {
   right: 10px;
 }
+
 
 /* Inhalt unter dem Bild */
 
