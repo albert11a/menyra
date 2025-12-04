@@ -586,21 +586,52 @@ function renderDrinks() {
       div.appendChild(descEl);
     }
 
+    // === Aktionen: Stepper (- qty +) + Hinzufügen-Button ===
     const actions = document.createElement("div");
     actions.className = "drink-actions";
 
+    // Stepper-Kapsel
+    const stepper = document.createElement("div");
+    stepper.className = "drink-stepper";
+
     const minusBtn = document.createElement("button");
-    minusBtn.className = "btn btn-ghost btn-small";
+    minusBtn.type = "button";
+    minusBtn.className = "drink-stepper-btn";
     minusBtn.textContent = "−";
-    minusBtn.addEventListener("click", () => changeCart(item, -1));
+
+    const qtySpan = document.createElement("span");
+    qtySpan.className = "drink-qty-value";
+    const cartItem = cart.find((c) => c.id === item.id);
+    qtySpan.textContent = cartItem ? cartItem.qty : 0;
 
     const plusBtn = document.createElement("button");
-    plusBtn.className = "btn btn-primary btn-small";
-    plusBtn.textContent = "Hinzufügen";
-    plusBtn.addEventListener("click", () => changeCart(item, 1));
+    plusBtn.type = "button";
+    plusBtn.className = "drink-stepper-btn";
+    plusBtn.textContent = "+";
 
-    actions.appendChild(minusBtn);
-    actions.appendChild(plusBtn);
+    minusBtn.addEventListener("click", () => {
+      changeCart(item, -1);
+    });
+    plusBtn.addEventListener("click", () => {
+      changeCart(item, 1);
+    });
+
+    stepper.appendChild(minusBtn);
+    stepper.appendChild(qtySpan);
+    stepper.appendChild(plusBtn);
+
+    // Hinzufügen-Button
+    const addBtn = document.createElement("button");
+    addBtn.type = "button";
+    addBtn.className = "btn btn-primary btn-small drink-add-btn";
+    addBtn.textContent = "Hinzufügen";
+    addBtn.addEventListener("click", () => {
+      changeCart(item, 1);
+    });
+
+    actions.appendChild(stepper);
+    actions.appendChild(addBtn);
+
     div.appendChild(actions);
 
     drinksListEl.appendChild(div);
@@ -717,7 +748,7 @@ function renderMenu() {
       "social-btn social-btn-like" +
       (isItemLiked(item.id) ? " social-btn-like--active" : "");
     likeBtn.innerHTML = `
-      <span class="social-icon">👍</span>
+      <span class="social-icon">❤️</span>
       <span class="social-count">${item.likeCount || 0}</span>
     `;
     likeBtn.addEventListener("click", async (ev) => {
@@ -749,11 +780,7 @@ function renderMenu() {
     const actions = document.createElement("div");
     actions.className = "menu-item-actions";
 
-    const minusBtn = document.createElement("button");
-    minusBtn.className = "btn btn-ghost";
-    minusBtn.textContent = "−";
-    minusBtn.addEventListener("click", () => changeCart(item, -1));
-
+    // Speisekarte: nur Detajet + Hinzufügen (keine Anzahl)
     const detailsBtn = document.createElement("button");
     detailsBtn.className = "btn btn-dark";
     detailsBtn.textContent = "Detajet";
@@ -771,7 +798,6 @@ function renderMenu() {
     plusBtn.textContent = "Hinzufügen";
     plusBtn.addEventListener("click", () => changeCart(item, 1));
 
-    actions.appendChild(minusBtn);
     actions.appendChild(detailsBtn);
     actions.appendChild(plusBtn);
     div.appendChild(actions);
@@ -869,6 +895,7 @@ function changeCart(item, delta) {
     if (cart[index].qty <= 0) cart.splice(index, 1);
   }
   renderCart();
+  renderDrinks(); // Getränkemengen im Stepper aktualisieren
 }
 
 /* =========================
