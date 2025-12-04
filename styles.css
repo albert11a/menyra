@@ -1070,7 +1070,7 @@ img {
 .drawer-image-wrap {
   position: relative;
   /* Abstand zum Kartenrand: hier kannst du später selbst spielen */
-  margin: 4px 4px 16px;      /* links/rechts Abstand + unten etwas Luft */
+  margin: 3px 3px 25px;      /* links/rechts Abstand + unten etwas Luft */
   padding: 0;
   border-radius: 16px;       /* gleiche Rundung wie Card */
   overflow: hidden;          /* Bild bleibt sauber in der Rundung */
@@ -1490,3 +1490,4 @@ img {
   align-items: center;
   justify-content: center;
 }
+
