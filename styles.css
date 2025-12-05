@@ -900,7 +900,7 @@ body.no-scroll {
   box-shadow: none;
   border: 1px solid rgba(148, 163, 184, 0.4);
   width: 100%;
-  margin-bottom: 14px;
+  margin-bottom: 4px;
 }
 
 .offers-header-row {
@@ -1109,7 +1109,6 @@ img {
    DETAIL & CART DRAWER – Fullscreen, swipe von rechts
    ======================================== */
 
-/* Overlay über kompletter Viewport-Fläche */
 .drawer-overlay {
   position: fixed;
   inset: 0;
@@ -1169,37 +1168,31 @@ img {
    DETAJET – Bildanzeige mit schönem Abstand
    ============================================ */
 
-/* Container für das Produktbild in detajet.html */
 .drawer-image-wrap {
   position: relative;
-  /* Abstand zum Kartenrand: hier kannst du später selbst spielen */
-  margin: 3px 3px 25px;      /* links/rechts Abstand + unten etwas Luft */
+  margin: 3px 3px 25px;
   padding: 0;
-  border-radius: 16px;       /* gleiche Rundung wie Card */
-  overflow: hidden;          /* Bild bleibt sauber in der Rundung */
-  background: #f9fafb;       /* leichter Hintergrund, keine dunklen Ränder */
+  border-radius: 16px;
+  overflow: hidden;
+  background: #f9fafb;
 }
 
-/* Falls du einen Slider benutzt: allgemeiner Wrapper */
 .detail-slider {
   width: 100%;
   height: auto;
 }
 
-/* Viewport → nur EIN Bild sichtbar */
 .detail-slider-viewport {
   width: 100%;
   overflow: hidden;
 }
 
-/* Track für Slides (Slide-Effekt) */
 .detail-slider-track {
   display: flex;
   transition: transform 0.35s ease;
   will-change: transform;
 }
 
-/* Jede Slide nimmt 100 % Breite ein */
 .detail-slide {
   flex: 0 0 100%;
   display: flex;
@@ -1207,21 +1200,19 @@ img {
   justify-content: center;
 }
 
-/* Das eigentliche Bild in Detajet */
 .drawer-image-wrap img,
 .detail-slide img {
   display: block;
   width: 100%;
   height: auto;
-  max-height: 260px;       /* kannst du anpassen, wenn du es höher willst */
+  max-height: 260px;
   object-fit: cover;
   border: none;
-  border-radius: 0;        /* Rundung kommt vom Container */
+  border-radius: 0;
   box-shadow: none;
   outline: none;
 }
 
-/* Pfeile im Bild (falls du Slider nutzt) */
 .detail-slider-arrow {
   position: absolute;
   top: 50%;
@@ -1248,7 +1239,6 @@ img {
   right: 10px;
 }
 
-
 /* Inhalt unter dem Bild */
 
 .drawer--product .drawer-body {
@@ -1257,7 +1247,6 @@ img {
   padding: 12px 14px 18px;
 }
 
-/* Titel / Preis */
 .drawer-title-row {
   display: flex;
   justify-content: space-between;
@@ -1276,7 +1265,6 @@ img {
   font-weight: 600;
 }
 
-/* Rating & Like */
 .drawer-meta-row {
   display: flex;
   justify-content: space-between;
@@ -1297,7 +1285,6 @@ img {
   cursor: pointer;
 }
 
-/* Beschreibung / Zutaten */
 .drawer-long-desc {
   font-size: 0.8rem;
   line-height: 1.5;
@@ -1310,7 +1297,6 @@ img {
   margin-bottom: 14px;
 }
 
-/* Menge + Add-Button */
 .drawer-qty-row {
   display: flex;
   align-items: center;
@@ -1328,7 +1314,6 @@ img {
   margin-left: auto;
 }
 
-/* Kommentare */
 .drawer-comments {
   margin-top: 4px;
 }
@@ -1401,14 +1386,12 @@ img {
   align-self: flex-end;
 }
 
-/* Shiko porosin Button im Drawer */
 .drawer-cart-btn {
   width: 100%;
   margin-top: 14px;
   justify-content: center;
 }
 
-/* Cart-Drawer (Bestellübersicht) – heller Card-Style */
 .drawer--cart .drawer-body {
   background: #ffffff;
   border-radius: 18px;
@@ -1421,7 +1404,6 @@ img {
   margin-bottom: 10px;
 }
 
-/* X-Button im Drawer – oben links */
 .drawer-close-btn {
   position: fixed;
   top: 18px;
@@ -1440,9 +1422,108 @@ img {
   z-index: 62;
 }
 
-/* Kleine Screens – Drawer nimmt automatisch volle Breite an */
-@media (max-width: 480px) {
-  .drawer {
-    max-width: 100%;
+/* ========================================
+   KARTE: Shiko porosinë + Thirr kamarierin
+   ======================================== */
+
+.karte-status-row {
+  display: flex;
+  gap: 12px;
+  margin-top: 8px;
+  margin-bottom: 4px;
+}
+
+/* Cards: wie andere, aber OHNE Schatten, immer 2 nebeneinander */
+.status-card {
+  flex: 1 1 0;
+  padding: 10px 10px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  background: #ffffff;
+  box-shadow: none; /* Card selbst kein Shadow */
+}
+
+/* oberer Bereich mit Icon-Kreis links */
+.status-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+}
+
+/* wir verwenden dein existierendes icon-circle, aber als Logo (nicht klickbar) */
+.status-card-top .icon-circle {
+  cursor: default;
+  pointer-events: none;
+}
+
+/* Logo im Kreis */
+.status-icon-circle {
+  background-size: 20px 20px;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Linke Card – Icon aus deinem Link */
+.status-icon-circle--order {
+  background-image: url("https://i.postimg.cc/fWrbHsdR/Chat-GPT-Image-5-Dez-2025-23-31-43.png");
+}
+
+/* Rechte Card – Icon aus deinem Link */
+.status-icon-circle--call {
+  background-image: url("https://i.postimg.cc/yNLKkhXd/Chat-GPT-Image-5-Dez-2025-23-36-38.png");
+}
+
+/* Hauptbutton mittig – iOS-Pill, Shadow wie Herz-Like-Button */
+.status-main-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 9px 18px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #ffffff;
+  color: #111827;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06); /* gleich wie .icon-circle */
+  -webkit-tap-highlight-color: transparent;
+  transition:
+    background 0.18s ease-out,
+    color 0.18s ease-out,
+    box-shadow 0.18s ease-out,
+    transform 0.12s ease-out;
+  margin: 0 auto;       /* Button mittig in der Card */
+  white-space: nowrap;
+}
+
+.status-main-btn:hover {
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.10);
+  transform: translateY(-1px);
+}
+
+.status-main-btn:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
+}
+
+/* Aktiver Staat – wird von deinem JS per Klasse gesetzt:
+   Shiko porosinë offen */
+.order-toggle-btn--active {
+  background: #ede9fe;
+  color: #4c1d95;
+}
+
+/* Kamarieri vjen */
+.call-waiter-btn--active {
+  background: #ecfdf5;
+  color: #166534;
+}
+
+/* Auch auf kleinen Displays: immer nebeneinander */
+@media (max-width: 400px) {
+  .karte-status-row {
+    flex-direction: row;
   }
 }
+
