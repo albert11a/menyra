@@ -33,23 +33,13 @@ const offersSection = document.getElementById("offersSection");
 const offersSliderEl = document.getElementById("offersSlider");
 const offersDotsEl = document.getElementById("offersDots");
 
-// WARENKORB (inline Card)
-const cartSection = document.getElementById("cartSection");
-const cartItemsEl = document.getElementById("cartItems");
-const cartTotalEl = document.getElementById("cartTotal");
-const clearCartBtn = document.getElementById("clearCartBtn");
-const sendOrderBtn = document.getElementById("sendOrderBtn");
-const noteInput = document.getElementById("noteInput");
-const statusMsg = document.getElementById("statusMsg");
-const cartTableLabel = document.getElementById("cartTableLabel");
-
-// SUCHE & FAB
+// SUCHE & FLOATING CART
 const searchInput = document.getElementById("searchInput");
 const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
 
-let allMenuItems = []; // alle Produkte mit type, likes etc.
+let allMenuItems = [];
 let drinksItems = [];
 let foodItems = [];
 
@@ -62,8 +52,6 @@ let cart = [];
 let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
-
-cartTableLabel.textContent = `Tisch ${tableId}`;
 
 /* =========================
    CART: LOCALSTORAGE
@@ -290,11 +278,7 @@ function renderOffersSlider(offers) {
 
       const targetItem = linkedMenuItem
         ? linkedMenuItem
-        : {
-            id: "offer:" + offer.id,
-            name: title,
-            price: price || 0,
-          };
+        : { id: "offer:" + offer.id, name: title, price: price || 0 };
 
       minusBtn.addEventListener("click", () => {
         changeCart(targetItem, -1);
@@ -383,9 +367,7 @@ function inferTypeForItem(item) {
     "energjike",
   ];
 
-  if (drinksWords.some((w) => cat.includes(w))) {
-    return "drink";
-  }
+  if (drinksWords.some((w) => cat.includes(w))) return "drink";
   return "food";
 }
 
@@ -398,7 +380,6 @@ async function loadRestaurantAndMenu() {
       restaurantNameEl.textContent = "Lokal nicht gefunden";
       restaurantMetaEl.textContent = `ID: ${restaurantId}`;
       menuListEl.innerHTML = "<p class='info'>Bitte Personal informieren.</p>";
-      cartSection.style.display = "none";
       offersSection.style.display = "none";
       if (drinksSection) drinksSection.style.display = "none";
       if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
@@ -420,7 +401,6 @@ async function loadRestaurantAndMenu() {
     if (!isRestaurantOperational(data)) {
       menuListEl.innerHTML =
         "<p class='info'>Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.</p>";
-      cartSection.style.display = "none";
       offersSection.style.display = "none";
       if (drinksSection) drinksSection.style.display = "none";
       if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
@@ -473,7 +453,6 @@ async function loadRestaurantAndMenu() {
     restaurantMetaEl.textContent = err.message;
     menuListEl.innerHTML =
       "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
-    cartSection.style.display = "none";
     offersSection.style.display = "none";
     if (drinksSection) drinksSection.style.display = "none";
     if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
@@ -527,10 +506,8 @@ function renderDrinksTabs() {
   });
 }
 
-/**
- * GETRÄNKE-RENDER –
- * Like oben (Herz + Count), unten links Menge, unten rechts "Wähle"
- */
+/* GETRÄNKE-RENDER */
+
 function renderDrinks() {
   if (!drinksSection || !drinksListEl) return;
 
@@ -560,7 +537,6 @@ function renderDrinks() {
     card.className = "drink-item";
     card.dataset.itemId = item.id;
 
-    /* ========= TOPBAR: Herz + Count oben ========= */
     const topbar = document.createElement("div");
     topbar.className = "drink-topbar";
 
@@ -600,7 +576,6 @@ function renderDrinks() {
       await toggleItemLike(item, likeWrap);
     });
 
-    /* ========= BILD ========= */
     if (item.imageUrl) {
       const img = document.createElement("img");
       img.src = item.imageUrl;
@@ -610,7 +585,6 @@ function renderDrinks() {
       card.appendChild(img);
     }
 
-    /* ========= TITEL + PREIS ========= */
     const header = document.createElement("div");
     header.className = "drink-header";
 
@@ -626,7 +600,6 @@ function renderDrinks() {
     header.appendChild(priceEl);
     card.appendChild(header);
 
-    /* ========= BESCHREIBUNG (optional) ========= */
     if (item.description && item.description.trim() !== "") {
       const descEl = document.createElement("div");
       descEl.className = "drink-desc";
@@ -634,11 +607,9 @@ function renderDrinks() {
       card.appendChild(descEl);
     }
 
-    /* ========= FOOTER: Menge links, Button rechts ========= */
     const footer = document.createElement("div");
     footer.className = "drink-footer";
 
-    // Menge-Control (nur lokal für diesen Klick)
     const qtyControl = document.createElement("div");
     qtyControl.className = "qty-control";
 
@@ -649,9 +620,8 @@ function renderDrinks() {
 
     const qtyValue = document.createElement("span");
     qtyValue.className = "qty-value";
-
     let currentQty = 1;
-    qtyValue.textContent = String(currentQty);
+    qtyValue.textContent = "1";
 
     const plusBtn = document.createElement("button");
     plusBtn.type = "button";
@@ -661,14 +631,14 @@ function renderDrinks() {
     minusBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       if (currentQty > 1) {
-        currentQty -= 1;
+        currentQty--;
         qtyValue.textContent = String(currentQty);
       }
     });
 
     plusBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
-      currentQty += 1;
+      currentQty++;
       qtyValue.textContent = String(currentQty);
     });
 
@@ -676,12 +646,11 @@ function renderDrinks() {
     qtyControl.appendChild(qtyValue);
     qtyControl.appendChild(plusBtn);
 
-    // Rechter Button „Wähle“
     const addBtn = document.createElement("button");
     addBtn.type = "button";
     addBtn.className = "btn-add-round";
     const addSpan = document.createElement("span");
-    addSpan.textContent = "Wähle"; // ohne "+"
+    addSpan.textContent = "Wähle";
     addBtn.appendChild(addSpan);
 
     addBtn.addEventListener("click", (ev) => {
@@ -698,7 +667,7 @@ function renderDrinks() {
 }
 
 /* =========================
-   SPEISEKARTE-TABS & -LISTE
+   SPEISEKARTE
    ========================= */
 
 function getFoodCategories() {
@@ -797,7 +766,6 @@ function renderMenu() {
     descEl.textContent = item.description;
     div.appendChild(descEl);
 
-    // Social-Leiste (Likes & Kommentare → Detajet-Seite)
     const socialRow = document.createElement("div");
     socialRow.className = "menu-item-social";
 
@@ -839,7 +807,6 @@ function renderMenu() {
     const actions = document.createElement("div");
     actions.className = "menu-item-actions";
 
-    // Speisekarte: nur Detajet + Hinzufügen (keine Anzahl)
     const detailsBtn = document.createElement("button");
     detailsBtn.className = "btn btn-dark";
     detailsBtn.textContent = "Detajet";
@@ -882,26 +849,18 @@ async function toggleItemLike(item, likeWrapEl = null) {
   }
   item.likeCount = modelItem ? modelItem.likeCount : item.likeCount;
 
-  // Optional: direkt den Drink-Card-Like updaten + animieren
   if (likeWrapEl) {
     likeWrapEl.classList.remove("is-animating");
     void likeWrapEl.offsetWidth;
     likeWrapEl.classList.add("is-animating");
 
-    if (likedAfter) {
-      likeWrapEl.classList.add("is-liked");
-    } else {
-      likeWrapEl.classList.remove("is-liked");
-    }
+    if (likedAfter) likeWrapEl.classList.add("is-liked");
+    else likeWrapEl.classList.remove("is-liked");
 
     const countEl = likeWrapEl.querySelector(".like-count");
-    if (countEl) {
-      countEl.textContent = String(item.likeCount || 0);
-    }
+    if (countEl) countEl.textContent = String(item.likeCount || 0);
 
-    setTimeout(() => {
-      likeWrapEl.classList.remove("is-animating");
-    }, 280);
+    setTimeout(() => likeWrapEl.classList.remove("is-animating"), 280);
   }
 
   try {
@@ -915,12 +874,11 @@ async function toggleItemLike(item, likeWrapEl = null) {
     console.error(err);
   }
 
-  // Speisekarte (Food) neu zeichnen, damit dort Like-Zahlen stimmen
   renderMenu();
 }
 
 /* =========================
-   WARENKORB
+   WARENKORB (nur FAB + Badge)
    ========================= */
 
 function updateCartBadge() {
@@ -941,29 +899,6 @@ function updateCartBadge() {
 }
 
 function renderCart() {
-  if (!cart.length) {
-    cartSection.style.display = "none";
-    updateCartBadge();
-    saveCartToStorage();
-    return;
-  }
-
-  cartSection.style.display = "block";
-  cartItemsEl.innerHTML = "";
-  let total = 0;
-
-  cart.forEach((item) => {
-    total += item.price * item.qty;
-    const row = document.createElement("div");
-    row.className = "cart-item-row";
-    row.innerHTML = `
-      <span>${item.qty}× ${item.name}</span>
-      <span>${(item.price * item.qty).toFixed(2)} €</span>
-    `;
-    cartItemsEl.appendChild(row);
-  });
-
-  cartTotalEl.textContent = `Summe: ${total.toFixed(2)} €`;
   updateCartBadge();
   saveCartToStorage();
 }
@@ -977,35 +912,18 @@ function changeCart(item, delta) {
     if (cart[index].qty <= 0) cart.splice(index, 1);
   }
   renderCart();
-  renderDrinks(); // Drink-Cards neu rendern (Likes & ggf. Menge-UI frisch)
+  renderDrinks();
 }
 
 /* =========================
    EVENTS
    ========================= */
 
-// Cart inline „Leeren“
-clearCartBtn.addEventListener("click", () => {
-  cart = [];
-  renderCart();
-});
-
-// Inline-Karten-Button unten → Porosia-Seite
-sendOrderBtn.addEventListener("click", () => {
-  const url = new URL(window.location.href);
-  url.pathname = "porosia.html";
-  url.searchParams.set("r", restaurantId);
-  url.searchParams.set("t", tableId);
-  window.location.href = url.toString();
-});
-
-// Suche (live) – nur für Speisekarte (Food)
 searchInput.addEventListener("input", () => {
   searchTerm = (searchInput.value || "").trim().toLowerCase();
   renderMenu();
 });
 
-// Floating Cart Button → Porosia-Seite
 cartFab.addEventListener("click", () => {
   if (!cart.length) return;
   const url = new URL(window.location.href);
@@ -1015,7 +933,6 @@ cartFab.addEventListener("click", () => {
   window.location.href = url.toString();
 });
 
-// Safari BFCache – beim Zurückkommen aus Detajet/Porosia Cart neu laden
 window.addEventListener("pageshow", () => {
   cart = loadCartFromStorage();
   renderCart();
