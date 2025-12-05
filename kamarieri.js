@@ -16,13 +16,19 @@ const waiterLoginCard = document.getElementById("waiterLoginCard");
 const waiterCodeInput = document.getElementById("waiterCodeInput");
 const waiterLoginBtn = document.getElementById("waiterLoginBtn");
 const waiterLoginStatus = document.getElementById("waiterLoginStatus");
+
 const orderCard = document.getElementById("orderCard");
 const orderList = document.getElementById("orderList");
 const statusFilterRow = document.getElementById("statusFilterRow");
 
+const waiterCallsCard = document.getElementById("waiterCallsCard");
+const waiterCallsList = document.getElementById("waiterCallsList");
+
 let currentRestaurantId = null;
 let unsubOrders = null;
+let unsubCalls = null;
 let allOrders = [];
+let waiterCalls = [];
 let statusFilter = "all";
 
 /* =========================
@@ -69,6 +75,7 @@ function mapStatusLabel(status) {
   if (status === "new") return "Neu";
   if (status === "in_progress") return "In Arbeit";
   if (status === "served") return "Serviert";
+  if (status === "paid") return "Bezahlt";
   return status || "";
 }
 
@@ -76,6 +83,7 @@ function getStatusColors(status) {
   if (status === "new") return { bg: "#dbeafe", fg: "#1d4ed8" };
   if (status === "in_progress") return { bg: "#fef9c3", fg: "#a16207" };
   if (status === "served") return { bg: "#e5e7eb", fg: "#374151" };
+  if (status === "paid") return { bg: "#dcfce7", fg: "#166534" };
   return { bg: "#e5e7eb", fg: "#374151" };
 }
 
@@ -127,8 +135,10 @@ async function loginWaiter(code) {
     kRestLabel.textContent = data.restaurantName || currentRestaurantId;
     waiterLoginCard.style.display = "none";
     orderCard.style.display = "block";
+    waiterCallsCard.style.display = "block";
 
     startOrderListener();
+    startCallsListener();
   } catch (err) {
     console.error(err);
     waiterLoginStatus.textContent = "Fehler: " + err.message;
@@ -180,9 +190,16 @@ function renderOrders(orders) {
       <div class="info">
         ${o.createdAtText || ""} • Summe: ${total.toFixed(2)} €
       </div>
-      <div style="margin-top:8px; display:flex; gap:6px;">
-        <button class="btn btn-ghost btn-small" data-id="${o.id}" data-status="in_progress">In Arbeit</button>
-        <button class="btn btn-primary btn-small" data-id="${o.id}" data-status="served">Serviert</button>
+      <div style="margin-top:8px; display:flex; gap:6px; flex-wrap:wrap;">
+        <button class="btn btn-ghost btn-small" data-id="${o.id}" data-status="in_progress">
+          In Arbeit
+        </button>
+        <button class="btn btn-ghost btn-small" data-id="${o.id}" data-status="served">
+          Serviert
+        </button>
+        <button class="btn btn-primary btn-small" data-id="${o.id}" data-status="paid">
+          Bezahlt
+        </button>
       </div>
     `;
 
@@ -199,21 +216,20 @@ function renderOrdersWithFilter() {
 }
 
 /* =========================
-   FIRESTORE LISTENER
+   FIRESTORE LISTENER ORDERS
    ========================= */
 
 function startOrderListener() {
   if (!currentRestaurantId) return;
   if (unsubOrders) unsubOrders();
 
-  console.log("[KAMARIERI] Starte Listener für Restaurant:", currentRestaurantId);
+  console.log("[KAMARIERI] Starte Orders-Listener für:", currentRestaurantId);
 
-  // → liest genau: restaurants/<currentRestaurantId>/orders
   const ordersCol = collection(db, "restaurants", currentRestaurantId, "orders");
-  const q = query(ordersCol, orderBy("createdAt", "desc"));
+  const qOrders = query(ordersCol, orderBy("createdAt", "desc"));
 
   unsubOrders = onSnapshot(
-    q,
+    qOrders,
     (snap) => {
       const orders = [];
       snap.forEach((docSnap) => {
@@ -247,20 +263,89 @@ function startOrderListener() {
         "<div class='info'>Fehler beim Laden der Bestellungen.</div>";
     }
   );
+}
 
-  // Status-Buttons (Neu / In Arbeit / Serviert) → Status updaten
-  orderList.addEventListener("click", async (e) => {
-    const btn = e.target.closest("button[data-id]");
-    if (!btn) return;
-    const id = btn.dataset.id;
-    const status = btn.dataset.status;
-    const orderRef = doc(db, "restaurants", currentRestaurantId, "orders", id);
-    try {
-      await updateDoc(orderRef, { status });
-    } catch (err) {
-      console.error("[KAMARIERI] Status Update Error:", err);
-    }
+/* =========================
+   FIRESTORE LISTENER CALLS
+   ========================= */
+
+function renderWaiterCalls() {
+  if (!waiterCallsCard || !waiterCallsList) return;
+
+  waiterCallsList.innerHTML = "";
+
+  if (!waiterCalls.length) {
+    waiterCallsCard.style.display = "none";
+    return;
+  }
+
+  waiterCallsCard.style.display = "block";
+
+  waiterCalls.forEach((c) => {
+    const row = document.createElement("div");
+    row.className = "list-item-row waiter-call-row";
+    row.innerHTML = `
+      <span>
+        Tisch ${c.table}
+        <br/>
+        <span class="info">
+          Hat nach einem Kellner gerufen${c.createdAtText ? " • " + c.createdAtText : ""}.
+        </span>
+      </span>
+      <button
+        class="btn btn-small btn-primary"
+        data-call-id="${c.id}"
+      >
+        U kry
+      </button>
+    `;
+    waiterCallsList.appendChild(row);
   });
+}
+
+function startCallsListener() {
+  if (!currentRestaurantId) return;
+  if (unsubCalls) unsubCalls();
+
+  console.log("[KAMARIERI] Starte Calls-Listener für:", currentRestaurantId);
+
+  const callsCol = collection(db, "restaurants", currentRestaurantId, "calls");
+  const qCalls = query(
+    callsCol,
+    where("status", "==", "open")
+  );
+
+  unsubCalls = onSnapshot(
+    qCalls,
+    (snap) => {
+      const calls = [];
+      snap.forEach((docSnap) => {
+        const data = docSnap.data();
+        const ts = data.createdAt;
+        let createdAtText = "";
+        if (ts && typeof ts.toDate === "function") {
+          createdAtText = ts.toDate().toLocaleTimeString("de-AT", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+        }
+
+        calls.push({
+          id: docSnap.id,
+          table: data.table || data.tableId || "?",
+          createdAtText,
+        });
+      });
+
+      waiterCalls = calls;
+      renderWaiterCalls();
+    },
+    (error) => {
+      console.error("[KAMARIERI] Calls Listener Fehler:", error);
+      waiterCallsList.innerHTML =
+        "<div class='info'>Fehler beim Laden der Thirrje.</div>";
+    }
+  );
 }
 
 /* =========================
@@ -291,6 +376,38 @@ statusFilterRow.addEventListener("click", (e) => {
   renderOrdersWithFilter();
 });
 
+// Status-Buttons auf Order-Cards
+orderList.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-id]");
+  if (!btn) return;
+
+  const id = btn.dataset.id;
+  const status = btn.dataset.status;
+  if (!id || !status || !currentRestaurantId) return;
+
+  const orderRef = doc(db, "restaurants", currentRestaurantId, "orders", id);
+  try {
+    await updateDoc(orderRef, { status });
+  } catch (err) {
+    console.error("[KAMARIERI] Status Update Error:", err);
+  }
+});
+
+// „U kry“ für Thirrje
+waiterCallsList.addEventListener("click", async (e) => {
+  const btn = e.target.closest("button[data-call-id]");
+  if (!btn) return;
+  const id = btn.dataset.callId;
+  if (!id || !currentRestaurantId) return;
+
+  const callRef = doc(db, "restaurants", currentRestaurantId, "calls", id);
+  try {
+    await updateDoc(callRef, { status: "done" });
+  } catch (err) {
+    console.error("[KAMARIERI] Call Update Error:", err);
+  }
+});
+
 /* =========================
    AUTO-LOGIN (wenn Session da)
    ========================= */
@@ -310,7 +427,9 @@ if (storedRestId) {
       kRestLabel.textContent = data.restaurantName || currentRestaurantId;
       waiterLoginCard.style.display = "none";
       orderCard.style.display = "block";
+
       startOrderListener();
+      startCallsListener();
     } catch (err) {
       console.error(err);
     }
