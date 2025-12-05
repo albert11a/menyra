@@ -8,6 +8,12 @@ import {
   getDocs,
   updateDoc,
   increment,
+  addDoc,
+  serverTimestamp,
+  query,
+  where,
+  orderBy,
+  onSnapshot,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 const params = new URLSearchParams(window.location.search);
@@ -39,6 +45,15 @@ const cartFab = document.getElementById("cartFab");
 const cartFabLabel = document.getElementById("cartFabLabel");
 const cartBadgeEl = document.getElementById("cartBadge");
 
+// STATUS-ROW + ORDER-DETAILS
+const orderToggleBtn = document.getElementById("orderToggleBtn");
+const orderDetailsContainer = document.getElementById("orderDetailsContainer");
+const orderDetailsCard = document.getElementById("orderDetailsCard");
+const orderStatusBadge = document.getElementById("orderStatusBadge");
+const orderDetailsContent = document.getElementById("orderDetailsContent");
+
+const callWaiterBtn = document.getElementById("callWaiterBtn");
+
 let allMenuItems = [];
 let drinksItems = [];
 let foodItems = [];
@@ -52,6 +67,11 @@ let cart = [];
 let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
+
+// Order-/Call-State
+let orderDetailsOpen = false;
+let unsubLatestOrder = null;
+let unsubWaiterCall = null;
 
 /* =========================
    CART: LOCALSTORAGE
@@ -83,7 +103,9 @@ function loadCartFromStorage() {
 function saveCartToStorage() {
   try {
     localStorage.setItem(getCartStorageKey(), JSON.stringify(cart));
-  } catch {}
+  } catch {
+    // ignore
+  }
 }
 
 /* =========================
@@ -506,8 +528,6 @@ function renderDrinksTabs() {
   });
 }
 
-/* GETRÄNKE-RENDER */
-
 function renderDrinks() {
   if (!drinksSection || !drinksListEl) return;
 
@@ -888,7 +908,7 @@ function updateCartBadge() {
     cartBadgeEl.style.display = "flex";
     cartFab.classList.add("visible", "cart-fab--has-items");
     if (cartFabLabel) {
-      cartFabLabel.textContent = "Shiko porosin";
+      cartFabLabel.textContent = "Shiko porosinë";
       cartFabLabel.style.display = "block";
     }
   } else {
@@ -916,27 +936,261 @@ function changeCart(item, delta) {
 }
 
 /* =========================
+   GUEST: ORDER OVERVIEW (Shiko porosinë)
+   ========================= */
+
+function mapGuestOrderStatus(status) {
+  const s = status || "new";
+  if (s === "new") {
+    return { label: "Neu", badgeClass: "order-status-badge--new" };
+  }
+  if (s === "in_progress") {
+    return { label: "Në përgatitje", badgeClass: "order-status-badge--in-progress" };
+  }
+  if (s === "served") {
+    return { label: "Serviert", badgeClass: "order-status-badge--served" };
+  }
+  if (s === "paid") {
+    return { label: "Paguar", badgeClass: "order-status-badge--paid" };
+  }
+  return { label: s, badgeClass: "order-status-badge--empty" };
+}
+
+function renderOrderEmpty() {
+  if (!orderStatusBadge || !orderDetailsContent) return;
+  orderStatusBadge.textContent = "S'ka porosi";
+  orderStatusBadge.className =
+    "order-status-badge order-status-badge--empty";
+  orderDetailsContent.textContent = "Ende nuk keni porositur.";
+}
+
+function renderLatestOrder(latest) {
+  if (!orderStatusBadge || !orderDetailsContent) return;
+
+  const { label, badgeClass } = mapGuestOrderStatus(latest.status);
+  orderStatusBadge.textContent = label;
+  orderStatusBadge.className = "order-status-badge " + badgeClass;
+
+  const items = latest.items || [];
+  if (!items.length) {
+    orderDetailsContent.textContent =
+      "Porosia është regjistruar, por artikujt nuk janë gjetur.";
+    return;
+  }
+
+  const total = items.reduce(
+    (sum, i) =>
+      sum + (Number(i.price) || 0) * (Number(i.qty) || 0),
+    0
+  );
+
+  const lines = items
+    .map((i) => {
+      const qty = i.qty || 0;
+      const name = i.name || "";
+      const rowTotal =
+        (Number(i.price) || 0) * (Number(i.qty) || 0);
+      return `
+        <div class="order-item-row">
+          <span class="order-item-name">${qty}× ${name}</span>
+          <span class="order-item-price">${rowTotal.toFixed(2)} €</span>
+        </div>
+      `;
+    })
+    .join("");
+
+  const html = `
+    <div class="order-items-list">
+      ${lines}
+    </div>
+    <div class="order-summary-row">
+      <span>Totali</span>
+      <span>${total.toFixed(2)} €</span>
+    </div>
+  `;
+
+  orderDetailsContent.innerHTML = html;
+}
+
+function startLatestOrderListener() {
+  const ordersCol = collection(db, "restaurants", restaurantId, "orders");
+  const qOrders = query(ordersCol, orderBy("createdAt", "desc"));
+
+  unsubLatestOrder = onSnapshot(
+    qOrders,
+    (snap) => {
+      let found = null;
+      snap.forEach((docSnap) => {
+        if (found) return;
+        const data = docSnap.data();
+        const tableField = data.table || data.tableId;
+        if (tableField === tableId) {
+          found = {
+            id: docSnap.id,
+            ...data,
+          };
+        }
+      });
+
+      if (!found) {
+        renderOrderEmpty();
+      } else {
+        renderLatestOrder(found);
+      }
+    },
+    (err) => {
+      console.error("[KARTE] OrderListener Fehler:", err);
+      renderOrderEmpty();
+    }
+  );
+}
+
+function openOrderDetails() {
+  orderDetailsOpen = true;
+  if (!orderToggleBtn || !orderDetailsContainer || !orderDetailsCard) return;
+
+  orderToggleBtn.classList.add("order-toggle-btn--active");
+  orderToggleBtn.textContent = "Shiko porosinë -";
+
+  orderDetailsContainer.style.display = "block";
+  requestAnimationFrame(() => {
+    orderDetailsCard.classList.add("order-details-card--open");
+  });
+}
+
+function closeOrderDetails() {
+  orderDetailsOpen = false;
+  if (!orderToggleBtn || !orderDetailsContainer || !orderDetailsCard) return;
+
+  orderToggleBtn.classList.remove("order-toggle-btn--active");
+  orderToggleBtn.textContent = "Shiko porosinë +";
+
+  orderDetailsCard.classList.remove("order-details-card--open");
+  setTimeout(() => {
+    if (!orderDetailsOpen) {
+      orderDetailsContainer.style.display = "none";
+    }
+  }, 220);
+}
+
+/* =========================
+   GUEST: THIRR KAMARIERIN
+   ========================= */
+
+function updateWaiterCallUI(hasOpen) {
+  if (!callWaiterBtn) return;
+
+  if (hasOpen) {
+    callWaiterBtn.textContent = "Kamarieri vjen";
+    callWaiterBtn.classList.add("call-waiter-btn--active");
+  } else {
+    callWaiterBtn.textContent = "Thirr kamarierin";
+    callWaiterBtn.classList.remove("call-waiter-btn--active");
+  }
+}
+
+function startWaiterCallListener() {
+  const callsCol = collection(db, "restaurants", restaurantId, "calls");
+  const qCalls = query(
+    callsCol,
+    where("tableId", "==", tableId),
+    where("status", "==", "open")
+  );
+
+  unsubWaiterCall = onSnapshot(
+    qCalls,
+    (snap) => {
+      const hasOpen = !snap.empty;
+      updateWaiterCallUI(hasOpen);
+    },
+    (err) => {
+      console.error("[KARTE] WaiterCallListener Fehler:", err);
+    }
+  );
+}
+
+async function handleCallWaiter() {
+  if (!callWaiterBtn) return;
+
+  callWaiterBtn.disabled = true;
+
+  try {
+    const callsCol = collection(
+      db,
+      "restaurants",
+      restaurantId,
+      "calls"
+    );
+
+    // Check, ob schon eine offene Thirrje existiert
+    const qOpen = query(
+      callsCol,
+      where("tableId", "==", tableId),
+      where("status", "==", "open")
+    );
+    const snap = await getDocs(qOpen);
+
+    if (snap.empty) {
+      await addDoc(callsCol, {
+        tableId,
+        table: tableId,
+        status: "open",
+        createdAt: serverTimestamp(),
+      });
+    }
+
+    // Direkt UI umstellen, Listener hält das dann aktuell
+    updateWaiterCallUI(true);
+  } catch (err) {
+    console.error("[KARTE] Fehler bei Thirr kamarierin:", err);
+    alert("Thirrja nuk u dërgua, provo përsëri.");
+  } finally {
+    callWaiterBtn.disabled = false;
+  }
+}
+
+/* =========================
    EVENTS
    ========================= */
 
-searchInput.addEventListener("input", () => {
-  searchTerm = (searchInput.value || "").trim().toLowerCase();
-  renderMenu();
-});
+if (searchInput) {
+  searchInput.addEventListener("input", () => {
+    searchTerm = (searchInput.value || "").trim().toLowerCase();
+    renderMenu();
+  });
+}
 
-cartFab.addEventListener("click", () => {
-  if (!cart.length) return;
-  const url = new URL(window.location.href);
-  url.pathname = "porosia.html";
-  url.searchParams.set("r", restaurantId);
-  url.searchParams.set("t", tableId);
-  window.location.href = url.toString();
-});
+if (cartFab) {
+  cartFab.addEventListener("click", () => {
+    if (!cart.length) return;
+    const url = new URL(window.location.href);
+    url.pathname = "porosia.html";
+    url.searchParams.set("r", restaurantId);
+    url.searchParams.set("t", tableId);
+    window.location.href = url.toString();
+  });
+}
 
 window.addEventListener("pageshow", () => {
   cart = loadCartFromStorage();
   renderCart();
 });
+
+if (orderToggleBtn) {
+  orderToggleBtn.addEventListener("click", () => {
+    if (orderDetailsOpen) {
+      closeOrderDetails();
+    } else {
+      openOrderDetails();
+    }
+  });
+}
+
+if (callWaiterBtn) {
+  callWaiterBtn.addEventListener("click", () => {
+    handleCallWaiter();
+  });
+}
 
 /* =========================
    INIT
@@ -945,3 +1199,5 @@ window.addEventListener("pageshow", () => {
 cart = loadCartFromStorage();
 renderCart();
 loadRestaurantAndMenu();
+startLatestOrderListener();
+startWaiterCallListener();
