@@ -36,7 +36,7 @@
         <div class="list-item-row">
           <span class="info">Filter nach Status:</span>
           <span style="display:flex; gap:6px; flex-wrap:wrap;">
-            <button class="btn btn-small btn-ghost" data-filter="all">Alle</button>
+            <button class="btn btn-small btn-primary" data-filter="all">Alle</button>
             <button class="btn btn-small btn-ghost" data-filter="new">Neu</button>
             <button class="btn btn-small btn-ghost" data-filter="in_progress">In Arbeit</button>
             <button class="btn btn-small btn-ghost" data-filter="served">Serviert</button>
@@ -46,8 +46,18 @@
 
       <div class="list" id="orderList" style="margin-top:10px;"></div>
       <p class="info">
-        Status wird oben an jeder Bestellung angezeigt. Tippe auf „In Arbeit“ oder „Serviert“,
-        um den Status zu ändern.
+        Status wird oben an jeder Bestellung angezeigt. Tippe auf „In Arbeit“, „Serviert“
+        oder „Bezahlt“, um den Status zu ändern.
+      </p>
+    </section>
+
+    <!-- NEU: Thirrje nga tavolinat -->
+    <section class="card" id="waiterCallsCard" style="display:none;">
+      <h2>Thirrje nga tavolinat</h2>
+      <div class="list" id="waiterCallsList"></div>
+      <p class="info">
+        Wenn du bei einem Tisch warst, tippe auf „U kry“, damit der Gast wieder normal
+        „Thirr kamarierin“ drücken kann.
       </p>
     </section>
   </main>
