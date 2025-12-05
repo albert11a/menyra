@@ -616,40 +616,39 @@ body.no-scroll {
   margin-top: 14px;    /* Abstand: Likes → Buttons (Speisekarte) */
 }
 
-/* Mengen-Kapsel – wie Like-Button: kein Rahmen, weiß, gleicher Shadow */
+/* Mengen-Kapsel – weißer Hintergrund, kein Rahmen, Shadow wie Like */
 .qty-control {
   display: inline-flex;
   align-items: center;
-  justify-content: space-between;
   border-radius: 999px;
-  border: none;                               /* kein Rahmen */
-  background: #ffffff;                        /* weißer Hintergrund wie Like-Kreis */
-  height: 32px;                               /* gleiche Höhe wie btn-add-round */
-  padding: 0 4px;
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);  /* gleicher Shadow wie .icon-circle */
+  border: none; /* kein Rahmen */
+  overflow: hidden;
+  background: #ffffff; /* wie Like-Button */
+  height: 34px;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06); /* gleicher Shadow wie Herz */
 }
 
 .qty-btn {
   border: none;
   background: transparent;
-  width: 24px;                                /* schmaler, damit alles nebeneinander passt */
+  width: 30px;
   height: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.95rem;
+  font-size: 1rem;
   cursor: pointer;
   color: #111827;
 }
 
 .qty-btn:active {
-  background: #f3f4f6;                        /* ganz leichte Tap-Farbe */
+  background: #e5e7eb;
 }
 
 .qty-value {
-  min-width: 24px;
+  min-width: 30px;
   text-align: center;
-  font-size: 0.82rem;
+  font-size: 0.85rem;
   font-weight: 600;
   color: #111827;
   padding: 0 4px;
@@ -1447,4 +1446,3 @@ img {
     max-width: 100%;
   }
 }
-
