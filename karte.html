@@ -9,7 +9,7 @@
 </head>
 <body>
   <main class="page page--karte">
-    <!-- Top: Restaurant-Card + Sot ne fokus + Suche -->
+    <!-- Top: Restaurant-Card + Sot ne fokus + Status-Buttons + Suche -->
     <header class="karte-topbar">
       <!-- Restaurant -->
       <section class="card restaurant-card">
@@ -31,6 +31,63 @@
           <!-- Slides dynamisch -->
         </div>
         <div class="offers-dots" id="offersDots"></div>
+      </section>
+
+             <!-- STATUS-ROW: Shiko porosinë + Thirr kamarierin -->
+      <section class="karte-status-row">
+        <!-- Links: Shiko porosinë -->
+        <article class="card status-card status-card--order">
+          <div class="status-card-top">
+            <div class="icon-circle status-icon-circle status-icon-circle--order"></div>
+          </div>
+          <button
+            id="orderToggleBtn"
+            class="status-main-btn order-toggle-btn"
+            type="button"
+          >
+            Shiko porosinë +
+          </button>
+        </article>
+
+        <!-- Rechts: Thirr kamarierin -->
+        <article class="card status-card status-card--call">
+          <div class="status-card-top">
+            <div class="icon-circle status-icon-circle status-icon-circle--call"></div>
+          </div>
+          <button
+            id="callWaiterBtn"
+            class="status-main-btn call-waiter-btn"
+            type="button"
+          >
+            Thirr kamarierin
+          </button>
+        </article>
+      </section>
+
+
+      <!-- Porosia juaj – Card unter den zwei Buttons -->
+      <section
+        id="orderDetailsContainer"
+        class="order-details-container"
+        style="display:none;"
+      >
+        <article id="orderDetailsCard" class="order-details-card">
+          <div class="order-details-header">
+            <span class="order-details-title">Porosia juaj</span>
+            <span
+              id="orderStatusBadge"
+              class="order-status-badge order-status-badge--empty"
+            >
+              S'ka porosi
+            </span>
+          </div>
+          <div
+            id="orderDetailsContent"
+            class="order-details-content"
+          >
+            Ende nuk keni porositur.
+          </div>
+        </article>
       </section>
 
       <!-- Suche -->
@@ -76,7 +133,7 @@
       <h2>Speisekarte</h2>
       <div class="menu-list" id="menuList"></div>
     </section>
-</main>
+  </main>
 
   <!-- Floating Cart Button unten rechts -->
   <button class="cart-fab" id="cartFab" type="button">
@@ -85,8 +142,6 @@
     <span class="cart-fab-badge" id="cartBadge">0</span>
   </button>
 
-
   <script type="module" src="karte.js"></script>
 </body>
 </html>
-
