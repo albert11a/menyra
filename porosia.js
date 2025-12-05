@@ -195,8 +195,13 @@ async function sendOrder() {
     const restRef = doc(db, "restaurants", restaurantId);
     const ordersCol = collection(restRef, "orders");
 
+    const total = cart.reduce(
+      (sum, c) => sum + (c.price || 0) * (c.qty || 0),
+      0
+    );
+
     const payload = {
-      restaurantId, // zur Sicherheit mit speichern
+      restaurantId,
       table: tableId,
       items: cart.map((c) => ({
         id: c.id,
@@ -206,17 +211,28 @@ async function sendOrder() {
       })),
       note: noteEl.value || "",
       status: "new",
+      paid: false,          // wichtig für "Për t'u paguar"
+      total,                // Gesamtbetrag speichern
       createdAt: serverTimestamp(),
       source: "qr",
     };
 
     await addDoc(ordersCol, payload);
 
+    // Cart leeren + speichern
     cart = [];
     renderCart();
     noteEl.value = "";
+
     statusEl.textContent = "Porosia u dërgua. Faleminderit!";
     statusEl.classList.add("status-ok");
+
+    // Zurück zur Karte – dort erscheint dann "Porosia juaj"
+    const url = new URL(window.location.href);
+    url.pathname = "karte.html";
+    url.searchParams.set("r", restaurantId);
+    url.searchParams.set("t", tableId);
+    window.location.href = url.toString();
   } catch (err) {
     console.error(err);
     statusEl.textContent = "Gabim gjatë dërgimit: " + err.message;
