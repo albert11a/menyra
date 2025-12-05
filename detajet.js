@@ -26,7 +26,7 @@ const detailQtyValueEl = document.getElementById("detailQtyValue");
 const detailAddBtn = document.getElementById("detailAddBtn");
 const detailViewCartBtn = document.getElementById("detailViewCartBtn");
 
-// Mini-Cart in Detajet
+// Mini-Cart in Detajet (kann im HTML entfernt sein)
 const detailCartSection = document.getElementById("detailCartSection");
 const detailCartItemsEl = document.getElementById("detailCartItems");
 const detailCartTotalEl = document.getElementById("detailCartTotal");
@@ -101,9 +101,32 @@ function updateCartBadge() {
   }
 }
 
+/**
+ * Mini-Cart rendern.
+ * Wenn das HTML (detailCartSection, ...) nicht existiert,
+ * wird NUR der Floating-Button + Storage aktualisiert.
+ */
 function renderMiniCart() {
+  const hasMiniCartDom =
+    detailCartSection &&
+    detailCartItemsEl &&
+    detailCartTotalEl &&
+    detailCartTableLabel;
+
   if (!cart.length) {
-    detailCartSection.style.display = "none";
+    if (hasMiniCartDom) {
+      detailCartSection.style.display = "none";
+      detailCartItemsEl.innerHTML = "";
+      detailCartTotalEl.textContent = "";
+      detailCartTableLabel.textContent = "";
+    }
+    updateCartBadge();
+    saveCartToStorage();
+    return;
+  }
+
+  if (!hasMiniCartDom) {
+    // Kein Mini-Cart mehr im DOM: nur Badge + Storage
     updateCartBadge();
     saveCartToStorage();
     return;
@@ -252,7 +275,7 @@ if (sliderPrevBtn) sliderPrevBtn.addEventListener("click", goPrevSlide);
 if (sliderNextBtn) sliderNextBtn.addEventListener("click", goNextSlide);
 initSliderTouch();
 
-// Bei Resize neu ausrichten (sonst verschiebt sich das Bild wieder ein wenig)
+// Bei Resize neu ausrichten
 window.addEventListener("resize", () => {
   updateSliderPosition();
 });
@@ -284,7 +307,6 @@ async function loadItem() {
 
     const d = itemSnap.data();
 
-    // Bilder: bevorzugt imageUrls[], fallback auf imageUrl
     const gallery = Array.isArray(d.imageUrls)
       ? d.imageUrls.filter((u) => typeof u === "string" && u.trim() !== "")
       : [];
