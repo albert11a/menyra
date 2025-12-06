@@ -1800,3 +1800,99 @@ img {
   font-size: 0.9rem;
   font-weight: 600;
 }
+
+
+/* =========================================
+   OVERRIDES – ALLE CARDS ANGLEICHEN
+   (Porosia-Widget, Language, Kamarieri bleiben unangetastet)
+   ========================================= */
+
+/* Basis-Styles wie bei deiner Porosia-Card */
+:root {
+  /* Heller Card-Verlauf (Referenz: Porosia juaj) */
+  --card-bg-main: linear-gradient(
+    145deg,
+    #ffffff 0%,
+    #f9fafb 40%,
+    #eef2ff 100%
+  );
+
+  /* Dunkler Gradient wie bei "Thirr kamarierin" */
+  --call-card-gradient:
+    radial-gradient(circle at 0% 0%, rgba(148, 163, 253, 0.24) 0%, transparent 55%),
+    linear-gradient(135deg, #020617 0%, #020617 45%, #111827 100%);
+}
+
+/* 1) ALLE .card ANGLEICHEN – ABER NICHT Language-Card */
+.card:not(.lang-card) {
+  background: var(--card-bg-main);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+}
+
+/* Order-Details-Card (unter Shiko porosinë) – gleiche Optik */
+.order-details-card {
+  background: var(--card-bg-main);
+  border-radius: 18px;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  box-shadow: none;
+}
+
+/* 2) Restaurant-Logo oben – als Quadrat, komplett sichtbar */
+.rest-logo {
+  width: 64px;
+  height: 64px;
+  border-radius: 14px;           /* leicht abgerundet, aber klarer Quadrat-Look */
+  object-fit: contain;           /* Logo komplett sichtbar */
+  background: #f9fafb;
+  border: 1px solid #e2e8f0;
+  padding: 4px;                  /* etwas Luft im Rahmen */
+}
+
+/* 3) SOT NE FOKUS – gleicher Verlauf wie Kamarieri-Widget */
+.offers-card {
+  background: var(--call-card-gradient);  /* EXAKT gleicher Verlauf */
+  color: #f9fafb;
+  border-radius: 18px;
+  border: 1px solid rgba(15, 23, 42, 0.7);
+  box-shadow: none;
+}
+
+/* Texte in Sot ne fokus auf hell trimmen */
+.offers-card .offers-label {
+  color: #e5e7eb;
+  opacity: 0.9;
+}
+
+.offers-card .offer-title {
+  color: #f9fafb;
+}
+
+.offers-card .offer-price {
+  color: #e5e7eb;
+}
+
+.offers-card .offer-desc {
+  color: #e5e7eb;
+}
+
+/* Buttons im Sot-ne-fokus-Widget */
+.offers-card .btn,
+.offers-card .btn-primary,
+.offers-card .btn-ghost {
+  border-radius: 999px;
+  font-size: 0.8rem;
+}
+
+.offers-card .btn-primary {
+  background: #f9fafb;
+  color: #020617;
+  border: none;
+}
+
+.offers-card .btn-ghost {
+  background: transparent;
+  color: #f9fafb;
+  border: 1px solid rgba(248, 250, 252, 0.35);
+}
