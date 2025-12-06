@@ -1817,6 +1817,10 @@ img {
     #eef2ff 100%
   );
 
+     /* GLOBAL BUTTON RADIUS – hier einstellen */
+  --btn-radius-global: 14px; /* z.B. 10–16px für weniger rund als Pill */
+}
+
   /* Dunkler Gradient wie bei "Thirr kamarierin" */
   --call-card-gradient:
     radial-gradient(circle at 0% 0%, rgba(148, 163, 253, 0.24) 0%, transparent 55%),
@@ -1945,4 +1949,24 @@ img {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
 }
 
+/* =========================================
+   GLOBAL: Button-Radius über Variable steuern
+   ========================================= */
+
+/* Alle Standard-Buttons nutzen denselben Radius */
+button,
+.btn,
+.btn-primary,
+.btn-ghost,
+.btn-small,
+.btn-dark,
+.status-main-btn,
+.lang-pill,
+.btn-add-round,
+.cart-fab,
+.search-btn,
+.category-tab,
+.rating-pill {
+  border-radius: var(--btn-radius-global);
+}
 
