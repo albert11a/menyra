@@ -80,15 +80,15 @@ body.no-scroll {
 }
 
 /* ========================================
-   CARDS / BOXEN
+   CARDS / BOXEN – Basis
    ======================================== */
 
 .card {
   background: #ffffff;
-  padding: 14px 14px;
-  border-radius: 18px;
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
-  border: 1px solid rgba(148, 163, 184, 0.25);
+  padding: 16px 16px;
+  border-radius: 24px;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+  border: 0.5px solid rgba(148, 163, 184, 0.35);
 }
 
 .card h1,
@@ -103,29 +103,36 @@ body.no-scroll {
   color: #475569;
 }
 
-/* Restaurant-Card */
+/* Restaurant-Card (oben) – iOS Widget Style */
 
 .restaurant-card {
-  padding: 14px 16px;
+  padding: 16px 18px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, #f9fbff 0%, #ffffff 45%, #edf1fb 100%);
+  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
+  border: 0.5px solid rgba(148, 163, 184, 0.45);
 }
 
 .restaurant-header {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 14px;
 }
 
 .rest-logo {
-  width: 44px;
-  height: 44px;
-  border-radius: 10px;
-  object-fit: contain;
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  object-fit: cover;
   border: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.20);
 }
 
 .restaurant-name {
   font-weight: 700;
   font-size: 1.05rem;
+  letter-spacing: 0.01em;
 }
 
 .restaurant-meta {
@@ -159,15 +166,15 @@ body.no-scroll {
 
 /* Hauptfarbe: #643A71 */
 .btn-primary {
-  background: #643A71;
+  background: #643a71;
   color: #ffffff;
-  border: 1px solid #643A71;
+  border: 1px solid #643a71;
   box-shadow: none;
 }
 
 .btn-primary:hover {
-  background: #4F2F59;
-  border-color: #4F2F59;
+  background: #4f2f59;
+  border-color: #4f2f59;
 }
 
 .btn-ghost {
@@ -312,8 +319,8 @@ body.no-scroll {
   width: 40px;
   height: 40px;
   border-radius: 999px;
-  border: 1px solid #643A71;
-  background: #643A71;
+  border: 1px solid #643a71;
+  background: #643a71;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -322,8 +329,8 @@ body.no-scroll {
 }
 
 .search-btn:hover {
-  background: #4F2F59;
-  border-color: #4F2F59;
+  background: #4f2f59;
+  border-color: #4f2f59;
 }
 
 .search-btn-icon {
@@ -355,8 +362,8 @@ body.no-scroll {
   height: 54px;
   padding: 0 18px;
   border-radius: 999px;
-  border: 1px solid #643A71;
-  background: #643A71;
+  border: 1px solid #643a71;
+  background: #643a71;
   box-shadow: none;
   display: flex;
   align-items: center;
@@ -495,9 +502,10 @@ body.no-scroll {
   margin-top: 10px;
 }
 
+/* Card als Grid */
 .menu-item {
   background: #ffffff;
-  border-radius: 14px;
+  border-radius: 18px;
   padding: 10px 12px 14px;
   border: 1px solid #e2e8f0;
   display: grid;
@@ -510,7 +518,7 @@ body.no-scroll {
   grid-column: 1 / -1;
   width: 100%;
   max-height: 160px;
-  border-radius: 12px;
+  border-radius: 14px;
   object-fit: cover;
 }
 
@@ -539,6 +547,8 @@ body.no-scroll {
   margin-top: 14px;
   margin-bottom: 18px;
 }
+
+/* Social-Leiste */
 
 .menu-item-social {
   grid-column: 1 / 2;
@@ -583,6 +593,8 @@ body.no-scroll {
   font-weight: 500;
 }
 
+/* Like-Farben */
+
 .social-btn-like .social-icon {
   background: rgba(239, 68, 68, 0.08);
   color: #ef4444;
@@ -602,6 +614,8 @@ body.no-scroll {
   color: #b91c1c;
 }
 
+/* Aktionen (rechts) */
+
 .menu-item-actions {
   grid-column: 2 / 3;
   justify-self: end;
@@ -610,6 +624,8 @@ body.no-scroll {
   gap: 8px;
   margin-top: 14px;
 }
+
+/* Mengen-Kapsel */
 
 .qty-control {
   display: inline-flex;
@@ -658,12 +674,15 @@ body.no-scroll {
   margin-bottom: 6px;
 }
 
+/* Grid: 2 Spalten */
 .drinks-list {
   margin-top: 8px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 14px;
 }
+
+/* Drink-Card */
 
 .drink-item {
   background: #ffffff;
@@ -727,13 +746,15 @@ body.no-scroll {
   gap: 10px;
 }
 
-/* Like-Icon Kreis (drinks) */
+/* Like-Bereich (Drinks) */
 
 .like-wrap {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
+
+/* Weißer Kreis, kein Border, iOS-Shadow */
 
 .icon-circle {
   position: relative;
@@ -770,6 +791,8 @@ body.no-scroll {
   height: 17px;
   display: block;
 }
+
+/* Herz-Pfad */
 
 .heart-path {
   fill: none;
@@ -827,7 +850,7 @@ body.no-scroll {
   100% { transform: scale(1); }
 }
 
-/* rechter Button (drinks) */
+/* Rechter Button – „Wähle“ */
 
 .btn-add-round {
   border: none;
@@ -867,16 +890,18 @@ body.no-scroll {
 }
 
 /* ========================================
-   ANGEBOTS-KARTE (Slider "Sot ne fokus")
+   ANGEBOTS-KARTE (Sot ne fokus – Slider)
    ======================================== */
 
 .offers-card {
-  background: #0f172a;
+  background:
+    radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.25), transparent 58%),
+    linear-gradient(145deg, #050c18 0%, #0c1727 50%, #182842 100%);
   color: #f9fafb;
-  border-radius: 18px;
+  border-radius: 28px;
   padding: 16px 16px 22px;
-  box-shadow: none;
-  border: 1px solid rgba(148, 163, 184, 0.4);
+  box-shadow: 0 14px 28px rgba(15, 23, 42, 0.60);
+  border: 0.5px solid rgba(15, 23, 42, 0.90);
   width: 100%;
   margin-bottom: 4px;
 }
@@ -892,7 +917,8 @@ body.no-scroll {
   font-size: 0.7rem;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  opacity: 0.85;
+  opacity: 0.9;
+  color: #e5e7eb;
 }
 
 .offers-slider {
@@ -915,15 +941,20 @@ body.no-scroll {
 .offer-slide {
   flex: 0 0 100%;
   scroll-snap-align: center;
+  display: flex;
+  flex-direction: column;
 }
+
+/* Bild mit Shadow */
 
 .offer-image {
   width: 100%;
   height: 180px;
-  border-radius: 14px;
+  border-radius: 18px;
   object-fit: cover;
-  background: #1f2937;
+  background: #111827;
   margin-bottom: 16px;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55);
 }
 
 .offer-header {
@@ -947,22 +978,23 @@ body.no-scroll {
   font-size: 0.8rem;
   color: #e5e7eb;
   line-height: 1.5;
-  margin-bottom: 20px;
+  margin-bottom: 16px;
 }
 
 .offer-actions {
   display: flex;
   justify-content: flex-end;
   gap: 8px;
-  margin-top: 6px;
+  margin-top: 4px;
 }
 
 .offer-info-only {
   font-size: 0.78rem;
   color: #e5e7eb;
   opacity: 0.9;
-  margin-top: 6px;
 }
+
+/* Indikator-Punkte */
 
 .offers-dots {
   margin-top: 14px;
@@ -1084,7 +1116,7 @@ img {
 }
 
 /* ========================================
-   DETAIL & CART DRAWER – Fullscreen
+   DRAWER-OVERLAYS
    ======================================== */
 
 .drawer-overlay {
@@ -1102,6 +1134,8 @@ img {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* Drawer */
 
 .drawer {
   position: fixed;
@@ -1397,18 +1431,21 @@ img {
 }
 
 /* =====================================================
-   KARTE – STATUS-WIDGETS (Porosia / Kamarieri – iOS Card Style)
+   KARTE – STATUS-CARDS (Shiko porosinë / Thirr kamarierin)
+   – iOS Widget Style wie die 2 neuen Cards
    ===================================================== */
 
 .karte-status-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: flex;
+  flex-wrap: nowrap;
   gap: 14px;
   margin-top: 8px;
   margin-bottom: 4px;
 }
 
-.status-widget-card {
+.status-card {
+  flex: 1 1 0;
+  min-width: 0;
   border-radius: 30px;
   padding: 20px 16px 18px;
   display: flex;
@@ -1420,308 +1457,18 @@ img {
   transition: transform 0.22s ease, box-shadow 0.22s ease;
 }
 
-.status-widget-card:hover {
-  transform: translateY(-3px) scale(1.01);
-  box-shadow: 0 16px 32px rgba(15, 23, 42, 0.25);
-}
+/* Links: Porosia – hell wie unsere Porosia-Card */
 
-/* Porosia – hell */
-.status-widget-card--porosia {
+.status-card--order {
   background: linear-gradient(145deg, #f9fbff 0%, #ffffff 45%, #edf1fb 100%);
   color: #0f172a;
   border: 0.5px solid rgba(148, 163, 184, 0.40);
 }
 
-/* Kamarieri – dunkel */
-.status-widget-card--kamarieri {
+/* Rechts: Kamarieri – dunkel wie unsere Kamarieri-Card */
+
+.status-card--call {
   background:
     radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.25), transparent 58%),
     linear-gradient(145deg, #050c18 0%, #0c1727 50%, #182842 100%);
-  color: #f9fafb;
-  border: 0.5px solid rgba(15, 23, 42, 0.9);
-}
-
-.status-widget-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 10px;
-}
-
-.status-widget-icon-circle {
-  width: 64px;
-  height: 64px;
-  border-radius: 32px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-}
-
-/* Porosia: heller Orb */
-.status-widget-card--porosia .status-widget-icon-circle {
-  background:
-    radial-gradient(circle at 30% 0, rgba(148, 163, 184, 0.12) 0%, rgba(148, 163, 184, 0.02) 45%, transparent 100%),
-    #ffffff;
-  box-shadow:
-    0 10px 20px rgba(15, 23, 42, 0.12),
-    inset 0 0 0 0.5px rgba(148, 163, 184, 0.35);
-}
-
-/* Kamarieri: dunkler Orb */
-.status-widget-card--kamarieri .status-widget-icon-circle {
-  background:
-    radial-gradient(circle at 30% 0, rgba(255, 255, 255, 0.22) 0%, rgba(255, 255, 255, 0.05) 40%, transparent 100%);
-  box-shadow:
-    0 12px 26px rgba(5, 10, 25, 0.7),
-    inset 0 0 0 0.5px rgba(255, 255, 255, 0.10);
-}
-
-.status-widget-icon-circle svg {
-  width: 34px;
-  height: 34px;
-  stroke: #020617;
-  stroke-width: 1.9;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  fill: none;
-}
-
-.status-widget-icon-circle img {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  display: block;
-}
-
-/* Pill oben rechts */
-.status-widget-pill {
-  border-radius: 999px;
-  border: none;
-  padding: 5px 14px;
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 0.01em;
-  white-space: nowrap;
-  cursor: default;
-}
-
-.status-widget-pill--light {
-  background: rgba(148, 163, 184, 0.14);
-  color: #111827;
-  box-shadow:
-    0 6px 14px rgba(148, 163, 184, 0.4),
-    0 0 0 1px rgba(148, 163, 184, 0.45);
-}
-
-.status-widget-pill--dark {
-  background: rgba(255, 255, 255, 0.14);
-  color: #e5ebff;
-  box-shadow:
-    0 8px 18px rgba(2, 6, 23, 0.75),
-    0 0 0 1px rgba(255, 255, 255, 0.24);
-  backdrop-filter: blur(8px);
-}
-
-.status-widget-body {
-  margin-top: 20px;
-}
-
-.status-widget-title {
-  font-size: 18px;
-  font-weight: 700;
-  line-height: 1.16;
-  letter-spacing: 0.01em;
-  margin-bottom: 4px;
-}
-
-.status-widget-subtitle {
-  font-size: 12px;
-  opacity: 0.7;
-  margin-bottom: 12px;
-}
-
-.status-widget-btn {
-  width: 100%;
-  height: 44px;
-  border-radius: 22px;
-  border: none;
-  outline: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 14px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
-}
-
-.status-widget-btn:active {
-  transform: translateY(1px);
-}
-
-/* Porosia-Button */
-.status-widget-btn--light {
-  background: rgba(15, 23, 42, 0.06);
-  color: #020617;
-  box-shadow:
-    0 8px 18px rgba(148, 163, 184, 0.4),
-    0 0 0 1px rgba(148, 163, 184, 0.5);
-  backdrop-filter: blur(8px);
-}
-
-.status-widget-btn--light:hover {
-  background: rgba(15, 23, 42, 0.09);
-}
-
-/* Kamarieri-Button */
-.status-widget-btn--dark {
-  background: rgba(255, 255, 255, 0.12);
-  color: #e5ebff;
-  box-shadow:
-    0 10px 22px rgba(2, 6, 23, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.26);
-  backdrop-filter: blur(10px);
-}
-
-.status-widget-btn--dark:hover {
-  background: rgba(255, 255, 255, 0.18);
-}
-
-/* Mobile Feintuning */
-@media (max-width: 400px) {
-  .karte-status-row {
-    gap: 10px;
-  }
-  .status-widget-card {
-    padding: 16px 12px 16px;
-    border-radius: 24px;
-  }
-  .status-widget-title {
-    font-size: 16px;
-  }
-  .status-widget-btn {
-    height: 40px;
-    font-size: 13px;
-  }
-}
-
-/* ========================================
-   POROSIA JUAJ – Card unter Shiko porosinë
-   ======================================== */
-
-.order-details-container {
-  margin-top: 10px;
-}
-
-.order-details-card {
-  width: 100%;
-  border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: #ffffff;
-  box-shadow: none;
-  padding: 12px 14px 14px;
-  opacity: 0;
-  transform: translateY(6px);
-  transition:
-    opacity 0.22s ease-out,
-    transform 0.22s ease-out;
-}
-
-.order-details-card--open {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.order-details-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.order-details-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.order-status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-.order-status-badge--empty {
-  background: #e5e7eb;
-  color: #6b7280;
-}
-
-.order-status-badge--new {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.order-status-badge--in-progress {
-  background: #fef9c3;
-  color: #a16207;
-}
-
-.order-status-badge--served {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.order-status-badge--paid {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.order-details-content {
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #0f172a;
-}
-
-.order-items-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.order-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 0.8rem;
-}
-
-.order-item-name {
-  max-width: 70%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.order-item-price {
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.order-summary-row {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
+  color: #f9fbf
