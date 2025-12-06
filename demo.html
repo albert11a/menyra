@@ -2,320 +2,184 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>MENYRA – Karte (Demo1)</title>
+  <title>MENYRA – Karte Demo</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta name="theme-color" content="#f3f4f6" />
   <link rel="stylesheet" href="demo1.css" />
 </head>
 <body>
-  <main class="page page--karte">
-    <!-- Top: Restaurant-Card + Sot ne fokus + Status-Widgets + Suche -->
-    <header class="karte-topbar">
-      <!-- Restaurant -->
-      <section class="card restaurant-card">
-        <div class="restaurant-header">
-          <img id="restaurantLogo" class="rest-logo" style="display:none;" alt="Logo" />
-          <div>
-            <div class="restaurant-name" id="restaurantName">Lokal</div>
-            <div class="restaurant-meta" id="restaurantMeta">Adresse · Öffnungszeiten</div>
-          </div>
+  <main class="page">
+
+    <!-- RESTAURANT OBEN -->
+    <section class="restaurant-card">
+      <div class="restaurant-header">
+        <img
+          class="rest-logo"
+          src="https://via.placeholder.com/80x80.png?text=RH"
+          alt="Roter Han Logo"
+        />
+        <div class="restaurant-text">
+          <div class="restaurant-name">Roter Han</div>
+          <div class="restaurant-meta">Bar · Restaurant · Wien</div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- ANGEBOTE / SOT NE FOKUS SLIDER -->
-      <section class="offers-card" id="offersSection">
-        <div class="offers-header-row">
-          <div class="offers-label">SOT NE FOKUS</div>
-        </div>
-        <div class="offers-slider" id="offersSlider">
-          <div class="offer-slide">
-            <img class="offer-image" src="https://via.placeholder.com/600x400" alt="Offer" />
-            <div class="offer-header">
-              <div class="offer-title">Special Burger</div>
-              <div class="offer-price">9,90 €</div>
-            </div>
-            <div class="offer-desc">
-              Sot në fokus: burger me mish viçi, djathë cheddar dhe patate të skuqura.
-            </div>
-            <div class="offer-actions">
-              <span class="offer-info-only">Vetëm sot</span>
-            </div>
-          </div>
-        </div>
-        <div class="offers-dots" id="offersDots">
-          <button class="offers-dot active" type="button"></button>
-        </div>
-      </section>
+    <!-- SOT NË FOKUS – 2 CARDS WIE WIDGETS -->
+    <section class="offers-widget">
+      <div class="offers-widget-header">
+        <span class="offers-widget-label">SOT NË FOKUS</span>
+      </div>
 
-      <!-- NEUE STATUS-WIDGETS: Porosia + Kamarieri -->
-      <section class="karte-status-row">
-        <!-- LINKS: POROSIA -->
-        <article class="status-widget-card status-widget-card--porosia">
-          <div class="status-widget-top">
-            <div class="status-widget-icon-circle">
-              <!-- Scooter Icon -->
-              <svg viewBox="0 0 48 48" aria-hidden="true">
-                <circle cx="16" cy="32" r="3" />
-                <circle cx="30" cy="32" r="3" />
-                <path d="M13 32H10" />
-                <path d="M33 32h3" />
-                <path d="M16 23h5l2 4h6" />
-                <path d="M19 20l-2-3h-4" />
-                <circle cx="17" cy="15" r="2.4" />
-                <rect x="30" y="21" width="6" height="6" rx="1.2" />
-              </svg>
-            </div>
-
-            <!-- Preis-Pill -->
-            <button
-              class="status-widget-pill status-widget-pill--light"
-              type="button"
-              disabled
-            >
-              15 €
-            </button>
-          </div>
-
-          <div class="status-widget-body">
-            <div class="status-widget-title">Porosia</div>
-            <div class="status-widget-subtitle">Permbledhe e porosise</div>
-
-            <!-- gleiche ID für JS-kompatible Demoversion -->
-            <button
-              id="orderToggleBtn"
-              class="status-widget-btn status-widget-btn--light order-toggle-btn"
-              type="button"
-            >
-              Shiko
-            </button>
-          </div>
-        </article>
-
-        <!-- RECHTS: KAMARIERI -->
-        <article class="status-widget-card status-widget-card--kamarieri">
-          <div class="status-widget-top">
-            <div class="status-widget-icon-circle">
-              <img
-                src="https://i.postimg.cc/59vmM8dH/Chat-GPT-Image-6-Dez-2025-04-19-16.png"
-                alt="Kamarieri Icon"
-              />
-            </div>
-
-            <!-- 2 min Pill -->
-            <button
-              class="status-widget-pill status-widget-pill--dark"
-              type="button"
-              disabled
-            >
-              2 min
-            </button>
-          </div>
-
-          <div class="status-widget-body">
-            <div class="status-widget-title">Kamarieri vjen</div>
-            <div class="status-widget-subtitle">
-              Tap once to call the waiter.
-            </div>
-
-            <!-- gleiche ID für JS-kompatible Demoversion -->
-            <button
-              id="callWaiterBtn"
-              class="status-widget-btn status-widget-btn--dark call-waiter-btn"
-              type="button"
-            >
-              Thirr
-            </button>
-          </div>
-        </article>
-      </section>
-
-      <!-- Porosia juaj – Card unter den zwei Widgets -->
-      <section
-        id="orderDetailsContainer"
-        class="order-details-container"
-      >
-        <article id="orderDetailsCard" class="order-details-card order-details-card--open">
-          <div class="order-details-header">
-            <span class="order-details-title">Porosia juaj</span>
-            <span
-              id="orderStatusBadge"
-              class="order-status-badge order-status-badge--new"
-            >
-              E re
-            </span>
-          </div>
-          <div
-            id="orderDetailsContent"
-            class="order-details-content"
-          >
-            <div class="order-items-list">
-              <div class="order-item-row">
-                <span class="order-item-name">2× Cappuccino</span>
-                <span class="order-item-price">5,00 €</span>
-              </div>
-              <div class="order-item-row">
-                <span class="order-item-name">1× Croissant</span>
-                <span class="order-item-price">2,50 €</span>
-              </div>
-            </div>
-            <div class="order-summary-row">
-              <span>Totali</span>
-              <span>7,50 €</span>
-            </div>
-          </div>
-        </article>
-      </section>
-
-      <!-- Suche -->
-      <section class="card search-card">
-        <div class="search-wrapper">
-          <div class="search-pill">
-            <input
-              id="searchInput"
-              class="search-input"
-              type="search"
-              placeholder="Kërko në meny."
+      <div class="offers-widget-row">
+        <!-- Offer 1 -->
+        <article class="offer-card">
+          <div class="offer-image-wrap">
+            <img
+              src="https://via.placeholder.com/600x400.png?text=Offer+1"
+              alt="Offer 1"
             />
-            <button type="button" class="search-btn">
-              <span class="search-btn-icon"></span>
-            </button>
           </div>
-        </div>
-      </section>
-    </header>
-
-    <!-- DRINKS-TABS -->
-    <section
-      class="tabs-wrapper tabs-wrapper--drinks"
-      id="drinksTabsWrapper"
-    >
-      <div class="category-tabs" id="drinksTabs">
-        <button class="category-tab active" type="button">Të gjitha</button>
-        <button class="category-tab" type="button">Kafe</button>
-        <button class="category-tab" type="button">Fresh</button>
-      </div>
-    </section>
-
-    <!-- GETRÄNKE -->
-    <section class="card" id="drinksSection">
-      <h2>Getränke</h2>
-      <div class="drinks-list" id="drinksList">
-        <article class="drink-item">
-          <div class="drink-topbar">
-            <div class="like-wrap">
-              <button class="icon-circle" type="button">
-                <svg class="icon-circle__inner" viewBox="0 0 24 24">
-                  <path
-                    class="heart-path"
-                    d="M12.1 5.1C11.2 4.2 9.9 3.8 8.7 4.1C7 4.5 5.8 5.9 5.8 7.7C5.8 9.1 6.4 10.1 7.3 11.1L12.1 16L16.9 11.1C17.8 10.1 18.4 9.1 18.4 7.7C18.4 5.9 17.2 4.5 15.5 4.1C14.3 3.8 13 4.2 12.1 5.1Z"
-                  />
-                </svg>
+          <div class="offer-body">
+            <div class="offer-topline">
+              <span class="offer-title">Steak Special</span>
+              <button class="offer-pill" type="button" disabled>
+                18,90 €
               </button>
-              <span class="like-count">12</span>
             </div>
-          </div>
-
-          <img
-            src="https://via.placeholder.com/400x600"
-            class="drink-image"
-            alt="Latte"
-          />
-
-          <div class="drink-header">
-            <div class="drink-name">Latte Macchiato</div>
-            <div class="drink-price">3,50 €</div>
-          </div>
-          <div class="drink-desc">
-            Espresso me qumësht të freskët, shërbehet i ngrohtë.
-          </div>
-
-          <div class="drink-footer">
-            <div class="like-wrap">
-              <!-- Leer, nur Demo -->
-            </div>
-            <button class="btn-add-round" type="button">
-              <span>Zgjidh</span>
+            <p class="offer-desc">
+              Steak me patate të skuqura dhe salcë piper.
+            </p>
+            <button class="offer-btn" type="button">
+              Shiko ofertën
             </button>
           </div>
         </article>
 
-        <article class="drink-item">
-          <div class="drink-topbar"></div>
-          <img
-            src="https://via.placeholder.com/400x600"
-            class="drink-image"
-            alt="Fresh Orange"
-          />
-          <div class="drink-header">
-            <div class="drink-name">Fresh Portokalli</div>
-            <div class="drink-price">4,00 €</div>
+        <!-- Offer 2 -->
+        <article class="offer-card">
+          <div class="offer-image-wrap">
+            <img
+              src="https://via.placeholder.com/600x400.png?text=Offer+2"
+              alt="Offer 2"
+            />
           </div>
-          <div class="drink-desc">
-            Lëng portokalli 100% i shtrydhur.
-          </div>
-          <div class="drink-footer">
-            <div></div>
-            <button class="btn-add-round" type="button">
-              <span>Zgjidh</span>
+          <div class="offer-body">
+            <div class="offer-topline">
+              <span class="offer-title">Dessert Duo</span>
+              <button class="offer-pill" type="button" disabled>
+                6,50 €
+              </button>
+            </div>
+            <p class="offer-desc">
+              Dy ëmbëlsira të përzgjedhura nga shefi.
+            </p>
+            <button class="offer-btn" type="button">
+              Shiko ofertën
             </button>
           </div>
         </article>
       </div>
     </section>
 
-    <!-- FOOD-TABS -->
-    <section class="tabs-wrapper tabs-wrapper--food" id="foodTabsWrapper">
-      <div class="category-tabs" id="foodCategoryTabs">
-        <button class="category-tab active" type="button">Të gjitha</button>
-        <button class="category-tab" type="button">Pizza</button>
-        <button class="category-tab" type="button">Pasta</button>
-      </div>
+    <!-- POROSIA & KAMARIERI – WIDGET-CARDS -->
+    <section class="karte-status-row">
+      <!-- Links: POROSIA -->
+      <article class="status-card status-card--order">
+        <div class="status-card-top">
+          <div class="icon-circle">
+            <div class="status-icon-circle status-icon-circle--order"></div>
+          </div>
+          <div class="status-card-label">Porosia juaj</div>
+        </div>
+        <button
+          id="orderToggleBtn"
+          class="status-main-btn order-toggle-btn"
+          type="button"
+        >
+          Shiko porosinë +
+        </button>
+      </article>
+
+      <!-- Rechts: KAMARIERI -->
+      <article class="status-card status-card--call">
+        <div class="status-card-top">
+          <div class="icon-circle">
+            <div class="status-icon-circle status-icon-circle--call"></div>
+          </div>
+          <div class="status-card-label">Thirr kamarierin</div>
+        </div>
+        <button
+          id="callWaiterBtn"
+          class="status-main-btn call-waiter-btn"
+          type="button"
+        >
+          Thirr kamarierin
+        </button>
+      </article>
     </section>
 
-    <!-- SPEISEKARTE -->
+    <!-- SUCHE -->
     <section class="card">
-      <h2>Speisekarte</h2>
-      <div class="menu-list" id="menuList">
-        <article class="menu-item">
+      <div class="search-pill">
+        <input
+          class="search-input"
+          type="search"
+          placeholder="Kërko në meny."
+        />
+        <button class="search-btn" type="button">
+          <span class="search-btn-icon"></span>
+        </button>
+      </div>
+    </section>
+
+    <!-- GETRÄNKE (DEMO) -->
+    <section class="card">
+      <h2 class="section-title">Getränke</h2>
+      <div class="drinks-list">
+        <article class="drink-item">
           <img
-            src="https://via.placeholder.com/600x400"
-            class="menu-item-image"
-            alt="Pizza Margherita"
+            src="https://via.placeholder.com/400x600.png?text=Drink+1"
+            alt="Latte Macchiato"
+            class="drink-image"
           />
-          <div class="menu-item-header">
-            <div class="menu-item-name">Pizza Margherita</div>
-            <div class="menu-item-price">7,90 €</div>
+          <div class="drink-name-row">
+            <span class="drink-name">Latte Macchiato</span>
+            <span class="drink-price">3,50 €</span>
           </div>
-          <div class="menu-item-desc">
-            Domate, djathë mozzarella, borzilok i freskët.
-          </div>
-          <div class="menu-item-social">
-            <button class="social-btn social-btn-like" type="button">
-              <span class="social-icon">♥</span>
-              <span class="social-count">24</span>
-            </button>
-            <button class="social-btn social-btn-comment" type="button">
-              <span class="social-icon">💬</span>
-              <span class="social-count">5</span>
-            </button>
-          </div>
-          <div class="menu-item-actions">
-            <div class="qty-control">
-              <button class="qty-btn" type="button">-</button>
-              <span class="qty-value">1</span>
-              <button class="qty-btn" type="button">+</button>
-            </div>
+        </article>
+        <article class="drink-item">
+          <img
+            src="https://via.placeholder.com/400x600.png?text=Drink+2"
+            alt="Fresh Portokalli"
+            class="drink-image"
+          />
+          <div class="drink-name-row">
+            <span class="drink-name">Fresh Portokalli</span>
+            <span class="drink-price">4,00 €</span>
           </div>
         </article>
       </div>
     </section>
-  </main>
 
-  <!-- Floating Cart Button unten rechts -->
-  <button class="cart-fab cart-fab--has-items" id="cartFab" type="button">
-    <span class="cart-fab-icon"></span>
-    <span class="cart-fab-label" id="cartFabLabel">Shiko porosin</span>
-    <span class="cart-fab-badge" id="cartBadge">2</span>
-  </button>
+    <!-- SPEISEKARTE (DEMO) -->
+    <section class="card">
+      <h2 class="section-title">Speisekarte</h2>
+      <article class="menu-item">
+        <img
+          src="https://via.placeholder.com/600x400.png?text=Food+1"
+          alt="Pizza Margherita"
+          class="menu-image"
+        />
+        <div class="menu-name-row">
+          <span class="menu-name">Pizza Margherita</span>
+          <span class="menu-price">7,90 €</span>
+        </div>
+        <p class="menu-desc">
+          Domate, djathë mozzarella dhe borzilok i freskët.
+        </p>
+      </article>
+    </section>
+
+  </main>
 </body>
 </html>
