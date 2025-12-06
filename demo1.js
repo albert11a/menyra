@@ -21,7 +21,7 @@ import {
 // so wie sie im Firestore unter "restaurants" heißt.
 // Beispiel: "shpija vjeter" oder "shpija-vjeter" oder was du wirklich benutzt:
 
-const RESTAURANT_FIRESTORE_ID = "shpija vjeter"; // <- HIER EXAKT ANPASSEN
+const RESTAURANT_FIRESTORE_ID = "shpija-e-vjetr"; // <- HIER EXAKT ANPASSEN
 
 // Wenn du später mit URL-Param arbeiten willst, kannst du das optional lassen:
 const params = new URLSearchParams(window.location.search);
