@@ -19,7 +19,7 @@ import {
 const RESTAURANT_FIRESTORE_ID = "shpija-e-vjetr";
 
 const params = new URLSearchParams(window.location.search);
-const restaurantId = params.get("r") || "test-restaurant";
+const restaurantId = params.get("r") || "shpija-e-vjetr";
 const tableId = params.get("t") || "T1";
 
 const restaurantLogoEl = document.getElementById("restaurantLogo");
