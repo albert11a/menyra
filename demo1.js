@@ -1,4 +1,4 @@
-// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, globalem Warenkorb
+// demo1.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, globalem Warenkorb & Mehrsprachigkeit
 
 import { db } from "./firebase-config.js";
 import {
@@ -16,10 +16,20 @@ import {
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
+/* =========================
+   URL PARAMS
+   ========================= */
+
 const params = new URLSearchParams(window.location.search);
+// Default: shpija-e-vjetr
 const restaurantId = params.get("r") || "shpija-e-vjetr";
 const tableId = params.get("t") || "T1";
 
+/* =========================
+   DOM ELEMENTE
+   ========================= */
+
+// Restaurant Header
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
@@ -54,10 +64,7 @@ const orderDetailsContent = document.getElementById("orderDetailsContent");
 
 const callWaiterBtn = document.getElementById("callWaiterBtn");
 
-/* =========================
-   LANGUAGE-UI REFERENZEN
-   ========================= */
-
+// LANGUAGE-UI
 const langCard = document.getElementById("langCard");
 const langButtons = document.querySelectorAll("[data-lang-btn]");
 const statusOrderLabelEl = document.getElementById("statusOrderLabel");
@@ -65,50 +72,189 @@ const statusCallLabelEl = document.getElementById("statusCallLabel");
 const langTitleEl = document.getElementById("langTitle");
 const langHintEl = document.getElementById("langHint");
 
+/* =========================
+   SPRACHEN KONFIG
+   ========================= */
+
 const LANGS = {
   sq: {
     label: "SQ",
+
+    // Top / Language
+    langTitle: "Gjuha",
+    langHint: "Zgjidh gjuhën për porosi & kamarier.",
+
+    // Order / Porosia
     orderTitle: "Porosia juaj",
     orderBtnClosed: "Shiko porosinë +",
     orderBtnOpen: "Shiko porosinë -",
+    orderEmptyStatus: "S'ka porosi",
+    orderEmptyText: "Ende nuk keni porositur.",
+    orderStatusNew: "E re",
+    orderStatusInProgress: "Në përgatitje",
+    orderStatusServed: "Servuar",
+    orderStatusPaid: "Paguar",
+    orderTotalLabel: "Totali",
+
+    // Call waiter
     callTitle: "Thirr kamarierin",
     callBtnIdle: "Thirr kamarierin",
     callBtnActive: "Kamarieri vjen",
-    langTitle: "Gjuha",
-    langHint: "Zgjidh gjuhën për porosi & kamarier.",
+
+    // Search
+    searchPlaceholder: "Kërko në meny.",
+
+    // Sections
+    drinksTitle: "Pije",
+    menuTitle: "Menyja",
+
+    // Offers
+    offersLabel: "SOT NË FOKUS",
+    offerInfoOnly:
+      "Vetëm informacion / reklamë – jo e porositshme direkt.",
+
+    // Buttons allgemein
+    btnDetails: "Detajet",
+    btnAdd: "Shto",
+    btnDrinkChoose: "Zgjidh",
+    cartFabLabel: "Shiko porosinë",
+
+    // Fehler / Infos
+    noDrinks: "Nuk ka pije.",
+    noFood: "Nuk ka produkte.",
+    menuError: "Gabim gjatë ngarkimit të menysë.",
+    restaurantInactive:
+      "Ky MENYRA aktualisht nuk është aktiv. Ju lutemi informoni stafin.",
+    restaurantNotFound: "Lokal nuk u gjet",
   },
+
   de: {
     label: "DE",
+
+    langTitle: "Sprache",
+    langHint: "Sprache für Bestellung & Kellner.",
+
     orderTitle: "Deine Bestellung",
     orderBtnClosed: "Bestellung anzeigen +",
     orderBtnOpen: "Bestellung ausblenden -",
+    orderEmptyStatus: "Keine Bestellung",
+    orderEmptyText: "Du hast noch nichts bestellt.",
+    orderStatusNew: "Neu",
+    orderStatusInProgress: "In Vorbereitung",
+    orderStatusServed: "Serviert",
+    orderStatusPaid: "Bezahlt",
+    orderTotalLabel: "Gesamt",
+
     callTitle: "Kellner rufen",
     callBtnIdle: "Kellner rufen",
     callBtnActive: "Kellner kommt",
-    langTitle: "Sprache",
-    langHint: "Sprache für Bestellung & Kellner.",
+
+    searchPlaceholder: "In der Speisekarte suchen.",
+
+    drinksTitle: "Getränke",
+    menuTitle: "Speisekarte",
+
+    offersLabel: "HEUTE IM FOKUS",
+    offerInfoOnly:
+      "Nur Information / Werbung – nicht direkt bestellbar.",
+
+    btnDetails: "Details",
+    btnAdd: "Hinzufügen",
+    btnDrinkChoose: "Wähle",
+    cartFabLabel: "Bestellung ansehen",
+
+    noDrinks: "Keine Getränke.",
+    noFood: "Keine Produkte.",
+    menuError: "Fehler beim Laden der Speisekarte.",
+    restaurantInactive:
+      "Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.",
+    restaurantNotFound: "Lokal nicht gefunden",
   },
+
   en: {
     label: "EN",
+
+    langTitle: "Language",
+    langHint: "Choose language for order & waiter.",
+
     orderTitle: "Your order",
     orderBtnClosed: "View order +",
     orderBtnOpen: "Hide order -",
+    orderEmptyStatus: "No order",
+    orderEmptyText: "You haven’t ordered anything yet.",
+    orderStatusNew: "New",
+    orderStatusInProgress: "In preparation",
+    orderStatusServed: "Served",
+    orderStatusPaid: "Paid",
+    orderTotalLabel: "Total",
+
     callTitle: "Call waiter",
     callBtnIdle: "Call waiter",
     callBtnActive: "Waiter on the way",
-    langTitle: "Language",
-    langHint: "Choose language for order & waiter.",
+
+    searchPlaceholder: "Search in the menu.",
+
+    drinksTitle: "Drinks",
+    menuTitle: "Food menu",
+
+    offersLabel: "TODAY IN FOCUS",
+    offerInfoOnly:
+      "Information / promotion only – not directly orderable.",
+
+    btnDetails: "Details",
+    btnAdd: "Add",
+    btnDrinkChoose: "Choose",
+    cartFabLabel: "View order",
+
+    noDrinks: "No drinks.",
+    noFood: "No products.",
+    menuError: "Error loading the menu.",
+    restaurantInactive:
+      "This MENYRA is currently not active. Please inform the staff.",
+    restaurantNotFound: "Venue not found",
   },
+
   sr: {
     label: "SR",
+
+    langTitle: "Jezik",
+    langHint: "Izaberi jezik za porudžbinu i konobara.",
+
     orderTitle: "Tvoja porudžbina",
     orderBtnClosed: "Prikaži porudžbinu +",
     orderBtnOpen: "Sakrij porudžbinu -",
+    orderEmptyStatus: "Nema porudžbine",
+    orderEmptyText: "Još nisi ništa poručio/la.",
+    orderStatusNew: "Nova",
+    orderStatusInProgress: "U pripremi",
+    orderStatusServed: "Posluženo",
+    orderStatusPaid: "Plaćeno",
+    orderTotalLabel: "Ukupno",
+
     callTitle: "Pozovi konobara",
     callBtnIdle: "Pozovi konobara",
     callBtnActive: "Konobar dolazi",
-    langTitle: "Jezik",
-    langHint: "Izaberi jezik za porudžbinu i konobara.",
+
+    searchPlaceholder: "Pretraži meni.",
+
+    drinksTitle: "Pića",
+    menuTitle: "Meni",
+
+    offersLabel: "DANAS U FOKUSU",
+    offerInfoOnly:
+      "Samo informacija / reklama – nije moguće direktno poručiti.",
+
+    btnDetails: "Detalji",
+    btnAdd: "Dodaj",
+    btnDrinkChoose: "Izaberi",
+    cartFabLabel: "Vidi porudžbinu",
+
+    noDrinks: "Nema pića.",
+    noFood: "Nema proizvoda.",
+    menuError: "Greška pri učitavanju menija.",
+    restaurantInactive:
+      "Ovaj MENYRA trenutno nije aktivan. Obavesti osoblje.",
+    restaurantNotFound: "Lokal nije pronađen",
   },
 };
 
@@ -134,58 +280,13 @@ function saveLanguageToStorage(lang) {
   }
 }
 
-let currentLang = loadLanguageFromStorage();
-
-/* =========================
-   SPRACHE AUF UI ANWENDEN
-   ========================= */
-
-function applyLanguageToUI() {
+/** Helper: Text holen */
+function t(key) {
   const cfg = LANGS[currentLang] || LANGS.sq;
-
-  // Language-Card Überschrift / Hint
-  if (langTitleEl) langTitleEl.textContent = cfg.langTitle;
-  if (langHintEl) langHintEl.textContent = cfg.langHint;
-
-  // Pills aktiv setzen
-  if (langButtons?.length) {
-    langButtons.forEach((btn) => {
-      const code = btn.dataset.lang;
-      if (code === currentLang) {
-        btn.classList.add("lang-pill--active");
-      } else {
-        btn.classList.remove("lang-pill--active");
-      }
-    });
-  }
-
-  // Porosia Label
-  if (statusOrderLabelEl) {
-    statusOrderLabelEl.textContent = cfg.orderTitle;
-  }
-
-  // Button-Text Porosia je nach offen/zu
-  if (orderToggleBtn) {
-    orderToggleBtn.textContent = orderDetailsOpen
-      ? cfg.orderBtnOpen
-      : cfg.orderBtnClosed;
-  }
-
-  // Kamarieri Label
-  if (statusCallLabelEl) {
-    statusCallLabelEl.textContent = cfg.callTitle;
-  }
-
-  // Kamarieri Button je nach aktiv
-  if (callWaiterBtn) {
-    const hasOpen = callWaiterBtn.classList.contains(
-      "call-waiter-btn--active"
-    );
-    callWaiterBtn.textContent = hasOpen
-      ? cfg.callBtnActive
-      : cfg.callBtnIdle;
-  }
+  return cfg[key] || LANGS.sq[key] || key;
 }
+
+let currentLang = loadLanguageFromStorage();
 
 /* =========================
    STATE
@@ -204,6 +305,7 @@ let cart = [];
 let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
+let offersCache = [];
 
 // Order-/Call-State
 let orderDetailsOpen = false;
@@ -330,6 +432,7 @@ async function loadOffersForRestaurant(restaurantRef, restData) {
   if (restData.offerActive === false) {
     offersSection.style.display = "none";
     clearOffersTimer();
+    offersCache = [];
     return;
   }
 
@@ -346,6 +449,8 @@ async function loadOffersForRestaurant(restaurantRef, restData) {
     });
   });
 
+  offersCache = offers;
+
   if (!offers.length) {
     offersSection.style.display = "none";
     clearOffersTimer();
@@ -356,6 +461,8 @@ async function loadOffersForRestaurant(restaurantRef, restData) {
 }
 
 function renderOffersSlider(offers) {
+  if (!offersSection || !offersSliderEl || !offersDotsEl) return;
+
   offersSliderEl.innerHTML = "";
   offersDotsEl.innerHTML = "";
   offersSection.style.display = "block";
@@ -433,7 +540,7 @@ function renderOffersSlider(offers) {
 
       const plusBtn = document.createElement("button");
       plusBtn.className = "btn btn-primary";
-      plusBtn.textContent = "Hinzufügen";
+      plusBtn.textContent = t("btnAdd");
 
       const targetItem = linkedMenuItem
         ? linkedMenuItem
@@ -452,8 +559,7 @@ function renderOffersSlider(offers) {
     } else {
       const infoOnly = document.createElement("div");
       infoOnly.className = "offer-info-only";
-      infoOnly.textContent =
-        "Vetëm informacion / reklamë – jo e porositshme direkt.";
+      infoOnly.textContent = t("offerInfoOnly");
       slide.appendChild(infoOnly);
     }
 
@@ -475,6 +581,12 @@ function renderOffersSlider(offers) {
   offersSlides = Array.from(offersSliderEl.querySelectorAll(".offer-slide"));
   offersCurrentIndex = 0;
   startOffersAutoSlide();
+
+  // Offizielle Überschrift im Widget
+  const offersLabelEl = offersSection.querySelector(".offers-label");
+  if (offersLabelEl) {
+    offersLabelEl.textContent = t("offersLabel");
+  }
 
   offersSliderEl.addEventListener("scroll", () => {
     if (!offersSlides.length) return;
@@ -536,9 +648,9 @@ async function loadRestaurantAndMenu() {
     const restaurantSnap = await getDoc(restaurantRef);
 
     if (!restaurantSnap.exists()) {
-      restaurantNameEl.textContent = "Lokal nicht gefunden";
+      restaurantNameEl.textContent = t("restaurantNotFound");
       restaurantMetaEl.textContent = `ID: ${restaurantId}`;
-      menuListEl.innerHTML = "<p class='info'>Bitte Personal informieren.</p>";
+      menuListEl.innerHTML = `<p class="info">${t("menuError")}</p>`;
       offersSection.style.display = "none";
       if (drinksSection) drinksSection.style.display = "none";
       if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
@@ -559,7 +671,7 @@ async function loadRestaurantAndMenu() {
 
     if (!isRestaurantOperational(data)) {
       menuListEl.innerHTML =
-        "<p class='info'>Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.</p>";
+        `<p class="info">${t("restaurantInactive")}</p>`;
       offersSection.style.display = "none";
       if (drinksSection) drinksSection.style.display = "none";
       if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
@@ -611,8 +723,8 @@ async function loadRestaurantAndMenu() {
     restaurantNameEl.textContent = "Fehler";
     restaurantMetaEl.textContent = err.message;
     menuListEl.innerHTML =
-      "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
-    offersSection.style.display = "none";
+      `<p class="info">${t("menuError")}</p>`;
+    if (offersSection) offersSection.style.display = "none";
     if (drinksSection) drinksSection.style.display = "none";
     if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
     if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
@@ -679,13 +791,17 @@ function renderDrinks() {
   drinksSection.style.display = "block";
   if (drinksTabsWrapper) drinksTabsWrapper.style.display = "block";
 
+  // Titel "Getränke / Pije / Drinks / Pića"
+  const drinksTitleEl = drinksSection.querySelector("h2");
+  if (drinksTitleEl) drinksTitleEl.textContent = t("drinksTitle");
+
   let items = drinksItems;
   if (activeDrinksCategory) {
     items = drinksItems.filter((i) => i.category === activeDrinksCategory);
   }
 
   if (!items.length) {
-    drinksListEl.innerHTML = "<p class='info'>Keine Getränke.</p>";
+    drinksListEl.innerHTML = `<p class="info">${t("noDrinks")}</p>`;
     return;
   }
 
@@ -807,7 +923,7 @@ function renderDrinks() {
     addBtn.type = "button";
     addBtn.className = "btn-add-round";
     const addSpan = document.createElement("span");
-    addSpan.textContent = "Wähle";
+    addSpan.textContent = t("btnDrinkChoose");
     addBtn.appendChild(addSpan);
 
     addBtn.addEventListener("click", (ev) => {
@@ -869,6 +985,8 @@ function renderFoodCategories() {
 }
 
 function renderMenu() {
+  if (!menuListEl) return;
+
   menuListEl.innerHTML = "";
 
   let items = foodItems;
@@ -885,8 +1003,15 @@ function renderMenu() {
     });
   }
 
+  // Titel "Speisekarte / Menyja / Food menu / Meni"
+  const menuCard = menuListEl.closest(".card");
+  if (menuCard) {
+    const h2 = menuCard.querySelector("h2");
+    if (h2) h2.textContent = t("menuTitle");
+  }
+
   if (!items.length) {
-    menuListEl.innerHTML = "<p class='info'>Keine Produkte.</p>";
+    menuListEl.innerHTML = `<p class="info">${t("noFood")}</p>`;
     return;
   }
 
@@ -966,7 +1091,7 @@ function renderMenu() {
 
     const detailsBtn = document.createElement("button");
     detailsBtn.className = "btn btn-dark";
-    detailsBtn.textContent = "Detajet";
+    detailsBtn.textContent = t("btnDetails");
     detailsBtn.addEventListener("click", () => {
       const url = new URL(window.location.href);
       url.pathname = "detajet.html";
@@ -978,7 +1103,7 @@ function renderMenu() {
 
     const plusBtn = document.createElement("button");
     plusBtn.className = "btn btn-primary";
-    plusBtn.textContent = "Hinzufügen";
+    plusBtn.textContent = t("btnAdd");
     plusBtn.addEventListener("click", () => changeCart(item, 1));
 
     actions.appendChild(detailsBtn);
@@ -1045,7 +1170,7 @@ function updateCartBadge() {
     cartBadgeEl.style.display = "flex";
     cartFab.classList.add("visible", "cart-fab--has-items");
     if (cartFabLabel) {
-      cartFabLabel.textContent = "Shiko porosin";
+      cartFabLabel.textContent = t("cartFabLabel");
       cartFabLabel.style.display = "block";
     }
   } else {
@@ -1079,26 +1204,26 @@ function changeCart(item, delta) {
 function mapGuestOrderStatus(status) {
   const s = status || "new";
   if (s === "new") {
-    return { label: "Neu", badgeClass: "order-status-badge--new" };
+    return { label: t("orderStatusNew"), badgeClass: "order-status-badge--new" };
   }
   if (s === "in_progress") {
-    return { label: "Në përgatitje", badgeClass: "order-status-badge--in-progress" };
+    return { label: t("orderStatusInProgress"), badgeClass: "order-status-badge--in-progress" };
   }
   if (s === "served") {
-    return { label: "Serviert", badgeClass: "order-status-badge--served" };
+    return { label: t("orderStatusServed"), badgeClass: "order-status-badge--served" };
   }
   if (s === "paid") {
-    return { label: "Paguar", badgeClass: "order-status-badge--paid" };
+    return { label: t("orderStatusPaid"), badgeClass: "order-status-badge--paid" };
   }
   return { label: s, badgeClass: "order-status-badge--empty" };
 }
 
 function renderOrderEmpty() {
   if (!orderStatusBadge || !orderDetailsContent) return;
-  orderStatusBadge.textContent = "S'ka porosi";
+  orderStatusBadge.textContent = t("orderEmptyStatus");
   orderStatusBadge.className =
     "order-status-badge order-status-badge--empty";
-  orderDetailsContent.textContent = "Ende nuk keni porositur.";
+  orderDetailsContent.textContent = t("orderEmptyText");
 }
 
 function renderLatestOrder(latest) {
@@ -1111,7 +1236,7 @@ function renderLatestOrder(latest) {
   const items = latest.items || [];
   if (!items.length) {
     orderDetailsContent.textContent =
-      "Porosia është regjistruar, por artikujt nuk janë gjetur.";
+      t("orderEmptyText");
     return;
   }
 
@@ -1141,7 +1266,7 @@ function renderLatestOrder(latest) {
       ${lines}
     </div>
     <div class="order-summary-row">
-      <span>Totali</span>
+      <span>${t("orderTotalLabel")}</span>
       <span>${total.toFixed(2)} €</span>
     </div>
   `;
@@ -1193,7 +1318,6 @@ function openOrderDetails() {
     orderDetailsCard.classList.add("order-details-card--open");
   });
 
-  // Text in gewählter Sprache aktualisieren
   applyLanguageToUI();
 }
 
@@ -1209,7 +1333,6 @@ function closeOrderDetails() {
     }
   }, 220);
 
-  // Text in gewählter Sprache aktualisieren
   applyLanguageToUI();
 }
 
@@ -1226,7 +1349,6 @@ function updateWaiterCallUI(hasOpen) {
     callWaiterBtn.classList.remove("call-waiter-btn--active");
   }
 
-  // Text je nach Sprache setzen
   applyLanguageToUI();
 }
 
@@ -1280,13 +1402,82 @@ async function handleCallWaiter() {
       });
     }
 
-    // Direkt UI umstellen, Listener hält das dann aktuell
     updateWaiterCallUI(true);
   } catch (err) {
     console.error("[KARTE] Fehler bei Thirr kamarierin:", err);
     alert("Thirrja nuk u dërgua, provo përsëri.");
   } finally {
     callWaiterBtn.disabled = false;
+  }
+}
+
+/* =========================
+   SPRACHE AUF UI ANWENDEN
+   ========================= */
+
+function applyLanguageToUI() {
+  const cfg = LANGS[currentLang] || LANGS.sq;
+
+  // Language-Card Überschrift / Hint
+  if (langTitleEl) langTitleEl.textContent = cfg.langTitle;
+  if (langHintEl) langHintEl.textContent = cfg.langHint;
+
+  // Sprache-Pills aktiv setzen
+  if (langButtons?.length) {
+    langButtons.forEach((btn) => {
+      const code = btn.dataset.lang;
+      if (code === currentLang) {
+        btn.classList.add("lang-pill--active");
+      } else {
+        btn.classList.remove("lang-pill--active");
+      }
+    });
+  }
+
+  // Porosia Label
+  if (statusOrderLabelEl) {
+    statusOrderLabelEl.textContent = cfg.orderTitle;
+  }
+
+  // Order Button Text (offen/zu)
+  if (orderToggleBtn) {
+    orderToggleBtn.textContent = orderDetailsOpen
+      ? cfg.orderBtnOpen
+      : cfg.orderBtnClosed;
+  }
+
+  // Kamarieri Label
+  if (statusCallLabelEl) {
+    statusCallLabelEl.textContent = cfg.callTitle;
+  }
+
+  // Kamarieri Button Text
+  if (callWaiterBtn) {
+    const hasOpen = callWaiterBtn.classList.contains(
+      "call-waiter-btn--active"
+    );
+    callWaiterBtn.textContent = hasOpen
+      ? cfg.callBtnActive
+      : cfg.callBtnIdle;
+  }
+
+  // Search-Placeholder
+  if (searchInput) {
+    searchInput.placeholder = cfg.searchPlaceholder;
+  }
+
+  // Cart-FAB-Label (wird zusätzlich in updateCartBadge gesetzt)
+  if (cartFabLabel && cartFab.classList.contains("cart-fab--has-items")) {
+    cartFabLabel.textContent = cfg.cartFabLabel;
+  }
+
+  // Drinks & Menü neu rendern, damit Buttons / Texte in richtiger Sprache sind
+  renderDrinks();
+  renderMenu();
+
+  // Offers-Label & Info-Text aktualisieren
+  if (offersCache.length) {
+    renderOffersSlider(offersCache);
   }
 }
 
