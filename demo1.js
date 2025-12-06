@@ -16,8 +16,6 @@ import {
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-const RESTAURANT_FIRESTORE_ID = "shpija-e-vjetr";
-
 const params = new URLSearchParams(window.location.search);
 const restaurantId = params.get("r") || "shpija-e-vjetr";
 const tableId = params.get("t") || "T1";
