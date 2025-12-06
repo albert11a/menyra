@@ -1948,11 +1948,7 @@ img {
   box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
 }
 
-/* =========================================
-   GLOBAL: Button-Radius über Variable steuern
-   ========================================= */
-
-/* Alle Standard-Buttons nutzen denselben Radius */
+/* Einfacher Global-Button-Radius – HIER EINSTELLEN */
 button,
 .btn,
 .btn-primary,
@@ -1962,17 +1958,9 @@ button,
 .status-main-btn,
 .lang-pill,
 .btn-add-round,
-.cart-fab,
-.search-btn,
 .category-tab,
-.rating-pill {
-  border-radius: var(--btn-radius-global);
-}
-
-/* Kreise bleiben bewusst rund (Like-Icon, Kamarieri/Porosia-Logo) */
-.icon-circle,
-.status-icon-circle,
-.cart-fab-icon {
-  border-radius: 999px;
+.search-btn,
+.cart-fab {
+  border-radius: 10px; /* <- HIER Zahl ändern (z.B. 6px, 8px, 12px) */
 }
 
