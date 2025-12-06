@@ -21,7 +21,7 @@ import {
    ========================= */
 
 // HIER GENAU deine Firestore-Dokument-ID eintragen:
-const RESTAURANT_FIRESTORE_ID = "shpija vjeter"; // <- anpassen!
+const RESTAURANT_FIRESTORE_ID = "shpija-e-vjetr"; // <- anpassen!
 
 const params = new URLSearchParams(window.location.search);
 const restaurantId = params.get("r") || RESTAURANT_FIRESTORE_ID;
