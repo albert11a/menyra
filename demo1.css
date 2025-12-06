@@ -1937,17 +1937,14 @@ img {
 }
 
 /* =========================================
-   SCHATTEN ANGLEICHEN: POROSIA = KAMARIERI
+   Dezenter, einheitlicher Schatten für Porosia & Kamarieri Icons
    ========================================= */
 
-/* Kamarieri hat hier schon einen eigenen Shadow:
-   .status-card--call .status-card-top .icon-circle {
-       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
-   }
-   -> Wir geben Porosia exakt den gleichen.
-*/
-.status-card--order .status-card-top .icon-circle {
-  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.35);
+/* Beide Icon-Kreise (links Porosia, rechts Kamarieri) bekommen
+   einen sehr soften, iOS-mäßigen Shadow */
+.status-card--order .status-card-top .icon-circle,
+.status-card--call  .status-card-top .icon-circle {
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14);
 }
 
 
