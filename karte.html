@@ -22,6 +22,71 @@
         </div>
       </section>
 
+      <!-- STATUS-ROW: Shiko porosinë + Thirr kamarierin -->
+<section class="karte-status-row">
+  <!-- Links: Shiko porosinë -->
+  <article class="status-card status-card--order">
+    <div class="status-card-top">
+      <div class="icon-circle">
+        <div class="status-icon-circle status-icon-circle--order"></div>
+      </div>
+      <div class="status-card-label">Porosia</div>
+    </div>
+    <button
+      id="orderToggleBtn"
+      class="status-main-btn order-toggle-btn"
+      type="button"
+    >
+      Shiko +
+    </button>
+  </article>
+
+  <!-- Rechts: Thirr kamarierin -->
+  <article class="status-card status-card--call">
+    <div class="status-card-top">
+      <div class="icon-circle">
+        <div class="status-icon-circle status-icon-circle--call"></div>
+      </div>
+      <div class="status-card-label">Kamarierin</div>
+    </div>
+    <button
+      id="callWaiterBtn"
+      class="status-main-btn call-waiter-btn"
+      type="button"
+    >
+      Thirr kamarierin
+    </button>
+  </article>
+</section>
+
+
+
+
+      <!-- Porosia juaj – Card unter den zwei Buttons -->
+      <section
+        id="orderDetailsContainer"
+        class="order-details-container"
+        style="display:none;"
+      >
+        <article id="orderDetailsCard" class="order-details-card">
+          <div class="order-details-header">
+            <span class="order-details-title">Porosia juaj</span>
+            <span
+              id="orderStatusBadge"
+              class="order-status-badge order-status-badge--empty"
+            >
+              S'ka porosi
+            </span>
+          </div>
+          <div
+            id="orderDetailsContent"
+            class="order-details-content"
+          >
+            Ende nuk keni porositur.
+          </div>
+        </article>
+      </section>
+      
       <!-- ANGEBOTE / SOT NE FOKUS SLIDER -->
       <section class="offers-card" id="offersSection" style="display:none;">
         <div class="offers-header-row">
@@ -153,6 +218,7 @@
   <script type="module" src="karte.js"></script>
 </body>
 </html>
+
 
 
 
