@@ -1422,126 +1422,133 @@ img {
   z-index: 62;
 }
 
-/* ========================================
-   KARTE: Shiko porosinë + Thirr kamarierin
-   ======================================== */
+    /* =====================================================
+       NEU: KARTE – STATUS-CARDS (Shiko / Thirr)
+       ===================================================== */
 
-.karte-status-row {
-  display: flex;
-  gap: 12px;
-  margin-top: 8px;
-  margin-bottom: 4px;
-}
+    .karte-status-row {
+      display: flex;
+      gap: 12px;
+      margin-top: 8px;
+      margin-bottom: 4px;
+    }
 
-/* Cards: wie andere, aber OHNE Shadow – Höhe anpassbar über min-height */
-.status-card {
-  flex: 1 1 0;
-  padding: 10px 10px 16px;
-  border-radius: 18px;
-  border: 1px solid rgba(148, 163, 184, 0.35);
-  background: #ffffff;
-  box-shadow: none; /* Card selbst kein Shadow */
+    /* Status-Cards: gleiche Farbe wie SOT NE FOKUS, ohne Border */
+    .status-card {
+      flex: 1 1 0;
+      padding: 12px 12px 14px;
+      border-radius: 18px;
+      background: #0f172a;               /* dark wie offers-card */
+      border: none;                      /* kein Border */
+      box-shadow: none;
+      color: #f9fafb;
 
-  /* WICHTIG: für sauberes Zentrieren des Buttons */
-  display: flex;
-  flex-direction: column;
-  align-items: center;      /* Button mittig */
-}
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+      justify-content: flex-start;
+    }
 
-/* Höhe der beiden Cards – HIER kannst du spielen (z.B. 120 / 140 / 160) */
-.status-card--order,
-.status-card--call {
-  min-height: 130px;
-}
+    .status-card--order,
+    .status-card--call {
+      min-height: 130px;                 /* Höhe kannst du hier ändern */
+    }
 
-/* oberer Bereich mit Icon-Kreis links */
-.status-card-top {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-}
+    .status-card-top {
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+    }
 
-/* wir verwenden dein existierendes icon-circle, aber als Logo (nicht klickbar) */
-.status-card-top .icon-circle {
-  cursor: default;
-  pointer-events: none;
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06); /* wie Like-Herz */
-}
+    /* Größerer iOS-Icon-Kreis mit stärkerem Shadow NUR in diesen Cards */
+    .status-card-top .icon-circle {
+      width: 42px;
+      height: 42px;
+      background: #f9fafb;
+      box-shadow: 0 6px 16px rgba(15, 23, 42, 0.45);
+      cursor: default;
+      pointer-events: none;
+    }
 
-/* Logo im Kreis – GRÖSSE kannst du hier ändern */
-.status-icon-circle {
-  background-size: 22px 22px;  /* Icon-Größe im Kreis (z.B. 18 / 20 / 24) */
-  background-position: center;
-  background-repeat: no-repeat;
-}
+    .status-icon-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 999px;
+      background-size: 26px 26px;    /* Icon-Größe */
+      background-position: center;
+      background-repeat: no-repeat;
+    }
 
-/* Linke Card – Icon aus deinem Link */
-.status-icon-circle--order {
-  background-image: url("https://i.postimg.cc/fWrbHsdR/Chat-GPT-Image-5-Dez-2025-23-31-43.png");
-}
+    .status-icon-circle--order {
+      background-image: url("https://i.postimg.cc/fWrbHsdR/Chat-GPT-Image-5-Dez-2025-23-31-43.png");
+    }
 
-/* Rechte Card – Icon aus deinem Link */
-.status-icon-circle--call {
-  background-image: url("https://i.postimg.cc/yNLKkhXd/Chat-GPT-Image-5-Dez-2025-23-36-38.png");
-}
+    .status-icon-circle--call {
+      background-image: url("https://i.postimg.cc/yNLKkhXd/Chat-GPT-Image-5-Dez-2025-23-36-38.png");
+    }
 
-/* Hauptbutton mittig – iOS-Pill, Shadow wie Herz-Like-Button */
-.status-main-btn {
-  border: none;
-  border-radius: 999px;
-  padding: 9px 18px;
-  font-size: 0.82rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #ffffff;
-  color: #111827;
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06); /* gleich wie .icon-circle */
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    background 0.18s ease-out,
-    color 0.18s ease-out,
-    box-shadow 0.18s ease-out,
-    transform 0.12s ease-out;
-  margin-top: 12px;
-  margin-left: auto;
-  margin-right: auto;      /* wirklich mittig in der Card */
-  white-space: nowrap;
-}
+    /* Button: weiß, weniger runde Ecken, gleiche Abstände links/rechts
+       → align-self: stretch = nimmt die komplette Innenbreite der Card */
+    .status-main-btn {
+      align-self: stretch;
+      margin-top: 18px;
+      border: none;
+      border-radius: 16px;            /* weniger rund als 999px */
+      padding: 9px 16px;
+      font-size: 0.82rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #f9fafb;
+      color: #111827;
+      box-shadow: 0 4px 10px rgba(15, 23, 42, 0.35);
+      -webkit-tap-highlight-color: transparent;
+      transition:
+        background 0.18s ease-out,
+        color 0.18s ease-out,
+        box-shadow 0.18s ease-out,
+        transform 0.12s ease-out;
+      text-align: center;
+      white-space: nowrap;
+    }
 
-.status-main-btn:hover {
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.10);
-  transform: translateY(-1px);
-}
+    .status-main-btn:hover {
+      box-shadow: 0 6px 14px rgba(15, 23, 42, 0.45);
+      transform: translateY(-1px);
+    }
 
-.status-main-btn:active {
-  transform: translateY(0) scale(0.97);
-  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.06);
-}
+    .status-main-btn:active {
+      transform: translateY(0) scale(0.97);
+      box-shadow: 0 3px 8px rgba(15, 23, 42, 0.28);
+      background: #e5e7eb;
+    }
 
-/* Aktiver Staat – wird von deinem JS per Klasse gesetzt:
-   Shiko porosinë offen */
-.order-toggle-btn--active {
-  background: #ede9fe;
-  color: #4c1d95;
-}
+    /* Beispiel für aktive States – später macht dein JS diese Klassen dran */
 
-/* Kamarieri vjen */
-.call-waiter-btn--active {
-  background: #ecfdf5;
-  color: #166534;
-}
+    .order-toggle-btn--active {
+      background: #e5e7eb;
+      color: #111827;
+    }
 
-/* Auch auf kleinen Displays: immer nebeneinander */
-@media (max-width: 400px) {
-  .karte-status-row {
-    flex-direction: row;
-  }
-}
+    .call-waiter-btn--active {
+      background: #020617;
+      color: #f9fafb;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
+    }
 
+    @media (max-width: 400px) {
+      .status-card {
+        padding: 10px 10px 12px;
+        min-height: 120px;
+      }
+      .status-main-btn {
+        padding-inline: 14px;
+        font-size: 0.8rem;
+      }
+    }
 /* ========================================
    POROSIA JUAJ – Card unter Shiko porosinë
    ======================================== */
@@ -1672,3 +1679,4 @@ img {
   font-size: 0.9rem;
   font-weight: 600;
 }
+
