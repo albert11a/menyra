@@ -27,22 +27,22 @@ body {
   max-width: 480px;
   margin: 0 auto;
   min-height: 100vh;
-  padding: 16px 16px 32px;
+  padding: 20px 16px 32px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px; /* mehr Abstand zwischen Sektionen */
 }
 
 /* ========================================
-   GENERELLE CARD-BASIS
+   CARD-BASIS
    ======================================== */
 
 .card {
   background: #ffffff;
   border-radius: 24px;
   padding: 16px 16px;
-  border: 0.5px solid rgba(148, 163, 184, 0.35);
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.30);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08); /* minimaler Shadow */
 }
 
 /* ========================================
@@ -53,8 +53,8 @@ body {
   background: linear-gradient(145deg, #f9fbff 0%, #ffffff 45%, #edf1fb 100%);
   border-radius: 28px;
   padding: 18px 18px;
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.18);
-  border: 0.5px solid rgba(148, 163, 184, 0.45);
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.12);
+  border: 1px solid rgba(148, 163, 184, 0.45);
 }
 
 .restaurant-header {
@@ -64,24 +64,24 @@ body {
 }
 
 .rest-logo {
-  width: 50px;
-  height: 50px;
+  width: 52px;
+  height: 52px;
   border-radius: 16px;
   object-fit: cover;
   border: 1px solid #e2e8f0;
   background: #ffffff;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.20);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.16);
 }
 
 .restaurant-text {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 3px;
 }
 
 .restaurant-name {
   font-weight: 700;
-  font-size: 1.05rem;
+  font-size: 1.06rem;
   letter-spacing: 0.01em;
 }
 
@@ -91,140 +91,124 @@ body {
 }
 
 /* ========================================
-   SOT NË FOKUS – 2 CARDS NEBENEINANDER
+   SOT NË FOKUS – EIN WIDGET
    ======================================== */
 
-.offers-widget {
+.focus-card {
+  border-radius: 26px;
+  padding: 16px 16px 18px;
+  background:
+    radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.22), transparent 60%),
+    linear-gradient(145deg, #020617 0%, #020617 50%, #111827 100%);
+  color: #f9fafb;
+  border: 1px solid rgba(15, 23, 42, 0.75);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.32); /* etwas, aber nicht zu stark */
   display: flex;
   flex-direction: column;
-  gap: 10px;
-}
-
-.offers-widget-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding-inline: 2px;
-}
-
-.offers-widget-label {
-  font-size: 0.72rem;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: #6b7280;
-}
-
-.offers-widget-row {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
-/* einzelne Offer-Card im Kamarieri-Style */
-
-.offer-card {
-  border-radius: 26px;
-  padding: 10px 10px 12px;
-  background:
-    radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.25), transparent 58%),
-    linear-gradient(145deg, #050c18 0%, #0c1727 50%, #182842 100%);
-  color: #f9fafb;
-  border: 0.5px solid rgba(15, 23, 42, 0.9);
-  box-shadow: 0 12px 24px rgba(15, 23, 42, 0.55);
+.focus-header-row {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
+  justify-content: space-between;
+  align-items: baseline;
 }
 
-/* Bild oben mit Shadow */
+.focus-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: #e5e7eb;
+  opacity: 0.9;
+}
 
-.offer-image-wrap {
+.focus-tag {
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid rgba(248, 250, 252, 0.28);
+  background: rgba(15, 23, 42, 0.6);
+}
+
+/* großes Bild */
+
+.focus-image-wrap {
   width: 100%;
   border-radius: 18px;
   overflow: hidden;
-  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.55);
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.55);
 }
 
-.offer-image-wrap img {
+.focus-image-wrap img {
   width: 100%;
   display: block;
-  aspect-ratio: 4 / 3;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
 }
 
-/* Textbereich */
+/* Text / Body */
 
-.offer-body {
-  margin-top: 6px;
+.focus-body {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.offer-topline {
+.focus-title-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 4px;
 }
 
-.offer-title {
-  font-size: 0.9rem;
+.focus-title {
+  font-size: 1rem;
   font-weight: 600;
 }
 
-.offer-pill {
-  border-radius: 999px;
-  border: none;
-  padding: 4px 10px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  background: rgba(255, 255, 255, 0.16);
-  color: #e5ebff;
-  box-shadow:
-    0 6px 14px rgba(2, 6, 23, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.24);
+.focus-price {
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
-.offer-desc {
-  font-size: 0.74rem;
-  line-height: 1.4;
+.focus-desc {
+  font-size: 0.8rem;
   color: #e5e7eb;
+  line-height: 1.5;
 }
 
-/* Button wie Kamarieri */
+/* Button */
 
-.offer-btn {
+.focus-btn {
   margin-top: 2px;
   width: 100%;
-  height: 40px;
-  border-radius: 20px;
+  height: 42px;
+  border-radius: 21px;
   border: none;
   outline: none;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   font-weight: 600;
   letter-spacing: 0.01em;
   cursor: pointer;
-  background: rgba(255, 255, 255, 0.14);
-  color: #e5ebff;
+  background: rgba(248, 250, 252, 0.16);
+  color: #f9fafb;
   box-shadow:
-    0 10px 22px rgba(2, 6, 23, 0.9),
-    0 0 0 1px rgba(255, 255, 255, 0.26);
+    0 8px 18px rgba(15, 23, 42, 0.7),
+    0 0 0 1px rgba(248, 250, 252, 0.28);
   backdrop-filter: blur(10px);
   transition: background 0.18s ease, transform 0.16s ease, box-shadow 0.18s ease;
 }
 
-.offer-btn:hover {
-  background: rgba(255, 255, 255, 0.20);
+.focus-btn:hover {
+  background: rgba(248, 250, 252, 0.22);
   transform: translateY(-1px);
 }
 
-.offer-btn:active {
+.focus-btn:active {
   transform: translateY(0) scale(0.97);
-  box-shadow: 0 6px 16px rgba(2, 6, 23, 0.8);
+  box-shadow: 0 5px 14px rgba(15, 23, 42, 0.6);
 }
 
 /* ========================================
@@ -234,20 +218,20 @@ body {
 .karte-status-row {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
+  gap: 14px;
 }
 
-/* gleiche Form wie Widgets */
+/* gleiche Form wie Widgets, minimaler Shadow */
 
 .status-card {
   border-radius: 26px;
-  padding: 18px 14px 16px;
+  padding: 16px 14px 16px;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
   position: relative;
   overflow: hidden;
-  box-shadow: 0 10px 22px rgba(15, 23, 42, 0.18);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.12);
 }
 
 /* Links – POROSIA: hell */
@@ -255,17 +239,17 @@ body {
 .status-card--order {
   background: linear-gradient(145deg, #f9fbff 0%, #ffffff 45%, #edf1fb 100%);
   color: #0f172a;
-  border: 0.5px solid rgba(148, 163, 184, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.4);
 }
 
 /* Rechts – KAMARIERI: dunkel */
 
 .status-card--call {
   background:
-    radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.25), transparent 58%),
-    linear-gradient(145deg, #050c18 0%, #0c1727 50%, #182842 100%);
-  color: #f9fbff;
-  border: 0.5px solid rgba(15, 23, 42, 0.9);
+    radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.24), transparent 60%),
+    linear-gradient(145deg, #020617 0%, #020617 50%, #111827 100%);
+  color: #f9fafb;
+  border: 1px solid rgba(15, 23, 42, 0.9);
 }
 
 .status-card-top {
@@ -274,48 +258,44 @@ body {
   gap: 10px;
 }
 
-/* Icon-Kreis links */
+/* Icon-Kreis */
 
 .status-card-top .icon-circle {
-  width: 46px;
-  height: 46px;
-  border-radius: 23px;
+  width: 44px;
+  height: 44px;
+  border-radius: 22px;
   background: #ffffff;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  box-shadow:
-    0 10px 22px rgba(15, 23, 42, 0.26),
-    inset 0 0 0 0.5px rgba(148, 163, 184, 0.35);
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.18);
 }
 
 .status-icon-circle {
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   border-radius: 999px;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 24px 24px;
 }
 
-/* Placeholder-Icons mit Links */
+/* echte Icons */
 
 .status-icon-circle--order {
-  background-image: url("https://via.placeholder.com/60x60.png?text=P");
+  background-image: url("https://source.unsplash.com/60x60/?receipt");
 }
 
 .status-icon-circle--call {
   background-image: url("https://i.postimg.cc/59vmM8dH/Chat-GPT-Image-6-Dez-2025-04-19-16.png");
 }
 
-/* Titel neben Icon */
-
 .status-card-label {
   font-size: 0.82rem;
   font-weight: 600;
 }
 
-/* Button unten – optisch wie Widgets */
+/* Buttons */
 
 .status-main-btn {
   margin-top: 16px;
@@ -338,46 +318,28 @@ body {
 /* Porosia-Button (hell, leicht grau) */
 
 .status-card--order .status-main-btn {
-  background: rgba(15, 23, 42, 0.04);
+  background: rgba(15, 23, 42, 0.03);
   color: #020617;
-  box-shadow:
-    0 8px 18px rgba(148, 163, 184, 0.4),
-    0 0 0 1px rgba(148, 163, 184, 0.5);
-  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 10px rgba(148, 163, 184, 0.4);
 }
 
 .status-card--order .status-main-btn:hover {
-  background: rgba(15, 23, 42, 0.07);
+  background: rgba(15, 23, 42, 0.06);
   transform: translateY(-1px);
 }
 
-/* Kamarieri-Button (transparent glasig) */
+/* Kamarieri-Button (glasig) */
 
 .status-card--call .status-main-btn {
-  background: rgba(255, 255, 255, 0.14);
-  color: #e5ebff;
-  box-shadow:
-    0 10px 22px rgba(2, 6, 23, 0.9),
-    0 0 0 1px rgba(255, 255, 255, 0.26);
+  background: rgba(248, 250, 252, 0.16);
+  color: #f9fafb;
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.6);
   backdrop-filter: blur(10px);
 }
 
 .status-card--call .status-main-btn:hover {
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(248, 250, 252, 0.22);
   transform: translateY(-1px);
-}
-
-/* Active States (optional) */
-
-.order-toggle-btn--active {
-  background: #111827 !important;
-  color: #f9fafb !important;
-}
-
-.call-waiter-btn--active {
-  background: #111827 !important;
-  color: #f9fafb !important;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.55);
 }
 
 /* ========================================
@@ -385,7 +347,7 @@ body {
    ======================================== */
 
 .search-card {
-  padding: 10px 14px;
+  padding: 12px 14px;
 }
 
 .search-pill {
@@ -444,19 +406,25 @@ body {
 }
 
 /* ========================================
-   DRINKS & FOOD DEMO – einfache Cards
+   SEKTION-TITEL
    ======================================== */
 
 .section-title {
   font-size: 1rem;
   font-weight: 600;
-  margin-bottom: 6px;
+  margin-bottom: 8px;
 }
 
-/* Drinks: 2 Spalten */
+/* ========================================
+   GETRÄNKE MIT LIKES
+   ======================================== */
+
+.drinks-card {
+  padding: 16px 16px 18px;
+}
 
 .drinks-list {
-  margin-top: 6px;
+  margin-top: 4px;
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
@@ -465,13 +433,15 @@ body {
 .drink-item {
   background: #ffffff;
   border-radius: 16px;
-  padding: 8px 8px 12px;
+  padding: 8px 8px 10px;
   border: 1px solid rgba(148, 163, 184, 0.3);
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.05);
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
+
+/* Bild */
 
 .drink-image {
   width: 100%;
@@ -480,11 +450,14 @@ body {
   object-fit: cover;
 }
 
+/* Titel + Preis */
+
 .drink-name-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
   font-size: 0.8rem;
+  margin-top: 4px;
 }
 
 .drink-name {
@@ -495,14 +468,72 @@ body {
   font-weight: 600;
 }
 
-/* Food: eine große Card */
+/* Footer mit Like + Button */
+
+.drink-footer {
+  margin-top: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Like-Bereich */
+
+.drink-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.drink-like-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fee2e2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: #b91c1c;
+}
+
+/* Button „Zgjidh“ */
+
+.drink-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #111827;
+  color: #f9fafb;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+}
+
+/* ========================================
+   SPEISEKARTE
+   ======================================== */
+
+.menu-card {
+  padding: 16px 16px 18px;
+}
+
+.menu-list {
+  margin-top: 6px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
 
 .menu-item {
   background: #ffffff;
-  border-radius: 16px;
-  padding: 10px 10px 14px;
+  border-radius: 18px;
+  padding: 10px 10px 12px;
   border: 1px solid rgba(148, 163, 184, 0.3);
-  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.08);
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.06);
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -510,8 +541,8 @@ body {
 
 .menu-image {
   width: 100%;
-  border-radius: 12px;
-  aspect-ratio: 4/3;
+  border-radius: 14px;
+  aspect-ratio: 16/9;
   object-fit: cover;
 }
 
@@ -519,20 +550,67 @@ body {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 0.9rem;
 }
 
 .menu-name {
+  font-size: 0.92rem;
   font-weight: 600;
 }
 
 .menu-price {
+  font-size: 0.9rem;
   font-weight: 600;
 }
 
 .menu-desc {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   color: #64748b;
+  line-height: 1.4;
+}
+
+/* Menü-Footer mit Like + „Detaje“ */
+
+.menu-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 4px;
+}
+
+/* Like */
+
+.menu-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.78rem;
+  color: #6b7280;
+}
+
+.menu-like-icon {
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fee2e2;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.72rem;
+  color: #b91c1c;
+}
+
+/* Detajet-Button */
+
+.menu-btn {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  background: #ffffff;
+  color: #111827;
+  border: 1px solid #111827;
+  cursor: pointer;
 }
 
 /* ========================================
@@ -540,19 +618,14 @@ body {
    ======================================== */
 
 @media (max-width: 400px) {
-  .restaurant-card {
-    padding: 16px 14px;
+  .page {
+    padding-inline: 14px;
+    gap: 18px;
   }
 
-  .offers-widget-row {
-    gap: 10px;
-  }
-
-  .status-card {
-    padding: 16px 12px 14px;
-  }
-
-  .card {
-    padding: 14px 14px;
+  .card,
+  .drinks-card,
+  .menu-card {
+    padding-inline: 14px;
   }
 }
