@@ -1451,7 +1451,7 @@ img {
 
     .status-card--order,
     .status-card--call {
-      min-height: 130px;                 /* Höhe kannst du hier ändern */
+      min-height: 160px;                 /* Höhe kannst du hier ändern */
     }
 
     .status-card-top {
@@ -1494,7 +1494,7 @@ img {
       align-self: stretch;
       margin-top: 18px;
       border: none;
-      border-radius: 16px;            /* weniger rund als 999px */
+      border-radius: 12px;            /* weniger rund als 999px */
       padding: 9px 16px;
       font-size: 0.82rem;
       font-weight: 600;
@@ -1679,4 +1679,5 @@ img {
   font-size: 0.9rem;
   font-weight: 600;
 }
+
 
