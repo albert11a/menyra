@@ -1971,3 +1971,10 @@ button,
   border-radius: var(--btn-radius-global);
 }
 
+/* Kreise bleiben bewusst rund (Like-Icon, Kamarieri/Porosia-Logo) */
+.icon-circle,
+.status-icon-circle,
+.cart-fab-icon {
+  border-radius: 999px;
+}
+
