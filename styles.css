@@ -1480,13 +1480,15 @@ img {
       background-repeat: no-repeat;
     }
 
-    .status-icon-circle--order {
-      background-image: url("https://i.postimg.cc/fWrbHsdR/Chat-GPT-Image-5-Dez-2025-23-31-43.png");
-    }
+/* Linke Card – Icon aus deinem Link */
+.status-icon-circle--order {
+  background-image: url("https://i.postimg.cc/fWrbHsdR/Chat-GPT-Image-5-Dez-2025-23-31-43.png");
+}
 
-    .status-icon-circle--call {
-      background-image: url("https://i.postimg.cc/yNLKkhXd/Chat-GPT-Image-5-Dez-2025-23-36-38.png");
-    }
+/* Rechte Card – Icon aus deinem Link */
+.status-icon-circle--call {
+  background-image: url("https://i.postimg.cc/yNLKkhXd/Chat-GPT-Image-5-Dez-2025-23-36-38.png");
+}
 
     /* Button: weiß, weniger runde Ecken, gleiche Abstände links/rechts
        → align-self: stretch = nimmt die komplette Innenbreite der Card */
@@ -1679,5 +1681,6 @@ img {
   font-size: 0.9rem;
   font-weight: 600;
 }
+
 
 
