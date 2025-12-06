@@ -17,10 +17,19 @@ import {
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
 // URL-Parameter
+// WICHTIG: Trage hier GENAU deine Restaurant-Dokument-ID ein,
+// so wie sie im Firestore unter "restaurants" heißt.
+// Beispiel: "shpija vjeter" oder "shpija-vjeter" oder was du wirklich benutzt:
+
+const RESTAURANT_FIRESTORE_ID = "shpija vjeter"; // <- HIER EXAKT ANPASSEN
+
+// Wenn du später mit URL-Param arbeiten willst, kannst du das optional lassen:
 const params = new URLSearchParams(window.location.search);
-// HIER kannst du als Fallback z.B. deine shpija vjeter ID eintragen
-const restaurantId = params.get("r") || "test-restaurant";
+const restaurantId = params.get("r") || RESTAURANT_FIRESTORE_ID;
+
+// Tisch-ID wie gehabt
 const tableId = params.get("t") || "T1";
+
 
 // DOM: Restaurant
 const restaurantLogoEl = document.getElementById("restaurantLogo");
