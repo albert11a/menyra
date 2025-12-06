@@ -1,4 +1,4 @@
-// demo1.js – Superdemo Karte mit 4 Sprachen & modernem Layout
+// karte.js – Gäste-Ansicht mit Drinks, Speisekarte, Likes, globalem Warenkorb
 
 import { db } from "./firebase-config.js";
 import {
@@ -16,260 +16,174 @@ import {
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-/* =========================
-   RESTAURANT-ID
-   ========================= */
-
-// HIER GENAU deine Firestore-Dokument-ID eintragen:
-const RESTAURANT_FIRESTORE_ID = "shpija-e-vjetr"; // <- anpassen!
-
 const params = new URLSearchParams(window.location.search);
-const restaurantId = params.get("r") || RESTAURANT_FIRESTORE_ID;
+const restaurantId = params.get("r") || "test-restaurant";
 const tableId = params.get("t") || "T1";
 
-/* =========================
-   DOM REFERENCES
-   ========================= */
-
-// Restaurant
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
 
-// Language Switcher
-const langSwitcherEl = document.getElementById("langSwitcher");
+// TABS & LISTEN
+const drinksSection = document.getElementById("drinksSection");
+const drinksTabsWrapper = document.getElementById("drinksTabsWrapper");
+const drinksTabsEl = document.getElementById("drinksTabs");
+const drinksListEl = document.getElementById("drinksList");
 
-// Offers
+const foodTabsWrapper = document.getElementById("foodTabsWrapper");
+const foodCategoryTabsEl = document.getElementById("foodCategoryTabs");
+const menuListEl = document.getElementById("menuList");
+
+// OFFERS
 const offersSection = document.getElementById("offersSection");
 const offersSliderEl = document.getElementById("offersSlider");
 const offersDotsEl = document.getElementById("offersDots");
-const offersLabelEl = document.getElementById("offersLabel");
-const offersTagEl = document.getElementById("offersTag");
 
-// Status / Order / Waiter
-const orderCardLabelEl = document.getElementById("orderCardLabel");
-const callCardLabelEl = document.getElementById("callCardLabel");
+// SUCHE & FLOATING CART
+const searchInput = document.getElementById("searchInput");
+const cartFab = document.getElementById("cartFab");
+const cartFabLabel = document.getElementById("cartFabLabel");
+const cartBadgeEl = document.getElementById("cartBadge");
+
+// STATUS-ROW + ORDER-DETAILS
 const orderToggleBtn = document.getElementById("orderToggleBtn");
 const orderDetailsContainer = document.getElementById("orderDetailsContainer");
 const orderDetailsCard = document.getElementById("orderDetailsCard");
-const orderDetailsTitleEl = document.getElementById("orderDetailsTitle");
 const orderStatusBadge = document.getElementById("orderStatusBadge");
 const orderDetailsContent = document.getElementById("orderDetailsContent");
+
 const callWaiterBtn = document.getElementById("callWaiterBtn");
 
-// Suche / Listen
-const searchInput = document.getElementById("searchInput");
-const drinksSection = document.getElementById("drinksSection");
-const drinksListEl = document.getElementById("drinksList");
-const menuListEl = document.getElementById("menuList");
-const drinksTitleEl = document.getElementById("drinksTitle");
-const menuTitleEl = document.getElementById("menuTitle");
-
 /* =========================
-   TRANSLATIONS (DE / SQ / EN / SR)
+   LANGUAGE-UI REFERENZEN
    ========================= */
 
-const translations = {
+const langCard = document.getElementById("langCard");
+const langButtons = document.querySelectorAll("[data-lang-btn]");
+const statusOrderLabelEl = document.getElementById("statusOrderLabel");
+const statusCallLabelEl = document.getElementById("statusCallLabel");
+const langTitleEl = document.getElementById("langTitle");
+const langHintEl = document.getElementById("langHint");
+
+const LANGS = {
   sq: {
-    welcomeSubtitle: "Mirësevini në menynë digjitale.",
-    offersLabel: "SOT NË FOKUS",
-    offersTag: "Ofertat e ditës",
-    infoOnlyOffer: "Vetëm informacion / ofertë vizuale.",
-    orderCardTitle: "Porosia juaj",
-    orderButtonOpen: "Shiko porosinë +",
-    orderButtonClose: "Shiko porosinë -",
-    orderDetailsTitle: "Porosia juaj",
-    orderEmptyStatus: "S'ka porosi",
-    orderEmptyText: "Ende nuk keni porositur.",
-    orderStatusNew: "E re",
-    orderStatusInProgress: "Në përgatitje",
-    orderStatusServed: "Servuar",
-    orderStatusPaid: "Paguar",
-    orderTotalLabel: "Totali",
-    callCardTitle: "Thirr kamarierin",
-    callButtonIdle: "Thirr kamarierin",
-    callButtonActive: "Kamarieri vjen",
-    searchPlaceholder: "Kërko në meny.",
-    drinksTitle: "Pije",
-    drinksEmptyForSearch: "S'ka pije për këtë kërkim.",
-    menuTitle: "Speisekarte",
-    menuEmptyForSearch: "Nuk ka produkte për këtë kërkim.",
-    detailsButton: "Detaje",
-    chooseButton: "Zgjidh",
-    videoLabel: "Video e produktit",
-    noRestaurant: 'Lokal nuk u gjet (ID: "{id}")',
-    notActive: "Ky MENYRA nuk është aktiv aktualisht. Ju lutem njoftoni stafin.",
-    orderErrorItems: "Porosia është regjistruar, por artikujt nuk janë gjetur.",
-    waiterError: "Thirrja nuk u dërgua, provo përsëri.",
+    label: "SQ",
+    orderTitle: "Porosia juaj",
+    orderBtnClosed: "Shiko porosinë +",
+    orderBtnOpen: "Shiko porosinë -",
+    callTitle: "Thirr kamarierin",
+    callBtnIdle: "Thirr kamarierin",
+    callBtnActive: "Kamarieri vjen",
+    langTitle: "Gjuha",
+    langHint: "Zgjidh gjuhën për porosi & kamarier.",
   },
   de: {
-    welcomeSubtitle: "Willkommen in der digitalen Speisekarte.",
-    offersLabel: "HEUTE IM FOKUS",
-    offersTag: "Angebote des Tages",
-    infoOnlyOffer: "Nur Information / visuelles Angebot.",
-    orderCardTitle: "Ihre Bestellung",
-    orderButtonOpen: "Bestellung ansehen +",
-    orderButtonClose: "Bestellung ansehen -",
-    orderDetailsTitle: "Ihre Bestellung",
-    orderEmptyStatus: "Keine Bestellung",
-    orderEmptyText: "Sie haben noch nichts bestellt.",
-    orderStatusNew: "Neu",
-    orderStatusInProgress: "In Vorbereitung",
-    orderStatusServed: "Serviert",
-    orderStatusPaid: "Bezahlt",
-    orderTotalLabel: "Gesamt",
-    callCardTitle: "Kellner rufen",
-    callButtonIdle: "Kellner rufen",
-    callButtonActive: "Kellner kommt",
-    searchPlaceholder: "In der Karte suchen.",
-    drinksTitle: "Getränke",
-    drinksEmptyForSearch: "Keine Getränke für diese Suche.",
-    menuTitle: "Speisen",
-    menuEmptyForSearch: "Keine Produkte für diese Suche.",
-    detailsButton: "Details",
-    chooseButton: "Auswählen",
-    videoLabel: "Produktvideo",
-    noRestaurant: 'Lokal nicht gefunden (ID: "{id}")',
-    notActive:
-      "Dieses MENYRA ist aktuell nicht aktiv. Bitte informieren Sie das Personal.",
-    orderErrorItems:
-      "Die Bestellung wurde registriert, aber die Artikel wurden nicht gefunden.",
-    waiterError: "Kellner konnte nicht gerufen werden, bitte erneut versuchen.",
+    label: "DE",
+    orderTitle: "Deine Bestellung",
+    orderBtnClosed: "Bestellung anzeigen +",
+    orderBtnOpen: "Bestellung ausblenden -",
+    callTitle: "Kellner rufen",
+    callBtnIdle: "Kellner rufen",
+    callBtnActive: "Kellner kommt",
+    langTitle: "Sprache",
+    langHint: "Sprache für Bestellung & Kellner.",
   },
   en: {
-    welcomeSubtitle: "Welcome to the digital menu.",
-    offersLabel: "TODAY'S FOCUS",
-    offersTag: "Deals of the day",
-    infoOnlyOffer: "Information / visual promotion only.",
-    orderCardTitle: "Your order",
-    orderButtonOpen: "View order +",
-    orderButtonClose: "View order -",
-    orderDetailsTitle: "Your order",
-    orderEmptyStatus: "No order",
-    orderEmptyText: "You have not ordered yet.",
-    orderStatusNew: "New",
-    orderStatusInProgress: "In preparation",
-    orderStatusServed: "Served",
-    orderStatusPaid: "Paid",
-    orderTotalLabel: "Total",
-    callCardTitle: "Call waiter",
-    callButtonIdle: "Call waiter",
-    callButtonActive: "Waiter is coming",
-    searchPlaceholder: "Search in menu.",
-    drinksTitle: "Drinks",
-    drinksEmptyForSearch: "No drinks for this search.",
-    menuTitle: "Menu",
-    menuEmptyForSearch: "No items for this search.",
-    detailsButton: "Details",
-    chooseButton: "Choose",
-    videoLabel: "Product video",
-    noRestaurant: 'Venue not found (ID: "{id}")',
-    notActive:
-      "This MENYRA is currently not active. Please inform the staff.",
-    orderErrorItems:
-      "Order is registered but items could not be found.",
-    waiterError: "Call could not be sent, please try again.",
+    label: "EN",
+    orderTitle: "Your order",
+    orderBtnClosed: "View order +",
+    orderBtnOpen: "Hide order -",
+    callTitle: "Call waiter",
+    callBtnIdle: "Call waiter",
+    callBtnActive: "Waiter on the way",
+    langTitle: "Language",
+    langHint: "Choose language for order & waiter.",
   },
   sr: {
-    welcomeSubtitle: "Dobrodošli u digitalni meni.",
-    offersLabel: "DANAS U FOKUSU",
-    offersTag: "Ponude dana",
-    infoOnlyOffer: "Samo informacija / vizuelna ponuda.",
-    orderCardTitle: "Vaša porudžbina",
-    orderButtonOpen: "Prikaži porudžbinu +",
-    orderButtonClose: "Prikaži porudžbinu -",
-    orderDetailsTitle: "Vaša porudžbina",
-    orderEmptyStatus: "Nema porudžbine",
-    orderEmptyText: "Još uvek niste poručili.",
-    orderStatusNew: "Nova",
-    orderStatusInProgress: "U pripremi",
-    orderStatusServed: "Posluženo",
-    orderStatusPaid: "Plaćeno",
-    orderTotalLabel: "Ukupno",
-    callCardTitle: "Pozovi konobara",
-    callButtonIdle: "Pozovi konobara",
-    callButtonActive: "Konobar dolazi",
-    searchPlaceholder: "Pretraži meni.",
-    drinksTitle: "Pića",
-    drinksEmptyForSearch: "Nema pića za ovu pretragu.",
-    menuTitle: "Jelovnik",
-    menuEmptyForSearch: "Nema proizvoda za ovu pretragu.",
-    detailsButton: "Detalji",
-    chooseButton: "Izaberi",
-    videoLabel: "Video proizvoda",
-    noRestaurant: 'Lokal nije pronađen (ID: "{id}")',
-    notActive:
-      "Ovaj MENYRA trenutno nije aktivan. Molimo obavestite osoblje.",
-    orderErrorItems:
-      "Porudžbina je zabeležena, ali artikli nisu pronađeni.",
-    waiterError: "Poziv nije poslat, pokušajte ponovo.",
+    label: "SR",
+    orderTitle: "Tvoja porudžbina",
+    orderBtnClosed: "Prikaži porudžbinu +",
+    orderBtnOpen: "Sakrij porudžbinu -",
+    callTitle: "Pozovi konobara",
+    callBtnIdle: "Pozovi konobara",
+    callBtnActive: "Konobar dolazi",
+    langTitle: "Jezik",
+    langHint: "Izaberi jezik za porudžbinu i konobara.",
   },
 };
 
-let currentLang =
-  localStorage.getItem("menyra_lang") || "sq";
-
-/**
- * Übersetzung holen (fallback: SQ -> key)
- */
-function t(key) {
-  const langPack = translations[currentLang] || translations.sq;
-  return langPack[key] ?? translations.sq[key] ?? key;
+function getLangStorageKey() {
+  return `menyra_lang_${restaurantId}`;
 }
 
-/**
- * Statische UI-Texte auf aktuelle Sprache setzen
- */
-function applyTranslations() {
-  if (restaurantMetaEl) {
-    restaurantMetaEl.textContent = t("welcomeSubtitle");
+function loadLanguageFromStorage() {
+  try {
+    const stored = localStorage.getItem(getLangStorageKey());
+    if (stored && LANGS[stored]) return stored;
+  } catch {
+    // ignore
   }
-  if (offersLabelEl) offersLabelEl.textContent = t("offersLabel");
-  if (offersTagEl) offersTagEl.textContent = t("offersTag");
-  if (orderCardLabelEl) orderCardLabelEl.textContent = t("orderCardTitle");
-  if (orderDetailsTitleEl) orderDetailsTitleEl.textContent = t("orderDetailsTitle");
-  if (callCardLabelEl) callCardLabelEl.textContent = t("callCardTitle");
-  if (orderToggleBtn) {
-    orderToggleBtn.textContent = orderDetailsOpen
-      ? t("orderButtonClose")
-      : t("orderButtonOpen");
-  }
-  if (callWaiterBtn) {
-    // Text wird von Listener ggf. überschrieben, hier nur Idle-Default
-    callWaiterBtn.textContent = t("callButtonIdle");
-  }
-  if (searchInput) {
-    searchInput.placeholder = t("searchPlaceholder");
-  }
-  if (drinksTitleEl) drinksTitleEl.textContent = t("drinksTitle");
-  if (menuTitleEl) menuTitleEl.textContent = t("menuTitle");
+  return "sq"; // Standard: Albanisch
 }
+
+function saveLanguageToStorage(lang) {
+  try {
+    localStorage.setItem(getLangStorageKey(), lang);
+  } catch {
+    // ignore
+  }
+}
+
+let currentLang = loadLanguageFromStorage();
 
 /* =========================
-   LANGUAGE SWITCHER
+   SPRACHE AUF UI ANWENDEN
    ========================= */
 
-function setLanguage(lang) {
-  if (!translations[lang]) lang = "sq";
-  currentLang = lang;
-  localStorage.setItem("menyra_lang", currentLang);
+function applyLanguageToUI() {
+  const cfg = LANGS[currentLang] || LANGS.sq;
 
-  // Active Button markieren
-  if (langSwitcherEl) {
-    const btns = langSwitcherEl.querySelectorAll(".lang-btn");
-    btns.forEach((btn) => {
-      const val = btn.getAttribute("data-lang");
-      if (val === currentLang) btn.classList.add("lang-btn--active");
-      else btn.classList.remove("lang-btn--active");
+  // Language-Card Überschrift / Hint
+  if (langTitleEl) langTitleEl.textContent = cfg.langTitle;
+  if (langHintEl) langHintEl.textContent = cfg.langHint;
+
+  // Pills aktiv setzen
+  if (langButtons?.length) {
+    langButtons.forEach((btn) => {
+      const code = btn.dataset.lang;
+      if (code === currentLang) {
+        btn.classList.add("lang-pill--active");
+      } else {
+        btn.classList.remove("lang-pill--active");
+      }
     });
   }
 
-  applyTranslations();
-  // Texte in dynamischen Bereichen aktualisieren
-  renderDrinks();
-  renderMenu();
-  if (!orderDetailsOpen) {
-    renderOrderEmpty();
+  // Porosia Label
+  if (statusOrderLabelEl) {
+    statusOrderLabelEl.textContent = cfg.orderTitle;
+  }
+
+  // Button-Text Porosia je nach offen/zu
+  if (orderToggleBtn) {
+    orderToggleBtn.textContent = orderDetailsOpen
+      ? cfg.orderBtnOpen
+      : cfg.orderBtnClosed;
+  }
+
+  // Kamarieri Label
+  if (statusCallLabelEl) {
+    statusCallLabelEl.textContent = cfg.callTitle;
+  }
+
+  // Kamarieri Button je nach aktiv
+  if (callWaiterBtn) {
+    const hasOpen = callWaiterBtn.classList.contains(
+      "call-waiter-btn--active"
+    );
+    callWaiterBtn.textContent = hasOpen
+      ? cfg.callBtnActive
+      : cfg.callBtnIdle;
   }
 }
 
@@ -280,21 +194,24 @@ function setLanguage(lang) {
 let allMenuItems = [];
 let drinksItems = [];
 let foodItems = [];
+
+let activeFoodCategory = "Alle";
+let activeDrinksCategory = null;
 let searchTerm = "";
 let cart = [];
 
-// Offers
+// Offers Slider State
 let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
 
-// Order / Call
+// Order-/Call-State
 let orderDetailsOpen = false;
 let unsubLatestOrder = null;
 let unsubWaiterCall = null;
 
 /* =========================
-   CART LOCALSTORAGE
+   CART: LOCALSTORAGE
    ========================= */
 
 function getCartStorageKey() {
@@ -328,24 +245,8 @@ function saveCartToStorage() {
   }
 }
 
-function changeCart(item, delta) {
-  const index = cart.findIndex((c) => c.id === item.id);
-  if (index === -1 && delta > 0) {
-    cart.push({
-      id: item.id,
-      name: item.name,
-      price: item.price,
-      qty: delta,
-    });
-  } else if (index >= 0) {
-    cart[index].qty += delta;
-    if (cart[index].qty <= 0) cart.splice(index, 1);
-  }
-  saveCartToStorage();
-}
-
 /* =========================
-   ABO / STATUS
+   HELFER: ABO & STATUS
    ========================= */
 
 function todayISO() {
@@ -369,7 +270,7 @@ function isRestaurantOperational(data) {
 }
 
 /* =========================
-   LIKES LOCALSTORAGE
+   LIKES: LOCALSTORAGE
    ========================= */
 
 function likeKey(itemId) {
@@ -389,7 +290,7 @@ function setItemLiked(itemId, liked) {
 }
 
 /* =========================
-   OFFERS SLIDER
+   OFFERS-SLIDER LOGIK
    ========================= */
 
 function clearOffersTimer() {
@@ -422,7 +323,7 @@ function startOffersAutoSlide() {
   offersTimer = setInterval(() => {
     const next = (offersCurrentIndex + 1) % offersSlides.length;
     goToOffer(next);
-  }, 5000);
+  }, 4000);
 }
 
 async function loadOffersForRestaurant(restaurantRef, restData) {
@@ -434,6 +335,7 @@ async function loadOffersForRestaurant(restaurantRef, restData) {
 
   const offersCol = collection(restaurantRef, "offers");
   const snap = await getDocs(offersCol);
+
   const offers = [];
   snap.forEach((docSnap) => {
     const d = docSnap.data();
@@ -458,8 +360,8 @@ function renderOffersSlider(offers) {
   offersDotsEl.innerHTML = "";
   offersSection.style.display = "block";
 
-  const slidesFrag = document.createDocumentFragment();
   const dotsFrag = document.createDocumentFragment();
+  const slidesFrag = document.createDocumentFragment();
 
   offers.forEach((offer, index) => {
     let linkedMenuItem = null;
@@ -469,7 +371,7 @@ function renderOffersSlider(offers) {
     }
 
     const title =
-      offer.title || (linkedMenuItem ? linkedMenuItem.name : "Ofertë");
+      offer.title || (linkedMenuItem ? linkedMenuItem.name : "Angebot");
     const description =
       offer.description || (linkedMenuItem ? linkedMenuItem.description : "");
     const imageUrl =
@@ -482,7 +384,9 @@ function renderOffersSlider(offers) {
       price = linkedMenuItem.price;
     }
 
-    const slide = document.createElement("article");
+    const addToCart = offer.addToCart === true;
+
+    const slide = document.createElement("div");
     slide.className = "offer-slide";
 
     if (imageUrl) {
@@ -492,6 +396,10 @@ function renderOffersSlider(offers) {
       img.loading = "lazy";
       img.className = "offer-image";
       slide.appendChild(img);
+    } else {
+      const placeholder = document.createElement("div");
+      placeholder.className = "offer-image";
+      slide.appendChild(placeholder);
     }
 
     const header = document.createElement("div");
@@ -510,17 +418,44 @@ function renderOffersSlider(offers) {
     header.appendChild(priceEl);
     slide.appendChild(header);
 
-    if (description) {
-      const descEl = document.createElement("div");
-      descEl.className = "offer-desc";
-      descEl.textContent = description;
-      slide.appendChild(descEl);
-    }
+    const descEl = document.createElement("div");
+    descEl.className = "offer-desc";
+    descEl.textContent = description || "";
+    slide.appendChild(descEl);
 
-    const infoOnly = document.createElement("div");
-    infoOnly.className = "offer-info-only";
-    infoOnly.textContent = t("infoOnlyOffer");
-    slide.appendChild(infoOnly);
+    if (addToCart && (linkedMenuItem || typeof price === "number")) {
+      const actions = document.createElement("div");
+      actions.className = "offer-actions";
+
+      const minusBtn = document.createElement("button");
+      minusBtn.className = "btn btn-ghost";
+      minusBtn.textContent = "−";
+
+      const plusBtn = document.createElement("button");
+      plusBtn.className = "btn btn-primary";
+      plusBtn.textContent = "Hinzufügen";
+
+      const targetItem = linkedMenuItem
+        ? linkedMenuItem
+        : { id: "offer:" + offer.id, name: title, price: price || 0 };
+
+      minusBtn.addEventListener("click", () => {
+        changeCart(targetItem, -1);
+      });
+      plusBtn.addEventListener("click", () => {
+        changeCart(targetItem, 1);
+      });
+
+      actions.appendChild(minusBtn);
+      actions.appendChild(plusBtn);
+      slide.appendChild(actions);
+    } else {
+      const infoOnly = document.createElement("div");
+      infoOnly.className = "offer-info-only";
+      infoOnly.textContent =
+        "Vetëm informacion / reklamë – jo e porositshme direkt.";
+      slide.appendChild(infoOnly);
+    }
 
     slidesFrag.appendChild(slide);
 
@@ -561,7 +496,7 @@ function renderOffersSlider(offers) {
 }
 
 /* =========================
-   RESTAURANT & MENÜ
+   RESTAURANT & MENÜ LADEN
    ========================= */
 
 function inferTypeForItem(item) {
@@ -588,7 +523,6 @@ function inferTypeForItem(item) {
     "verë",
     "vere",
     "koktej",
-    "cocktail",
     "energjike",
   ];
 
@@ -602,31 +536,34 @@ async function loadRestaurantAndMenu() {
     const restaurantSnap = await getDoc(restaurantRef);
 
     if (!restaurantSnap.exists()) {
-      restaurantNameEl.textContent = "MENYRA";
-      restaurantMetaEl.textContent = t("noRestaurant").replace(
-        "{id}",
-        restaurantId
-      );
-      menuListEl.innerHTML = "<p>" + t("noRestaurant").replace("{id}", restaurantId) + "</p>";
+      restaurantNameEl.textContent = "Lokal nicht gefunden";
+      restaurantMetaEl.textContent = `ID: ${restaurantId}`;
+      menuListEl.innerHTML = "<p class='info'>Bitte Personal informieren.</p>";
       offersSection.style.display = "none";
-      drinksSection.style.display = "none";
+      if (drinksSection) drinksSection.style.display = "none";
+      if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+      if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
       return;
     }
 
     const data = restaurantSnap.data();
-
-    restaurantNameEl.textContent = data.restaurantName || "MENYRA";
-    restaurantMetaEl.textContent = t("welcomeSubtitle");
+    restaurantNameEl.textContent = data.restaurantName || "Unbenanntes Lokal";
+    restaurantMetaEl.textContent = "Mirësevini në menynë digjitale";
 
     if (data.logoUrl) {
       restaurantLogoEl.src = data.logoUrl;
       restaurantLogoEl.style.display = "block";
+    } else {
+      restaurantLogoEl.style.display = "none";
     }
 
     if (!isRestaurantOperational(data)) {
-      menuListEl.innerHTML = "<p>" + t("notActive") + "</p>";
+      menuListEl.innerHTML =
+        "<p class='info'>Dieses MENYRA ist aktuell nicht aktiv. Bitte Personal informieren.</p>";
       offersSection.style.display = "none";
-      drinksSection.style.display = "none";
+      if (drinksSection) drinksSection.style.display = "none";
+      if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+      if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
       return;
     }
 
@@ -645,71 +582,118 @@ async function loadRestaurantAndMenu() {
           category: d.category || "Sonstiges",
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
-          videoUrl: d.videoUrl || null,
           type: d.type || null,
           likeCount: d.likeCount || 0,
           commentCount: d.commentCount || 0,
+          ratingCount: d.ratingCount || 0,
+          ratingSum: d.ratingSum || 0,
         };
       })
-      .filter((i) => i.available);
+      .filter((item) => item.available);
 
-    items = items.map((i) => ({
-      ...i,
-      type: inferTypeForItem(i),
+    items = items.map((item) => ({
+      ...item,
+      type: inferTypeForItem(item),
     }));
 
     allMenuItems = items;
     drinksItems = allMenuItems.filter((i) => i.type === "drink");
     foodItems = allMenuItems.filter((i) => i.type === "food");
 
+    renderDrinksTabs();
     renderDrinks();
+    renderFoodCategories();
     renderMenu();
+
     await loadOffersForRestaurant(restaurantRef, data);
   } catch (err) {
     console.error(err);
     restaurantNameEl.textContent = "Fehler";
     restaurantMetaEl.textContent = err.message;
+    menuListEl.innerHTML =
+      "<p class='info'>Fehler beim Laden der Speisekarte.</p>";
+    offersSection.style.display = "none";
+    if (drinksSection) drinksSection.style.display = "none";
+    if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
+    if (foodTabsWrapper) foodTabsWrapper.style.display = "none";
   }
 }
 
 /* =========================
-   GETRÄNKE
+   GETRÄNKE-TABS & -LISTE
    ========================= */
 
+function getDrinkCategories() {
+  const set = new Set();
+  drinksItems.forEach((i) => {
+    if (i.category) set.add(i.category);
+  });
+  return Array.from(set);
+}
+
+function renderDrinksTabs() {
+  if (!drinksTabsWrapper || !drinksTabsEl) return;
+
+  const cats = getDrinkCategories();
+
+  if (!cats.length) {
+    drinksTabsWrapper.style.display = "none";
+    if (drinksSection) drinksSection.style.display = "none";
+    drinksTabsEl.innerHTML = "";
+    return;
+  }
+
+  drinksTabsWrapper.style.display = "block";
+  if (drinksSection) drinksSection.style.display = "block";
+  drinksTabsEl.innerHTML = "";
+
+  if (!activeDrinksCategory || !cats.includes(activeDrinksCategory)) {
+    activeDrinksCategory = cats[0];
+  }
+
+  cats.forEach((cat) => {
+    const btn = document.createElement("button");
+    btn.className =
+      "category-tab" + (activeDrinksCategory === cat ? " active" : "");
+    btn.textContent = cat;
+    btn.addEventListener("click", () => {
+      activeDrinksCategory = cat;
+      renderDrinksTabs();
+      renderDrinks();
+    });
+    drinksTabsEl.appendChild(btn);
+  });
+}
+
 function renderDrinks() {
-  if (!drinksListEl || !drinksSection) return;
+  if (!drinksSection || !drinksListEl) return;
 
   drinksListEl.innerHTML = "";
 
   if (!drinksItems.length) {
     drinksSection.style.display = "none";
+    if (drinksTabsWrapper) drinksTabsWrapper.style.display = "none";
     return;
   }
 
   drinksSection.style.display = "block";
+  if (drinksTabsWrapper) drinksTabsWrapper.style.display = "block";
 
-  let items = [...drinksItems];
-  if (searchTerm) {
-    const q = searchTerm;
-    items = items.filter((i) => {
-      const txt = `${i.name} ${i.description}`.toLowerCase();
-      return txt.includes(q);
-    });
+  let items = drinksItems;
+  if (activeDrinksCategory) {
+    items = drinksItems.filter((i) => i.category === activeDrinksCategory);
   }
 
   if (!items.length) {
-    drinksListEl.innerHTML =
-      "<p style='font-size:0.8rem;'>" +
-      t("drinksEmptyForSearch") +
-      "</p>";
+    drinksListEl.innerHTML = "<p class='info'>Keine Getränke.</p>";
     return;
   }
 
   items.forEach((item) => {
-    const card = document.createElement("article");
+    const card = document.createElement("div");
     card.className = "drink-item";
+    card.dataset.itemId = item.id;
 
-    // Topbar mit Herz
     const topbar = document.createElement("div");
     topbar.className = "drink-topbar";
 
@@ -753,8 +737,8 @@ function renderDrinks() {
       const img = document.createElement("img");
       img.src = item.imageUrl;
       img.alt = item.name;
-      img.className = "drink-image";
       img.loading = "lazy";
+      img.className = "drink-image";
       card.appendChild(img);
     }
 
@@ -773,7 +757,7 @@ function renderDrinks() {
     header.appendChild(priceEl);
     card.appendChild(header);
 
-    if (item.description) {
+    if (item.description && item.description.trim() !== "") {
       const descEl = document.createElement("div");
       descEl.className = "drink-desc";
       descEl.textContent = item.description;
@@ -822,7 +806,10 @@ function renderDrinks() {
     const addBtn = document.createElement("button");
     addBtn.type = "button";
     addBtn.className = "btn-add-round";
-    addBtn.textContent = t("chooseButton");
+    const addSpan = document.createElement("span");
+    addSpan.textContent = "Wähle";
+    addBtn.appendChild(addSpan);
+
     addBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       changeCart(item, currentQty);
@@ -840,93 +827,146 @@ function renderDrinks() {
    SPEISEKARTE
    ========================= */
 
-function renderMenu() {
-  if (!menuListEl) return;
+function getFoodCategories() {
+  const set = new Set();
+  foodItems.forEach((i) => {
+    if (i.category) set.add(i.category);
+  });
+  return Array.from(set);
+}
 
+function renderFoodCategories() {
+  if (!foodCategoryTabsEl || !foodTabsWrapper) return;
+
+  foodCategoryTabsEl.innerHTML = "";
+
+  const cats = getFoodCategories();
+  foodTabsWrapper.style.display = "block";
+
+  const allBtn = document.createElement("button");
+  allBtn.className =
+    "category-tab" + (activeFoodCategory === "Alle" ? " active" : "");
+  allBtn.textContent = "Alle";
+  allBtn.addEventListener("click", () => {
+    activeFoodCategory = "Alle";
+    renderFoodCategories();
+    renderMenu();
+  });
+  foodCategoryTabsEl.appendChild(allBtn);
+
+  cats.forEach((cat) => {
+    const btn = document.createElement("button");
+    btn.className =
+      "category-tab" + (activeFoodCategory === cat ? " active" : "");
+    btn.textContent = cat;
+    btn.addEventListener("click", () => {
+      activeFoodCategory = cat;
+      renderFoodCategories();
+      renderMenu();
+    });
+    foodCategoryTabsEl.appendChild(btn);
+  });
+}
+
+function renderMenu() {
   menuListEl.innerHTML = "";
 
-  let items = [...foodItems];
+  let items = foodItems;
+
+  if (activeFoodCategory !== "Alle") {
+    items = items.filter((i) => i.category === activeFoodCategory);
+  }
+
   if (searchTerm) {
     const q = searchTerm;
     items = items.filter((i) => {
-      const txt = `${i.name} ${i.description} ${i.longDescription}`.toLowerCase();
-      return txt.includes(q);
+      const text = `${i.name} ${i.description} ${i.longDescription}`.toLowerCase();
+      return text.includes(q);
     });
   }
 
   if (!items.length) {
-    menuListEl.innerHTML =
-      "<p style='font-size:0.8rem;'>" +
-      t("menuEmptyForSearch") +
-      "</p>";
+    menuListEl.innerHTML = "<p class='info'>Keine Produkte.</p>";
     return;
   }
 
   items.forEach((item) => {
-    const card = document.createElement("article");
-    card.className = "menu-item";
+    const div = document.createElement("div");
+    div.className = "menu-item";
 
     if (item.imageUrl) {
       const img = document.createElement("img");
       img.src = item.imageUrl;
       img.alt = item.name;
-      img.className = "menu-image";
+      img.className = "menu-item-image";
       img.loading = "lazy";
-      card.appendChild(img);
-    }
-
-    if (item.videoUrl) {
-      const videoChip = document.createElement("div");
-      videoChip.className = "menu-video-chip";
-      videoChip.textContent = t("videoLabel");
-      card.appendChild(videoChip);
+      div.appendChild(img);
     }
 
     const header = document.createElement("div");
-    header.className = "menu-name-row";
+    header.className = "menu-item-header";
 
     const nameEl = document.createElement("div");
-    nameEl.className = "menu-name";
+    nameEl.className = "menu-item-name";
     nameEl.textContent = item.name;
 
     const priceEl = document.createElement("div");
-    priceEl.className = "menu-price";
+    priceEl.className = "menu-item-price";
     priceEl.textContent = item.price.toFixed(2) + " €";
 
     header.appendChild(nameEl);
     header.appendChild(priceEl);
-    card.appendChild(header);
+    div.appendChild(header);
 
     const descEl = document.createElement("div");
-    descEl.className = "menu-desc";
+    descEl.className = "menu-item-desc";
     descEl.textContent = item.description;
-    card.appendChild(descEl);
+    div.appendChild(descEl);
 
-    const footer = document.createElement("div");
-    footer.className = "menu-footer";
+    const socialRow = document.createElement("div");
+    socialRow.className = "menu-item-social";
 
-    const likeBox = document.createElement("div");
-    likeBox.className =
-      "menu-like" + (isItemLiked(item.id) ? " menu-like--active" : "");
-    likeBox.innerHTML = `
-      <span class="menu-like-icon">♥</span>
-      <span>${item.likeCount || 0}</span>
-      <span class="menu-comment-pill">· 💬 ${item.commentCount || 0}</span>
+    const likeBtn = document.createElement("button");
+    likeBtn.type = "button";
+    likeBtn.className =
+      "social-btn social-btn-like" +
+      (isItemLiked(item.id) ? " social-btn-like--active" : "");
+    likeBtn.innerHTML = `
+      <span class="social-icon">❤️</span>
+      <span class="social-count">${item.likeCount || 0}</span>
     `;
-    likeBox.addEventListener("click", async (ev) => {
+    likeBtn.addEventListener("click", async (ev) => {
       ev.stopPropagation();
       await toggleItemLike(item);
     });
 
-    footer.appendChild(likeBox);
+    const commentBtn = document.createElement("button");
+    commentBtn.type = "button";
+    commentBtn.className = "social-btn social-btn-comment";
+    commentBtn.innerHTML = `
+      <span class="social-icon">💬</span>
+      <span class="social-count">${item.commentCount || 0}</span>
+    `;
+    commentBtn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const url = new URL(window.location.href);
+      url.pathname = "detajet.html";
+      url.searchParams.set("r", restaurantId);
+      url.searchParams.set("t", tableId);
+      url.searchParams.set("item", item.id);
+      window.location.href = url.toString();
+    });
+
+    socialRow.appendChild(likeBtn);
+    socialRow.appendChild(commentBtn);
+    div.appendChild(socialRow);
 
     const actions = document.createElement("div");
-    actions.className = "menu-actions";
+    actions.className = "menu-item-actions";
 
     const detailsBtn = document.createElement("button");
-    detailsBtn.type = "button";
-    detailsBtn.className = "menu-btn";
-    detailsBtn.textContent = t("detailsButton");
+    detailsBtn.className = "btn btn-dark";
+    detailsBtn.textContent = "Detajet";
     detailsBtn.addEventListener("click", () => {
       const url = new URL(window.location.href);
       url.pathname = "detajet.html";
@@ -936,25 +976,21 @@ function renderMenu() {
       window.location.href = url.toString();
     });
 
-    const chooseBtn = document.createElement("button");
-    chooseBtn.type = "button";
-    chooseBtn.className = "menu-btn menu-btn--primary";
-    chooseBtn.textContent = t("chooseButton");
-    chooseBtn.addEventListener("click", () => {
-      changeCart(item, 1);
-    });
+    const plusBtn = document.createElement("button");
+    plusBtn.className = "btn btn-primary";
+    plusBtn.textContent = "Hinzufügen";
+    plusBtn.addEventListener("click", () => changeCart(item, 1));
 
     actions.appendChild(detailsBtn);
-    actions.appendChild(chooseBtn);
-    footer.appendChild(actions);
+    actions.appendChild(plusBtn);
+    div.appendChild(actions);
 
-    card.appendChild(footer);
-    menuListEl.appendChild(card);
+    menuListEl.appendChild(div);
   });
 }
 
 /* =========================
-   LIKE Firestore
+   LIKES Firestore-Update
    ========================= */
 
 async function toggleItemLike(item, likeWrapEl = null) {
@@ -971,11 +1007,17 @@ async function toggleItemLike(item, likeWrapEl = null) {
   item.likeCount = modelItem ? modelItem.likeCount : item.likeCount;
 
   if (likeWrapEl) {
+    likeWrapEl.classList.remove("is-animating");
+    void likeWrapEl.offsetWidth;
+    likeWrapEl.classList.add("is-animating");
+
     if (likedAfter) likeWrapEl.classList.add("is-liked");
     else likeWrapEl.classList.remove("is-liked");
 
     const countEl = likeWrapEl.querySelector(".like-count");
     if (countEl) countEl.textContent = String(item.likeCount || 0);
+
+    setTimeout(() => likeWrapEl.classList.remove("is-animating"), 280);
   }
 
   try {
@@ -989,46 +1031,74 @@ async function toggleItemLike(item, likeWrapEl = null) {
     console.error(err);
   }
 
-  // Menü-Likes aktualisieren
   renderMenu();
 }
 
 /* =========================
-   ORDER OVERVIEW
+   WARENKORB (nur FAB + Badge)
+   ========================= */
+
+function updateCartBadge() {
+  const totalQty = cart.reduce((sum, item) => sum + item.qty, 0);
+  if (totalQty > 0) {
+    cartBadgeEl.textContent = String(totalQty);
+    cartBadgeEl.style.display = "flex";
+    cartFab.classList.add("visible", "cart-fab--has-items");
+    if (cartFabLabel) {
+      cartFabLabel.textContent = "Shiko porosin";
+      cartFabLabel.style.display = "block";
+    }
+  } else {
+    cartBadgeEl.style.display = "none";
+    cartFab.classList.remove("visible", "cart-fab--has-items");
+    if (cartFabLabel) cartFabLabel.style.display = "none";
+  }
+}
+
+function renderCart() {
+  updateCartBadge();
+  saveCartToStorage();
+}
+
+function changeCart(item, delta) {
+  const index = cart.findIndex((c) => c.id === item.id);
+  if (index === -1 && delta > 0) {
+    cart.push({ id: item.id, name: item.name, price: item.price, qty: delta });
+  } else if (index >= 0) {
+    cart[index].qty += delta;
+    if (cart[index].qty <= 0) cart.splice(index, 1);
+  }
+  renderCart();
+  renderDrinks();
+}
+
+/* =========================
+   GUEST: ORDER OVERVIEW (Shiko porosinë)
    ========================= */
 
 function mapGuestOrderStatus(status) {
   const s = status || "new";
   if (s === "new") {
-    return { label: t("orderStatusNew"), badgeClass: "order-status-badge--new" };
+    return { label: "Neu", badgeClass: "order-status-badge--new" };
   }
   if (s === "in_progress") {
-    return {
-      label: t("orderStatusInProgress"),
-      badgeClass: "order-status-badge--in-progress",
-    };
+    return { label: "Në përgatitje", badgeClass: "order-status-badge--in-progress" };
   }
   if (s === "served") {
-    return {
-      label: t("orderStatusServed"),
-      badgeClass: "order-status-badge--served",
-    };
+    return { label: "Serviert", badgeClass: "order-status-badge--served" };
   }
   if (s === "paid") {
-    return {
-      label: t("orderStatusPaid"),
-      badgeClass: "order-status-badge--paid",
-    };
+    return { label: "Paguar", badgeClass: "order-status-badge--paid" };
   }
   return { label: s, badgeClass: "order-status-badge--empty" };
 }
 
 function renderOrderEmpty() {
   if (!orderStatusBadge || !orderDetailsContent) return;
-  orderStatusBadge.textContent = t("orderEmptyStatus");
+  orderStatusBadge.textContent = "S'ka porosi";
   orderStatusBadge.className =
     "order-status-badge order-status-badge--empty";
-  orderDetailsContent.textContent = t("orderEmptyText");
+  orderDetailsContent.textContent = "Ende nuk keni porositur.";
 }
 
 function renderLatestOrder(latest) {
@@ -1040,7 +1110,8 @@ function renderLatestOrder(latest) {
 
   const items = latest.items || [];
   if (!items.length) {
-    orderDetailsContent.textContent = t("orderErrorItems");
+    orderDetailsContent.textContent =
+      "Porosia është regjistruar, por artikujt nuk janë gjetur.";
     return;
   }
 
@@ -1065,15 +1136,17 @@ function renderLatestOrder(latest) {
     })
     .join("");
 
-  orderDetailsContent.innerHTML = `
+  const html = `
     <div class="order-items-list">
       ${lines}
     </div>
     <div class="order-summary-row">
-      <span>${t("orderTotalLabel")}</span>
+      <span>Totali</span>
       <span>${total.toFixed(2)} €</span>
     </div>
   `;
+
+  orderDetailsContent.innerHTML = html;
 }
 
 function startLatestOrderListener() {
@@ -1089,15 +1162,21 @@ function startLatestOrderListener() {
         const data = docSnap.data();
         const tableField = data.table || data.tableId;
         if (tableField === tableId) {
-          found = { id: docSnap.id, ...data };
+          found = {
+            id: docSnap.id,
+            ...data,
+          };
         }
       });
 
-      if (!found) renderOrderEmpty();
-      else renderLatestOrder(found);
+      if (!found) {
+        renderOrderEmpty();
+      } else {
+        renderLatestOrder(found);
+      }
     },
     (err) => {
-      console.error("[DEMO] OrderListener Fehler:", err);
+      console.error("[KARTE] OrderListener Fehler:", err);
       renderOrderEmpty();
     }
   );
@@ -1108,12 +1187,14 @@ function openOrderDetails() {
   if (!orderToggleBtn || !orderDetailsContainer || !orderDetailsCard) return;
 
   orderToggleBtn.classList.add("order-toggle-btn--active");
-  orderToggleBtn.textContent = t("orderButtonClose");
 
   orderDetailsContainer.style.display = "block";
   requestAnimationFrame(() => {
     orderDetailsCard.classList.add("order-details-card--open");
   });
+
+  // Text in gewählter Sprache aktualisieren
+  applyLanguageToUI();
 }
 
 function closeOrderDetails() {
@@ -1121,30 +1202,32 @@ function closeOrderDetails() {
   if (!orderToggleBtn || !orderDetailsContainer || !orderDetailsCard) return;
 
   orderToggleBtn.classList.remove("order-toggle-btn--active");
-  orderToggleBtn.textContent = t("orderButtonOpen");
-
   orderDetailsCard.classList.remove("order-details-card--open");
   setTimeout(() => {
     if (!orderDetailsOpen) {
       orderDetailsContainer.style.display = "none";
     }
   }, 220);
+
+  // Text in gewählter Sprache aktualisieren
+  applyLanguageToUI();
 }
 
 /* =========================
-   THIRR KAMARIERIN
+   GUEST: THIRR KAMARIERIN
    ========================= */
 
 function updateWaiterCallUI(hasOpen) {
   if (!callWaiterBtn) return;
 
   if (hasOpen) {
-    callWaiterBtn.textContent = t("callButtonActive");
     callWaiterBtn.classList.add("call-waiter-btn--active");
   } else {
-    callWaiterBtn.textContent = t("callButtonIdle");
     callWaiterBtn.classList.remove("call-waiter-btn--active");
   }
+
+  // Text je nach Sprache setzen
+  applyLanguageToUI();
 }
 
 function startWaiterCallListener() {
@@ -1162,7 +1245,7 @@ function startWaiterCallListener() {
       updateWaiterCallUI(hasOpen);
     },
     (err) => {
-      console.error("[DEMO] WaiterCallListener Fehler:", err);
+      console.error("[KARTE] WaiterCallListener Fehler:", err);
     }
   );
 }
@@ -1180,6 +1263,7 @@ async function handleCallWaiter() {
       "calls"
     );
 
+    // Check, ob schon eine offene Thirrje existiert
     const qOpen = query(
       callsCol,
       where("tableId", "==", tableId),
@@ -1196,40 +1280,50 @@ async function handleCallWaiter() {
       });
     }
 
+    // Direkt UI umstellen, Listener hält das dann aktuell
     updateWaiterCallUI(true);
   } catch (err) {
-    console.error("[DEMO] Fehler bei Thirr kamarierin:", err);
-    alert(t("waiterError"));
+    console.error("[KARTE] Fehler bei Thirr kamarierin:", err);
+    alert("Thirrja nuk u dërgua, provo përsëri.");
   } finally {
     callWaiterBtn.disabled = false;
   }
 }
 
 /* =========================
-   EVENTS & INIT
+   EVENTS
    ========================= */
-
-if (langSwitcherEl) {
-  langSwitcherEl.addEventListener("click", (ev) => {
-    const btn = ev.target.closest(".lang-btn");
-    if (!btn) return;
-    const lang = btn.getAttribute("data-lang");
-    setLanguage(lang);
-  });
-}
 
 if (searchInput) {
   searchInput.addEventListener("input", () => {
     searchTerm = (searchInput.value || "").trim().toLowerCase();
-    renderDrinks();
     renderMenu();
   });
 }
 
+if (cartFab) {
+  cartFab.addEventListener("click", () => {
+    if (!cart.length) return;
+    const url = new URL(window.location.href);
+    url.pathname = "porosia.html";
+    url.searchParams.set("r", restaurantId);
+    url.searchParams.set("t", tableId);
+    window.location.href = url.toString();
+  });
+}
+
+window.addEventListener("pageshow", () => {
+  cart = loadCartFromStorage();
+  renderCart();
+});
+
 if (orderToggleBtn) {
   orderToggleBtn.addEventListener("click", () => {
-    if (orderDetailsOpen) closeOrderDetails();
-    else openOrderDetails();
+    if (orderDetailsOpen) {
+      closeOrderDetails();
+    } else {
+      openOrderDetails();
+    }
   });
 }
 
@@ -1239,12 +1333,27 @@ if (callWaiterBtn) {
   });
 }
 
-window.addEventListener("DOMContentLoaded", () => {
-  // Sprache initial anwenden
-  setLanguage(currentLang);
+// LANGUAGE EVENTS
+if (langButtons?.length) {
+  langButtons.forEach((btn) => {
+    btn.addEventListener("click", (ev) => {
+      ev.stopPropagation();
+      const code = btn.dataset.lang;
+      if (!code || !LANGS[code]) return;
+      currentLang = code;
+      saveLanguageToStorage(code);
+      applyLanguageToUI();
+    });
+  });
+}
 
-  cart = loadCartFromStorage();
-  loadRestaurantAndMenu();
-  startLatestOrderListener();
-  startWaiterCallListener();
-});
+/* =========================
+   INIT
+   ========================= */
+
+cart = loadCartFromStorage();
+renderCart();
+loadRestaurantAndMenu();
+startLatestOrderListener();
+startWaiterCallListener();
+applyLanguageToUI();
