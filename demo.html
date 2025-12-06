@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Porosia & Kamarieri Cards</title>
+
+  <style>
+    :root {
+      --bg-page-top: #0b1020;
+      --bg-page-bottom: #f2f4f8;
+      --light-1: #f9fbff;
+      --light-2: #ffffff;
+      --light-3: #edf1fb;
+      --dark-1: #050c18;
+      --dark-2: #0c1727;
+      --dark-3: #182842;
+      --text-dark: #0f172a;
+      --text-light: #f9fbff;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      padding: 36px 16px;
+      font-family: -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+      background:
+        radial-gradient(circle at 0% 0%, rgba(139, 92, 246, 0.22), transparent 55%),
+        radial-gradient(circle at 100% 0%, rgba(56, 189, 248, 0.2), transparent 55%),
+        linear-gradient(180deg, var(--bg-page-top) 0%, var(--bg-page-bottom) 70%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cards-shell {
+      width: 100%;
+      max-width: 430px;
+      padding: 18px 14px 22px;
+      border-radius: 34px;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(18px);
+      box-shadow:
+        0 28px 80px rgba(15, 23, 42, 0.65),
+        0 0 0 1px rgba(148, 163, 184, 0.25);
+    }
+
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+    }
+
+    /* Basis für beide Cards */
+    .card {
+      border-radius: 30px;
+      padding: 20px 16px 18px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
+    }
+
+    .card:hover {
+      transform: translateY(-3px) scale(1.01);
+      box-shadow: 0 22px 50px rgba(15, 23, 42, 0.32);
+    }
+
+    .card-light {
+      background: linear-gradient(145deg, var(--light-1) 0%, var(--light-2) 45%, var(--light-3) 100%);
+      box-shadow:
+        0 16px 36px rgba(15, 23, 42, 0.16),
+        0 0 0 0.5px rgba(148, 163, 184, 0.35);
+      color: var(--text-dark);
+    }
+
+    .card-dark {
+      background:
+        radial-gradient(circle at 10% -20%, rgba(148, 163, 253, 0.32), transparent 58%),
+        linear-gradient(145deg, var(--dark-1) 0%, var(--dark-2) 50%, var(--dark-3) 100%);
+      box-shadow: 0 26px 60px rgba(3, 7, 18, 0.95);
+      color: var(--text-light);
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .icon-circle {
+      width: 64px;
+      height: 64px;
+      border-radius: 32px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+
+    .card-light .icon-circle {
+      background:
+        radial-gradient(circle at 30% 0, rgba(148, 163, 184, 0.12) 0%, rgba(148, 163, 184, 0.02) 45%, transparent 100%),
+        #ffffff;
+      box-shadow:
+        0 14px 30px rgba(15, 23, 42, 0.12),
+        inset 0 0 0 0.5px rgba(148, 163, 184, 0.35);
+    }
+
+    .card-dark .icon-circle {
+      background:
+        radial-gradient(circle at 30% 0, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.06) 40%, transparent 100%);
+      box-shadow:
+        0 16px 40px rgba(5, 10, 25, 0.9),
+        inset 0 0 0 0.5px rgba(255, 255, 255, 0.08);
+    }
+
+    .icon-circle img {
+      width: 44px;
+      height: 44px;
+      object-fit: contain;
+      display: block;
+    }
+
+    .icon-svg {
+      width: 34px;
+      height: 34px;
+      stroke: #020617;
+      stroke-width: 1.9;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      fill: none;
+    }
+
+    /* Pill oben rechts (2 min / 15 €) */
+    .pill {
+      border-radius: 999px;
+      border: none;
+      padding: 5px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      letter-spacing: 0.01em;
+      white-space: nowrap;
+      cursor: default;
+    }
+
+    .pill-light {
+      background: rgba(148, 163, 184, 0.14);
+      color: #111827;
+      box-shadow:
+        0 10px 20px rgba(148, 163, 184, 0.45),
+        0 0 0 1px rgba(148, 163, 184, 0.45);
+    }
+
+    .pill-dark {
+      background: rgba(255, 255, 255, 0.16);
+      color: #e5ebff;
+      box-shadow:
+        0 10px 22px rgba(2, 6, 23, 0.8),
+        0 0 0 1px rgba(255, 255, 255, 0.26);
+      backdrop-filter: blur(8px);
+    }
+
+    .card-body {
+      margin-top: 20px;
+    }
+
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.16;
+      letter-spacing: 0.01em;
+      margin-bottom: 4px;
+    }
+
+    .card-subtitle {
+      font-size: 12px;
+      opacity: 0.7;
+      margin-bottom: 12px;
+    }
+
+    /* halb transparente Glas-Buttons (für beide Cards) */
+    .btn-glass {
+      width: 100%;
+      height: 44px;
+      border-radius: 22px;
+      border: none;
+      outline: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      cursor: pointer;
+      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+    }
+
+    .btn-glass:active {
+      transform: translateY(1px);
+    }
+
+    .btn-glass-light {
+      background: rgba(15, 23, 42, 0.06);
+      color: #020617;
+      box-shadow:
+        0 10px 22px rgba(148, 163, 184, 0.45),
+        0 0 0 1px rgba(148, 163, 184, 0.5);
+      backdrop-filter: blur(8px);
+    }
+
+    .btn-glass-light:hover {
+      background: rgba(15, 23, 42, 0.09);
+    }
+
+    .btn-glass-dark {
+      background: rgba(255, 255, 255, 0.14); /* durchsichtig */
+      color: #e5ebff;
+      box-shadow:
+        0 12px 28px rgba(2, 6, 23, 0.95),
+        0 0 0 1px rgba(255, 255, 255, 0.28);
+      backdrop-filter: blur(10px);
+    }
+
+    .btn-glass-dark:hover {
+      background: rgba(255, 255, 255, 0.20);
+    }
+
+    @media (max-width: 390px) {
+      .cards-shell {
+        padding-inline: 12px;
+      }
+      .card {
+        padding-inline: 14px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="cards-shell">
+    <div class="cards-row">
+
+      <!-- LINKS: POROSIA -->
+      <div class="card card-light">
+        <div class="card-top">
+          <div class="icon-circle">
+            <!-- Scooter Icon -->
+            <svg class="icon-svg" viewBox="0 0 48 48" aria-hidden="true">
+              <circle cx="16" cy="32" r="3" />
+              <circle cx="30" cy="32" r="3" />
+              <path d="M13 32H10" />
+              <path d="M33 32h3" />
+              <path d="M16 23h5l2 4h6" />
+              <path d="M19 20l-2-3h-4" />
+              <circle cx="17" cy="15" r="2.4" />
+              <rect x="30" y="21" width="6" height="6" rx="1.2" />
+            </svg>
+          </div>
+
+          <!-- Preis-Pill -->
+          <button class="pill pill-light">
+            15 €
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="card-title">Porosia</div>
+          <div class="card-subtitle">Permbledhe e porosise</div>
+
+          <button class="btn-glass btn-glass-light">
+            Shiko
+          </button>
+        </div>
+      </div>
+
+      <!-- RECHTS: KAMARIERI -->
+      <div class="card card-dark">
+        <div class="card-top">
+          <div class="icon-circle">
+            <img
+              src="https://i.postimg.cc/59vmM8dH/Chat-GPT-Image-6-Dez-2025-04-19-16.png"
+              alt="Kamarieri Icon"
+            />
+          </div>
+
+          <!-- 2 min Pill -->
+          <button class="pill pill-dark">
+            2 min
+          </button>
+        </div>
+
+        <div class="card-body">
+          <div class="card-title">Kamarieri vjen</div>
+          <div class="card-subtitle">Tap once to call the waiter.</div>
+
+          <button class="btn-glass btn-glass-dark">
+            Thirr
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</body>
+</html>
