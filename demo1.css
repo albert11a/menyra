@@ -1937,14 +1937,12 @@ img {
 }
 
 /* =========================================
-   Dezenter, einheitlicher Schatten für Porosia & Kamarieri Icons
+   Ultra-dezenter Shadow für Porosia & Kamarieri Icons
    ========================================= */
 
-/* Beide Icon-Kreise (links Porosia, rechts Kamarieri) bekommen
-   einen sehr soften, iOS-mäßigen Shadow */
 .status-card--order .status-card-top .icon-circle,
 .status-card--call  .status-card-top .icon-circle {
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.14);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.10);
 }
 
 
