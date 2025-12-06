@@ -1918,3 +1918,21 @@ img {
   background-size: 28px 28px;  /* größer als vorher, schön sichtbar */
   margin: 0;                   /* wirklich zentriert im Kreis */
 }
+
+
+/* =========================================
+   FEINTUNING: POROSIA-ICON (links)
+   ========================================= */
+
+/* Neues Logo + gleiche Größe wie Kamarieri */
+.status-card--order .status-icon-circle--order {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background-image: url("https://i.postimg.cc/fWrbHsdR/Chat_GPT_Image_5_Dez_2025_23_31_43.png");
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 28px 28px; /* gleiche „Logo-Größe“ wie Kamarieri */
+  margin: 0;
+}
+
