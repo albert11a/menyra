@@ -1898,9 +1898,7 @@ img {
   border: 1px solid rgba(248, 250, 252, 0.35);
 }
 
-     /* GLOBAL BUTTON RADIUS – hier einstellen */
-  --btn-radius-global: 14px; /* z.B. 10–16px für weniger rund als Pill */
-}
+
 
 
 /* =========================================
