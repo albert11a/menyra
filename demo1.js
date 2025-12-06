@@ -1,4 +1,4 @@
-// demo1.js – vereinfachte Gäste-Ansicht mit neuem Layout
+// demo1.js – Superdemo Karte mit 4 Sprachen & modernem Layout
 
 import { db } from "./firebase-config.js";
 import {
@@ -16,64 +16,285 @@ import {
   onSnapshot,
 } from "https://www.gstatic.com/firebasejs/11.0.0/firebase-firestore.js";
 
-// URL-Parameter
-// WICHTIG: Trage hier GENAU deine Restaurant-Dokument-ID ein,
-// so wie sie im Firestore unter "restaurants" heißt.
-// Beispiel: "shpija vjeter" oder "shpija-vjeter" oder was du wirklich benutzt:
+/* =========================
+   RESTAURANT-ID
+   ========================= */
 
-const RESTAURANT_FIRESTORE_ID = "shpija-e-vjetr"; // <- HIER EXAKT ANPASSEN
+// HIER GENAU deine Firestore-Dokument-ID eintragen:
+const RESTAURANT_FIRESTORE_ID = "shpija vjeter"; // <- anpassen!
 
-// Wenn du später mit URL-Param arbeiten willst, kannst du das optional lassen:
 const params = new URLSearchParams(window.location.search);
 const restaurantId = params.get("r") || RESTAURANT_FIRESTORE_ID;
-
-// Tisch-ID wie gehabt
 const tableId = params.get("t") || "T1";
 
+/* =========================
+   DOM REFERENCES
+   ========================= */
 
-// DOM: Restaurant
+// Restaurant
 const restaurantLogoEl = document.getElementById("restaurantLogo");
 const restaurantNameEl = document.getElementById("restaurantName");
 const restaurantMetaEl = document.getElementById("restaurantMeta");
 
-// DOM: Offers
+// Language Switcher
+const langSwitcherEl = document.getElementById("langSwitcher");
+
+// Offers
 const offersSection = document.getElementById("offersSection");
 const offersSliderEl = document.getElementById("offersSlider");
 const offersDotsEl = document.getElementById("offersDots");
+const offersLabelEl = document.getElementById("offersLabel");
+const offersTagEl = document.getElementById("offersTag");
 
-// DOM: Status / Porosia / Kamarieri
+// Status / Order / Waiter
+const orderCardLabelEl = document.getElementById("orderCardLabel");
+const callCardLabelEl = document.getElementById("callCardLabel");
 const orderToggleBtn = document.getElementById("orderToggleBtn");
 const orderDetailsContainer = document.getElementById("orderDetailsContainer");
 const orderDetailsCard = document.getElementById("orderDetailsCard");
+const orderDetailsTitleEl = document.getElementById("orderDetailsTitle");
 const orderStatusBadge = document.getElementById("orderStatusBadge");
 const orderDetailsContent = document.getElementById("orderDetailsContent");
 const callWaiterBtn = document.getElementById("callWaiterBtn");
 
-// DOM: Suche, Drinks, Food
+// Suche / Listen
 const searchInput = document.getElementById("searchInput");
 const drinksSection = document.getElementById("drinksSection");
 const drinksListEl = document.getElementById("drinksList");
 const menuListEl = document.getElementById("menuList");
+const drinksTitleEl = document.getElementById("drinksTitle");
+const menuTitleEl = document.getElementById("menuTitle");
 
-// STATE
+/* =========================
+   TRANSLATIONS (DE / SQ / EN / SR)
+   ========================= */
+
+const translations = {
+  sq: {
+    welcomeSubtitle: "Mirësevini në menynë digjitale.",
+    offersLabel: "SOT NË FOKUS",
+    offersTag: "Ofertat e ditës",
+    infoOnlyOffer: "Vetëm informacion / ofertë vizuale.",
+    orderCardTitle: "Porosia juaj",
+    orderButtonOpen: "Shiko porosinë +",
+    orderButtonClose: "Shiko porosinë -",
+    orderDetailsTitle: "Porosia juaj",
+    orderEmptyStatus: "S'ka porosi",
+    orderEmptyText: "Ende nuk keni porositur.",
+    orderStatusNew: "E re",
+    orderStatusInProgress: "Në përgatitje",
+    orderStatusServed: "Servuar",
+    orderStatusPaid: "Paguar",
+    orderTotalLabel: "Totali",
+    callCardTitle: "Thirr kamarierin",
+    callButtonIdle: "Thirr kamarierin",
+    callButtonActive: "Kamarieri vjen",
+    searchPlaceholder: "Kërko në meny.",
+    drinksTitle: "Pije",
+    drinksEmptyForSearch: "S'ka pije për këtë kërkim.",
+    menuTitle: "Speisekarte",
+    menuEmptyForSearch: "Nuk ka produkte për këtë kërkim.",
+    detailsButton: "Detaje",
+    chooseButton: "Zgjidh",
+    videoLabel: "Video e produktit",
+    noRestaurant: 'Lokal nuk u gjet (ID: "{id}")',
+    notActive: "Ky MENYRA nuk është aktiv aktualisht. Ju lutem njoftoni stafin.",
+    orderErrorItems: "Porosia është regjistruar, por artikujt nuk janë gjetur.",
+    waiterError: "Thirrja nuk u dërgua, provo përsëri.",
+  },
+  de: {
+    welcomeSubtitle: "Willkommen in der digitalen Speisekarte.",
+    offersLabel: "HEUTE IM FOKUS",
+    offersTag: "Angebote des Tages",
+    infoOnlyOffer: "Nur Information / visuelles Angebot.",
+    orderCardTitle: "Ihre Bestellung",
+    orderButtonOpen: "Bestellung ansehen +",
+    orderButtonClose: "Bestellung ansehen -",
+    orderDetailsTitle: "Ihre Bestellung",
+    orderEmptyStatus: "Keine Bestellung",
+    orderEmptyText: "Sie haben noch nichts bestellt.",
+    orderStatusNew: "Neu",
+    orderStatusInProgress: "In Vorbereitung",
+    orderStatusServed: "Serviert",
+    orderStatusPaid: "Bezahlt",
+    orderTotalLabel: "Gesamt",
+    callCardTitle: "Kellner rufen",
+    callButtonIdle: "Kellner rufen",
+    callButtonActive: "Kellner kommt",
+    searchPlaceholder: "In der Karte suchen.",
+    drinksTitle: "Getränke",
+    drinksEmptyForSearch: "Keine Getränke für diese Suche.",
+    menuTitle: "Speisen",
+    menuEmptyForSearch: "Keine Produkte für diese Suche.",
+    detailsButton: "Details",
+    chooseButton: "Auswählen",
+    videoLabel: "Produktvideo",
+    noRestaurant: 'Lokal nicht gefunden (ID: "{id}")',
+    notActive:
+      "Dieses MENYRA ist aktuell nicht aktiv. Bitte informieren Sie das Personal.",
+    orderErrorItems:
+      "Die Bestellung wurde registriert, aber die Artikel wurden nicht gefunden.",
+    waiterError: "Kellner konnte nicht gerufen werden, bitte erneut versuchen.",
+  },
+  en: {
+    welcomeSubtitle: "Welcome to the digital menu.",
+    offersLabel: "TODAY'S FOCUS",
+    offersTag: "Deals of the day",
+    infoOnlyOffer: "Information / visual promotion only.",
+    orderCardTitle: "Your order",
+    orderButtonOpen: "View order +",
+    orderButtonClose: "View order -",
+    orderDetailsTitle: "Your order",
+    orderEmptyStatus: "No order",
+    orderEmptyText: "You have not ordered yet.",
+    orderStatusNew: "New",
+    orderStatusInProgress: "In preparation",
+    orderStatusServed: "Served",
+    orderStatusPaid: "Paid",
+    orderTotalLabel: "Total",
+    callCardTitle: "Call waiter",
+    callButtonIdle: "Call waiter",
+    callButtonActive: "Waiter is coming",
+    searchPlaceholder: "Search in menu.",
+    drinksTitle: "Drinks",
+    drinksEmptyForSearch: "No drinks for this search.",
+    menuTitle: "Menu",
+    menuEmptyForSearch: "No items for this search.",
+    detailsButton: "Details",
+    chooseButton: "Choose",
+    videoLabel: "Product video",
+    noRestaurant: 'Venue not found (ID: "{id}")',
+    notActive:
+      "This MENYRA is currently not active. Please inform the staff.",
+    orderErrorItems:
+      "Order is registered but items could not be found.",
+    waiterError: "Call could not be sent, please try again.",
+  },
+  sr: {
+    welcomeSubtitle: "Dobrodošli u digitalni meni.",
+    offersLabel: "DANAS U FOKUSU",
+    offersTag: "Ponude dana",
+    infoOnlyOffer: "Samo informacija / vizuelna ponuda.",
+    orderCardTitle: "Vaša porudžbina",
+    orderButtonOpen: "Prikaži porudžbinu +",
+    orderButtonClose: "Prikaži porudžbinu -",
+    orderDetailsTitle: "Vaša porudžbina",
+    orderEmptyStatus: "Nema porudžbine",
+    orderEmptyText: "Još uvek niste poručili.",
+    orderStatusNew: "Nova",
+    orderStatusInProgress: "U pripremi",
+    orderStatusServed: "Posluženo",
+    orderStatusPaid: "Plaćeno",
+    orderTotalLabel: "Ukupno",
+    callCardTitle: "Pozovi konobara",
+    callButtonIdle: "Pozovi konobara",
+    callButtonActive: "Konobar dolazi",
+    searchPlaceholder: "Pretraži meni.",
+    drinksTitle: "Pića",
+    drinksEmptyForSearch: "Nema pića za ovu pretragu.",
+    menuTitle: "Jelovnik",
+    menuEmptyForSearch: "Nema proizvoda za ovu pretragu.",
+    detailsButton: "Detalji",
+    chooseButton: "Izaberi",
+    videoLabel: "Video proizvoda",
+    noRestaurant: 'Lokal nije pronađen (ID: "{id}")',
+    notActive:
+      "Ovaj MENYRA trenutno nije aktivan. Molimo obavestite osoblje.",
+    orderErrorItems:
+      "Porudžbina je zabeležena, ali artikli nisu pronađeni.",
+    waiterError: "Poziv nije poslat, pokušajte ponovo.",
+  },
+};
+
+let currentLang =
+  localStorage.getItem("menyra_lang") || "sq";
+
+/**
+ * Übersetzung holen (fallback: SQ -> key)
+ */
+function t(key) {
+  const langPack = translations[currentLang] || translations.sq;
+  return langPack[key] ?? translations.sq[key] ?? key;
+}
+
+/**
+ * Statische UI-Texte auf aktuelle Sprache setzen
+ */
+function applyTranslations() {
+  if (restaurantMetaEl) {
+    restaurantMetaEl.textContent = t("welcomeSubtitle");
+  }
+  if (offersLabelEl) offersLabelEl.textContent = t("offersLabel");
+  if (offersTagEl) offersTagEl.textContent = t("offersTag");
+  if (orderCardLabelEl) orderCardLabelEl.textContent = t("orderCardTitle");
+  if (orderDetailsTitleEl) orderDetailsTitleEl.textContent = t("orderDetailsTitle");
+  if (callCardLabelEl) callCardLabelEl.textContent = t("callCardTitle");
+  if (orderToggleBtn) {
+    orderToggleBtn.textContent = orderDetailsOpen
+      ? t("orderButtonClose")
+      : t("orderButtonOpen");
+  }
+  if (callWaiterBtn) {
+    // Text wird von Listener ggf. überschrieben, hier nur Idle-Default
+    callWaiterBtn.textContent = t("callButtonIdle");
+  }
+  if (searchInput) {
+    searchInput.placeholder = t("searchPlaceholder");
+  }
+  if (drinksTitleEl) drinksTitleEl.textContent = t("drinksTitle");
+  if (menuTitleEl) menuTitleEl.textContent = t("menuTitle");
+}
+
+/* =========================
+   LANGUAGE SWITCHER
+   ========================= */
+
+function setLanguage(lang) {
+  if (!translations[lang]) lang = "sq";
+  currentLang = lang;
+  localStorage.setItem("menyra_lang", currentLang);
+
+  // Active Button markieren
+  if (langSwitcherEl) {
+    const btns = langSwitcherEl.querySelectorAll(".lang-btn");
+    btns.forEach((btn) => {
+      const val = btn.getAttribute("data-lang");
+      if (val === currentLang) btn.classList.add("lang-btn--active");
+      else btn.classList.remove("lang-btn--active");
+    });
+  }
+
+  applyTranslations();
+  // Texte in dynamischen Bereichen aktualisieren
+  renderDrinks();
+  renderMenu();
+  if (!orderDetailsOpen) {
+    renderOrderEmpty();
+  }
+}
+
+/* =========================
+   STATE
+   ========================= */
+
 let allMenuItems = [];
 let drinksItems = [];
 let foodItems = [];
 let searchTerm = "";
 let cart = [];
 
-// OFFERS-SLIDER STATE
+// Offers
 let offersSlides = [];
 let offersCurrentIndex = 0;
 let offersTimer = null;
 
-// ORDER / CALL LISTENER
+// Order / Call
 let orderDetailsOpen = false;
 let unsubLatestOrder = null;
 let unsubWaiterCall = null;
 
 /* =========================
-   CART: LOCALSTORAGE
+   CART LOCALSTORAGE
    ========================= */
 
 function getCartStorageKey() {
@@ -110,7 +331,12 @@ function saveCartToStorage() {
 function changeCart(item, delta) {
   const index = cart.findIndex((c) => c.id === item.id);
   if (index === -1 && delta > 0) {
-    cart.push({ id: item.id, name: item.name, price: item.price, qty: delta });
+    cart.push({
+      id: item.id,
+      name: item.name,
+      price: item.price,
+      qty: delta,
+    });
   } else if (index >= 0) {
     cart[index].qty += delta;
     if (cart[index].qty <= 0) cart.splice(index, 1);
@@ -119,7 +345,7 @@ function changeCart(item, delta) {
 }
 
 /* =========================
-   HELFER: ABO & STATUS
+   ABO / STATUS
    ========================= */
 
 function todayISO() {
@@ -143,7 +369,7 @@ function isRestaurantOperational(data) {
 }
 
 /* =========================
-   LIKES: LOCALSTORAGE
+   LIKES LOCALSTORAGE
    ========================= */
 
 function likeKey(itemId) {
@@ -163,7 +389,7 @@ function setItemLiked(itemId, liked) {
 }
 
 /* =========================
-   OFFERS-SLIDER LOGIK
+   OFFERS SLIDER
    ========================= */
 
 function clearOffersTimer() {
@@ -259,7 +485,6 @@ function renderOffersSlider(offers) {
     const slide = document.createElement("article");
     slide.className = "offer-slide";
 
-    // Bild
     if (imageUrl) {
       const img = document.createElement("img");
       img.src = imageUrl;
@@ -269,7 +494,6 @@ function renderOffersSlider(offers) {
       slide.appendChild(img);
     }
 
-    // Header (Titel + Preis)
     const header = document.createElement("div");
     header.className = "offer-header";
 
@@ -286,7 +510,6 @@ function renderOffersSlider(offers) {
     header.appendChild(priceEl);
     slide.appendChild(header);
 
-    // Beschreibung
     if (description) {
       const descEl = document.createElement("div");
       descEl.className = "offer-desc";
@@ -294,15 +517,13 @@ function renderOffersSlider(offers) {
       slide.appendChild(descEl);
     }
 
-    // Info-only Text (kein Direkt-Add to Cart in Demo)
     const infoOnly = document.createElement("div");
     infoOnly.className = "offer-info-only";
-    infoOnly.textContent = "Vetëm informacion / ofertë vizuale.";
+    infoOnly.textContent = t("infoOnlyOffer");
     slide.appendChild(infoOnly);
 
     slidesFrag.appendChild(slide);
 
-    // Dot
     const dot = document.createElement("button");
     dot.className = "offers-dot" + (index === 0 ? " active" : "");
     dot.dataset.index = String(index);
@@ -320,7 +541,6 @@ function renderOffersSlider(offers) {
   offersCurrentIndex = 0;
   startOffersAutoSlide();
 
-  // Sync aktiv Dot beim Scroll
   offersSliderEl.addEventListener("scroll", () => {
     if (!offersSlides.length) return;
     const center = offersSliderEl.scrollLeft + offersSliderEl.clientWidth / 2;
@@ -341,7 +561,7 @@ function renderOffersSlider(offers) {
 }
 
 /* =========================
-   RESTAURANT & MENÜ LADEN
+   RESTAURANT & MENÜ
    ========================= */
 
 function inferTypeForItem(item) {
@@ -350,10 +570,14 @@ function inferTypeForItem(item) {
   const cat = (item.category || "").toLowerCase();
   const drinksWords = [
     "getränke",
+    "getraenke",
     "drinks",
     "freskuese",
-    "kafe",
     "cafe",
+    "kafe",
+    "kafe & espresso",
+    "cappuccino",
+    "latte",
     "çaj",
     "caj",
     "ujë",
@@ -361,12 +585,13 @@ function inferTypeForItem(item) {
     "lëngje",
     "lengje",
     "birra",
-    "beer",
-    "wine",
     "verë",
     "vere",
+    "koktej",
     "cocktail",
+    "energjike",
   ];
+
   if (drinksWords.some((w) => cat.includes(w))) return "drink";
   return "food";
 }
@@ -377,9 +602,12 @@ async function loadRestaurantAndMenu() {
     const restaurantSnap = await getDoc(restaurantRef);
 
     if (!restaurantSnap.exists()) {
-      restaurantNameEl.textContent = "Lokal nicht gefunden";
-      restaurantMetaEl.textContent = `ID: ${restaurantId}`;
-      menuListEl.innerHTML = "<p>Bitte Personal informieren.</p>";
+      restaurantNameEl.textContent = "MENYRA";
+      restaurantMetaEl.textContent = t("noRestaurant").replace(
+        "{id}",
+        restaurantId
+      );
+      menuListEl.innerHTML = "<p>" + t("noRestaurant").replace("{id}", restaurantId) + "</p>";
       offersSection.style.display = "none";
       drinksSection.style.display = "none";
       return;
@@ -387,9 +615,8 @@ async function loadRestaurantAndMenu() {
 
     const data = restaurantSnap.data();
 
-    restaurantNameEl.textContent = data.restaurantName || "Lokal";
-    restaurantMetaEl.textContent =
-      data.subtitle || "Mirësevini në menynë digjitale.";
+    restaurantNameEl.textContent = data.restaurantName || "MENYRA";
+    restaurantMetaEl.textContent = t("welcomeSubtitle");
 
     if (data.logoUrl) {
       restaurantLogoEl.src = data.logoUrl;
@@ -397,8 +624,7 @@ async function loadRestaurantAndMenu() {
     }
 
     if (!isRestaurantOperational(data)) {
-      menuListEl.innerHTML =
-        "<p>Ky MENYRA nuk është aktiv aktualisht. Ju lutem njoftoni stafin.</p>";
+      menuListEl.innerHTML = "<p>" + t("notActive") + "</p>";
       offersSection.style.display = "none";
       drinksSection.style.display = "none";
       return;
@@ -419,6 +645,7 @@ async function loadRestaurantAndMenu() {
           category: d.category || "Sonstiges",
           available: d.available !== false,
           imageUrl: d.imageUrl || null,
+          videoUrl: d.videoUrl || null,
           type: d.type || null,
           likeCount: d.likeCount || 0,
           commentCount: d.commentCount || 0,
@@ -446,10 +673,12 @@ async function loadRestaurantAndMenu() {
 }
 
 /* =========================
-   GETRÄNKE RENDERING
+   GETRÄNKE
    ========================= */
 
 function renderDrinks() {
+  if (!drinksListEl || !drinksSection) return;
+
   drinksListEl.innerHTML = "";
 
   if (!drinksItems.length) {
@@ -469,7 +698,10 @@ function renderDrinks() {
   }
 
   if (!items.length) {
-    drinksListEl.innerHTML = "<p style='font-size:0.8rem;'>S'ka pije për këtë kërkim.</p>";
+    drinksListEl.innerHTML =
+      "<p style='font-size:0.8rem;'>" +
+      t("drinksEmptyForSearch") +
+      "</p>";
     return;
   }
 
@@ -517,7 +749,6 @@ function renderDrinks() {
       await toggleItemLike(item, likeWrap);
     });
 
-    // Bild
     if (item.imageUrl) {
       const img = document.createElement("img");
       img.src = item.imageUrl;
@@ -527,7 +758,6 @@ function renderDrinks() {
       card.appendChild(img);
     }
 
-    // Name + Preis
     const header = document.createElement("div");
     header.className = "drink-header";
 
@@ -550,7 +780,6 @@ function renderDrinks() {
       card.appendChild(descEl);
     }
 
-    // Footer: Menge + Zgjidh
     const footer = document.createElement("div");
     footer.className = "drink-footer";
 
@@ -593,8 +822,7 @@ function renderDrinks() {
     const addBtn = document.createElement("button");
     addBtn.type = "button";
     addBtn.className = "btn-add-round";
-    addBtn.textContent = "Zgjidh";
-
+    addBtn.textContent = t("chooseButton");
     addBtn.addEventListener("click", (ev) => {
       ev.stopPropagation();
       changeCart(item, currentQty);
@@ -609,10 +837,12 @@ function renderDrinks() {
 }
 
 /* =========================
-   SPEISEKARTE RENDERING
+   SPEISEKARTE
    ========================= */
 
 function renderMenu() {
+  if (!menuListEl) return;
+
   menuListEl.innerHTML = "";
 
   let items = [...foodItems];
@@ -626,7 +856,9 @@ function renderMenu() {
 
   if (!items.length) {
     menuListEl.innerHTML =
-      "<p style='font-size:0.8rem;'>Nuk ka produkte për këtë kërkim.</p>";
+      "<p style='font-size:0.8rem;'>" +
+      t("menuEmptyForSearch") +
+      "</p>";
     return;
   }
 
@@ -641,6 +873,13 @@ function renderMenu() {
       img.className = "menu-image";
       img.loading = "lazy";
       card.appendChild(img);
+    }
+
+    if (item.videoUrl) {
+      const videoChip = document.createElement("div");
+      videoChip.className = "menu-video-chip";
+      videoChip.textContent = t("videoLabel");
+      card.appendChild(videoChip);
     }
 
     const header = document.createElement("div");
@@ -667,11 +906,18 @@ function renderMenu() {
     footer.className = "menu-footer";
 
     const likeBox = document.createElement("div");
-    likeBox.className = "menu-like";
+    likeBox.className =
+      "menu-like" + (isItemLiked(item.id) ? " menu-like--active" : "");
     likeBox.innerHTML = `
       <span class="menu-like-icon">♥</span>
       <span>${item.likeCount || 0}</span>
+      <span class="menu-comment-pill">· 💬 ${item.commentCount || 0}</span>
     `;
+    likeBox.addEventListener("click", async (ev) => {
+      ev.stopPropagation();
+      await toggleItemLike(item);
+    });
+
     footer.appendChild(likeBox);
 
     const actions = document.createElement("div");
@@ -680,7 +926,7 @@ function renderMenu() {
     const detailsBtn = document.createElement("button");
     detailsBtn.type = "button";
     detailsBtn.className = "menu-btn";
-    detailsBtn.textContent = "Detaje";
+    detailsBtn.textContent = t("detailsButton");
     detailsBtn.addEventListener("click", () => {
       const url = new URL(window.location.href);
       url.pathname = "detajet.html";
@@ -693,7 +939,7 @@ function renderMenu() {
     const chooseBtn = document.createElement("button");
     chooseBtn.type = "button";
     chooseBtn.className = "menu-btn menu-btn--primary";
-    chooseBtn.textContent = "Zgjidh";
+    chooseBtn.textContent = t("chooseButton");
     chooseBtn.addEventListener("click", () => {
       changeCart(item, 1);
     });
@@ -708,7 +954,7 @@ function renderMenu() {
 }
 
 /* =========================
-   LIKE Firestore-Update
+   LIKE Firestore
    ========================= */
 
 async function toggleItemLike(item, likeWrapEl = null) {
@@ -743,7 +989,7 @@ async function toggleItemLike(item, likeWrapEl = null) {
     console.error(err);
   }
 
-  // aktualisiere Food-Likes auch
+  // Menü-Likes aktualisieren
   renderMenu();
 }
 
@@ -754,35 +1000,47 @@ async function toggleItemLike(item, likeWrapEl = null) {
 function mapGuestOrderStatus(status) {
   const s = status || "new";
   if (s === "new") {
-    return { label: "Neu", badgeClass: "order-status-badge--new" };
+    return { label: t("orderStatusNew"), badgeClass: "order-status-badge--new" };
   }
   if (s === "in_progress") {
-    return { label: "Në përgatitje", badgeClass: "order-status-badge--in-progress" };
+    return {
+      label: t("orderStatusInProgress"),
+      badgeClass: "order-status-badge--in-progress",
+    };
   }
   if (s === "served") {
-    return { label: "Serviert", badgeClass: "order-status-badge--served" };
+    return {
+      label: t("orderStatusServed"),
+      badgeClass: "order-status-badge--served",
+    };
   }
   if (s === "paid") {
-    return { label: "Paguar", badgeClass: "order-status-badge--paid" };
+    return {
+      label: t("orderStatusPaid"),
+      badgeClass: "order-status-badge--paid",
+    };
   }
   return { label: s, badgeClass: "order-status-badge--empty" };
 }
 
 function renderOrderEmpty() {
-  orderStatusBadge.textContent = "S'ka porosi";
-  orderStatusBadge.className = "order-status-badge order-status-badge--empty";
-  orderDetailsContent.textContent = "Ende nuk keni porositur.";
+  if (!orderStatusBadge || !orderDetailsContent) return;
+  orderStatusBadge.textContent = t("orderEmptyStatus");
+  orderStatusBadge.className =
+    "order-status-badge order-status-badge--empty";
+  orderDetailsContent.textContent = t("orderEmptyText");
 }
 
 function renderLatestOrder(latest) {
+  if (!orderStatusBadge || !orderDetailsContent) return;
+
   const { label, badgeClass } = mapGuestOrderStatus(latest.status);
   orderStatusBadge.textContent = label;
   orderStatusBadge.className = "order-status-badge " + badgeClass;
 
   const items = latest.items || [];
   if (!items.length) {
-    orderDetailsContent.textContent =
-      "Porosia është regjistruar, por artikujt nuk janë gjetur.";
+    orderDetailsContent.textContent = t("orderErrorItems");
     return;
   }
 
@@ -812,7 +1070,7 @@ function renderLatestOrder(latest) {
       ${lines}
     </div>
     <div class="order-summary-row">
-      <span>Totali</span>
+      <span>${t("orderTotalLabel")}</span>
       <span>${total.toFixed(2)} €</span>
     </div>
   `;
@@ -847,8 +1105,11 @@ function startLatestOrderListener() {
 
 function openOrderDetails() {
   orderDetailsOpen = true;
+  if (!orderToggleBtn || !orderDetailsContainer || !orderDetailsCard) return;
+
   orderToggleBtn.classList.add("order-toggle-btn--active");
-  orderToggleBtn.textContent = "Shiko porosinë -";
+  orderToggleBtn.textContent = t("orderButtonClose");
+
   orderDetailsContainer.style.display = "block";
   requestAnimationFrame(() => {
     orderDetailsCard.classList.add("order-details-card--open");
@@ -857,8 +1118,11 @@ function openOrderDetails() {
 
 function closeOrderDetails() {
   orderDetailsOpen = false;
+  if (!orderToggleBtn || !orderDetailsContainer || !orderDetailsCard) return;
+
   orderToggleBtn.classList.remove("order-toggle-btn--active");
-  orderToggleBtn.textContent = "Shiko porosinë +";
+  orderToggleBtn.textContent = t("orderButtonOpen");
+
   orderDetailsCard.classList.remove("order-details-card--open");
   setTimeout(() => {
     if (!orderDetailsOpen) {
@@ -872,11 +1136,13 @@ function closeOrderDetails() {
    ========================= */
 
 function updateWaiterCallUI(hasOpen) {
+  if (!callWaiterBtn) return;
+
   if (hasOpen) {
-    callWaiterBtn.textContent = "Kamarieri vjen";
+    callWaiterBtn.textContent = t("callButtonActive");
     callWaiterBtn.classList.add("call-waiter-btn--active");
   } else {
-    callWaiterBtn.textContent = "Thirr kamarierin";
+    callWaiterBtn.textContent = t("callButtonIdle");
     callWaiterBtn.classList.remove("call-waiter-btn--active");
   }
 }
@@ -902,9 +1168,18 @@ function startWaiterCallListener() {
 }
 
 async function handleCallWaiter() {
+  if (!callWaiterBtn) return;
+
   callWaiterBtn.disabled = true;
+
   try {
-    const callsCol = collection(db, "restaurants", restaurantId, "calls");
+    const callsCol = collection(
+      db,
+      "restaurants",
+      restaurantId,
+      "calls"
+    );
+
     const qOpen = query(
       callsCol,
       where("tableId", "==", tableId),
@@ -920,10 +1195,11 @@ async function handleCallWaiter() {
         createdAt: serverTimestamp(),
       });
     }
+
     updateWaiterCallUI(true);
   } catch (err) {
     console.error("[DEMO] Fehler bei Thirr kamarierin:", err);
-    alert("Thirrja nuk u dërgua, provo përsëri.");
+    alert(t("waiterError"));
   } finally {
     callWaiterBtn.disabled = false;
   }
@@ -932,6 +1208,15 @@ async function handleCallWaiter() {
 /* =========================
    EVENTS & INIT
    ========================= */
+
+if (langSwitcherEl) {
+  langSwitcherEl.addEventListener("click", (ev) => {
+    const btn = ev.target.closest(".lang-btn");
+    if (!btn) return;
+    const lang = btn.getAttribute("data-lang");
+    setLanguage(lang);
+  });
+}
 
 if (searchInput) {
   searchInput.addEventListener("input", () => {
@@ -955,6 +1240,9 @@ if (callWaiterBtn) {
 }
 
 window.addEventListener("DOMContentLoaded", () => {
+  // Sprache initial anwenden
+  setLanguage(currentLang);
+
   cart = loadCartFromStorage();
   loadRestaurantAndMenu();
   startLatestOrderListener();
