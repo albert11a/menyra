@@ -13,48 +13,35 @@
     <section class="restaurant-card">
       <div class="restaurant-header">
         <img
+          id="restaurantLogo"
           class="rest-logo"
-          src="https://images.pexels.com/photos/2696064/pexels-photo-2696064.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop"
-          alt="Roter Han Logo"
+          style="display:none;"
+          alt="Logo"
         />
         <div class="restaurant-text">
-          <div class="restaurant-name">Roter Han</div>
-          <div class="restaurant-meta">Bar · Restaurant · Wien</div>
+          <div class="restaurant-name" id="restaurantName">Lokal</div>
+          <div class="restaurant-meta" id="restaurantMeta">
+            Mirësevini në MENYRA.
+          </div>
         </div>
       </div>
     </section>
 
-    <!-- SOT NË FOKUS – EIN WIDGET -->
-    <section class="focus-card">
-      <div class="focus-header-row">
-        <span class="focus-label">SOT NË FOKUS</span>
-        <span class="focus-tag">Chef's special</span>
+    <!-- SOT NË FOKUS – SLIDER -->
+    <section class="offers-card" id="offersSection" style="display:none;">
+      <div class="offers-header-row">
+        <span class="offers-label">SOT NË FOKUS</span>
+        <span class="offers-tag">Ofertat e ditës</span>
       </div>
-
-      <div class="focus-image-wrap">
-        <img
-          src="https://images.pexels.com/photos/2313686/pexels-photo-2313686.jpeg?auto=compress&cs=tinysrgb&w=800"
-          alt="Steak Special"
-        />
+      <div class="offers-slider" id="offersSlider">
+        <!-- Slides kommen per JS -->
       </div>
-
-      <div class="focus-body">
-        <div class="focus-title-row">
-          <span class="focus-title">Steak Special</span>
-          <span class="focus-price">18,90 €</span>
-        </div>
-        <p class="focus-desc">
-          Steak me patate të skuqura, perime të pjekura dhe salcë piper.
-        </p>
-        <button class="focus-btn" type="button">
-          Shiko ofertën
-        </button>
-      </div>
+      <div class="offers-dots" id="offersDots"></div>
     </section>
 
-    <!-- POROSIA & KAMARIERI – WIDGET-CARDS -->
+    <!-- POROSIA & KAMARIERI – WIDGET CARDS -->
     <section class="karte-status-row">
-      <!-- Links: POROSIA -->
+      <!-- LINKS: POROSIA -->
       <article class="status-card status-card--order">
         <div class="status-card-top">
           <div class="icon-circle">
@@ -71,7 +58,7 @@
         </button>
       </article>
 
-      <!-- Rechts: KAMARIERI -->
+      <!-- RECHTS: KAMARIERI -->
       <article class="status-card status-card--call">
         <div class="status-card-top">
           <div class="icon-circle">
@@ -89,10 +76,33 @@
       </article>
     </section>
 
+    <!-- POROSIA JUAJ – DETAIL CARD -->
+    <section
+      id="orderDetailsContainer"
+      class="order-details-container"
+      style="display:none;"
+    >
+      <article id="orderDetailsCard" class="order-details-card">
+        <div class="order-details-header">
+          <span class="order-details-title">Porosia juaj</span>
+          <span
+            id="orderStatusBadge"
+            class="order-status-badge order-status-badge--empty"
+          >
+            S'ka porosi
+          </span>
+        </div>
+        <div id="orderDetailsContent" class="order-details-content">
+          Ende nuk keni porositur.
+        </div>
+      </article>
+    </section>
+
     <!-- SUCHE -->
     <section class="card search-card">
       <div class="search-pill">
         <input
+          id="searchInput"
           class="search-input"
           type="search"
           placeholder="Kërko në meny."
@@ -103,100 +113,21 @@
       </div>
     </section>
 
-    <!-- GETRÄNKE MIT LIKES -->
-    <section class="card drinks-card">
+    <!-- GETRÄNKE -->
+    <section class="card drinks-card" id="drinksSection" style="display:none;">
       <h2 class="section-title">Getränke</h2>
-      <div class="drinks-list">
-        <article class="drink-item">
-          <img
-            src="https://source.unsplash.com/400x600/?coffee"
-            alt="Latte Macchiato"
-            class="drink-image"
-          />
-          <div class="drink-name-row">
-            <span class="drink-name">Latte Macchiato</span>
-            <span class="drink-price">3,50 €</span>
-          </div>
-          <div class="drink-footer">
-            <div class="drink-like">
-              <span class="drink-like-icon">♥</span>
-              <span>24</span>
-            </div>
-            <button class="drink-btn" type="button">Zgjidh</button>
-          </div>
-        </article>
-
-        <article class="drink-item">
-          <img
-            src="https://source.unsplash.com/400x600/?cocktail"
-            alt="Aperol Spritz"
-            class="drink-image"
-          />
-          <div class="drink-name-row">
-            <span class="drink-name">Aperol Spritz</span>
-            <span class="drink-price">5,80 €</span>
-          </div>
-          <div class="drink-footer">
-            <div class="drink-like">
-              <span class="drink-like-icon">♥</span>
-              <span>17</span>
-            </div>
-            <button class="drink-btn" type="button">Zgjidh</button>
-          </div>
-        </article>
-      </div>
+      <div class="drinks-list" id="drinksList"></div>
     </section>
 
     <!-- SPEISEKARTE -->
     <section class="card menu-card">
       <h2 class="section-title">Speisekarte</h2>
-      <div class="menu-list">
-        <article class="menu-item">
-          <img
-            src="https://source.unsplash.com/600x400/?pizza"
-            alt="Pizza Margherita"
-            class="menu-image"
-          />
-          <div class="menu-name-row">
-            <span class="menu-name">Pizza Margherita</span>
-            <span class="menu-price">7,90 €</span>
-          </div>
-          <p class="menu-desc">
-            Domate, djathë mozzarella dhe borzilok i freskët – klasik italian.
-          </p>
-          <div class="menu-footer">
-            <div class="menu-like">
-              <span class="menu-like-icon">♥</span>
-              <span>31</span>
-            </div>
-            <button class="menu-btn" type="button">Detaje</button>
-          </div>
-        </article>
-
-        <article class="menu-item">
-          <img
-            src="https://source.unsplash.com/600x400/?pasta"
-            alt="Pasta Carbonara"
-            class="menu-image"
-          />
-          <div class="menu-name-row">
-            <span class="menu-name">Pasta Carbonara</span>
-            <span class="menu-price">9,20 €</span>
-          </div>
-          <p class="menu-desc">
-            Pasta me salcë kremoze, pancetta dhe djathë pecorino.
-          </p>
-          <div class="menu-footer">
-            <div class="menu-like">
-              <span class="menu-like-icon">♥</span>
-              <span>19</span>
-            </div>
-            <button class="menu-btn" type="button">Detaje</button>
-          </div>
-        </article>
-      </div>
+      <div class="menu-list" id="menuList"></div>
     </section>
 
   </main>
+
+  <!-- DEMO SCRIPT -->
+  <script type="module" src="demo1.js"></script>
 </body>
 </html>
