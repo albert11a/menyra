@@ -1896,3 +1896,25 @@ img {
   color: #f9fafb;
   border: 1px solid rgba(248, 250, 252, 0.35);
 }
+
+
+/* =========================================
+   FEINTUNING: KAMARIERI-ICON (nur rechts)
+   ========================================= */
+
+/* Nur die rechte Karte (Kamarieri) – Kreis-Hintergrund etwas anders */
+.status-card--call .status-card-top .icon-circle {
+  background: rgba(255, 255, 255, 0.12);  /* leicht andere Innenfarbe als Widget */
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35); /* darf etwas "tiefer" wirken */
+}
+
+/* Inneres Icon im Kreis größer & mittig */
+.status-card--call .status-icon-circle--call {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 28px 28px;  /* größer als vorher, schön sichtbar */
+  margin: 0;                   /* wirklich zentriert im Kreis */
+}
