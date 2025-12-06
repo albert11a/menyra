@@ -14,7 +14,7 @@
       <div class="restaurant-header">
         <img
           class="rest-logo"
-          src="https://via.placeholder.com/80x80.png?text=RH"
+          src="https://images.pexels.com/photos/2696064/pexels-photo-2696064.jpeg?auto=compress&cs=tinysrgb&w=120&h=120&fit=crop"
           alt="Roter Han Logo"
         />
         <div class="restaurant-text">
@@ -24,60 +24,31 @@
       </div>
     </section>
 
-    <!-- SOT NË FOKUS – 2 CARDS WIE WIDGETS -->
-    <section class="offers-widget">
-      <div class="offers-widget-header">
-        <span class="offers-widget-label">SOT NË FOKUS</span>
+    <!-- SOT NË FOKUS – EIN WIDGET -->
+    <section class="focus-card">
+      <div class="focus-header-row">
+        <span class="focus-label">SOT NË FOKUS</span>
+        <span class="focus-tag">Chef's special</span>
       </div>
 
-      <div class="offers-widget-row">
-        <!-- Offer 1 -->
-        <article class="offer-card">
-          <div class="offer-image-wrap">
-            <img
-              src="https://via.placeholder.com/600x400.png?text=Offer+1"
-              alt="Offer 1"
-            />
-          </div>
-          <div class="offer-body">
-            <div class="offer-topline">
-              <span class="offer-title">Steak Special</span>
-              <button class="offer-pill" type="button" disabled>
-                18,90 €
-              </button>
-            </div>
-            <p class="offer-desc">
-              Steak me patate të skuqura dhe salcë piper.
-            </p>
-            <button class="offer-btn" type="button">
-              Shiko ofertën
-            </button>
-          </div>
-        </article>
+      <div class="focus-image-wrap">
+        <img
+          src="https://images.pexels.com/photos/2313686/pexels-photo-2313686.jpeg?auto=compress&cs=tinysrgb&w=800"
+          alt="Steak Special"
+        />
+      </div>
 
-        <!-- Offer 2 -->
-        <article class="offer-card">
-          <div class="offer-image-wrap">
-            <img
-              src="https://via.placeholder.com/600x400.png?text=Offer+2"
-              alt="Offer 2"
-            />
-          </div>
-          <div class="offer-body">
-            <div class="offer-topline">
-              <span class="offer-title">Dessert Duo</span>
-              <button class="offer-pill" type="button" disabled>
-                6,50 €
-              </button>
-            </div>
-            <p class="offer-desc">
-              Dy ëmbëlsira të përzgjedhura nga shefi.
-            </p>
-            <button class="offer-btn" type="button">
-              Shiko ofertën
-            </button>
-          </div>
-        </article>
+      <div class="focus-body">
+        <div class="focus-title-row">
+          <span class="focus-title">Steak Special</span>
+          <span class="focus-price">18,90 €</span>
+        </div>
+        <p class="focus-desc">
+          Steak me patate të skuqura, perime të pjekura dhe salcë piper.
+        </p>
+        <button class="focus-btn" type="button">
+          Shiko ofertën
+        </button>
       </div>
     </section>
 
@@ -119,7 +90,7 @@
     </section>
 
     <!-- SUCHE -->
-    <section class="card">
+    <section class="card search-card">
       <div class="search-pill">
         <input
           class="search-input"
@@ -132,13 +103,13 @@
       </div>
     </section>
 
-    <!-- GETRÄNKE (DEMO) -->
-    <section class="card">
+    <!-- GETRÄNKE MIT LIKES -->
+    <section class="card drinks-card">
       <h2 class="section-title">Getränke</h2>
       <div class="drinks-list">
         <article class="drink-item">
           <img
-            src="https://via.placeholder.com/400x600.png?text=Drink+1"
+            src="https://source.unsplash.com/400x600/?coffee"
             alt="Latte Macchiato"
             class="drink-image"
           />
@@ -146,38 +117,84 @@
             <span class="drink-name">Latte Macchiato</span>
             <span class="drink-price">3,50 €</span>
           </div>
+          <div class="drink-footer">
+            <div class="drink-like">
+              <span class="drink-like-icon">♥</span>
+              <span>24</span>
+            </div>
+            <button class="drink-btn" type="button">Zgjidh</button>
+          </div>
         </article>
+
         <article class="drink-item">
           <img
-            src="https://via.placeholder.com/400x600.png?text=Drink+2"
-            alt="Fresh Portokalli"
+            src="https://source.unsplash.com/400x600/?cocktail"
+            alt="Aperol Spritz"
             class="drink-image"
           />
           <div class="drink-name-row">
-            <span class="drink-name">Fresh Portokalli</span>
-            <span class="drink-price">4,00 €</span>
+            <span class="drink-name">Aperol Spritz</span>
+            <span class="drink-price">5,80 €</span>
+          </div>
+          <div class="drink-footer">
+            <div class="drink-like">
+              <span class="drink-like-icon">♥</span>
+              <span>17</span>
+            </div>
+            <button class="drink-btn" type="button">Zgjidh</button>
           </div>
         </article>
       </div>
     </section>
 
-    <!-- SPEISEKARTE (DEMO) -->
-    <section class="card">
+    <!-- SPEISEKARTE -->
+    <section class="card menu-card">
       <h2 class="section-title">Speisekarte</h2>
-      <article class="menu-item">
-        <img
-          src="https://via.placeholder.com/600x400.png?text=Food+1"
-          alt="Pizza Margherita"
-          class="menu-image"
-        />
-        <div class="menu-name-row">
-          <span class="menu-name">Pizza Margherita</span>
-          <span class="menu-price">7,90 €</span>
-        </div>
-        <p class="menu-desc">
-          Domate, djathë mozzarella dhe borzilok i freskët.
-        </p>
-      </article>
+      <div class="menu-list">
+        <article class="menu-item">
+          <img
+            src="https://source.unsplash.com/600x400/?pizza"
+            alt="Pizza Margherita"
+            class="menu-image"
+          />
+          <div class="menu-name-row">
+            <span class="menu-name">Pizza Margherita</span>
+            <span class="menu-price">7,90 €</span>
+          </div>
+          <p class="menu-desc">
+            Domate, djathë mozzarella dhe borzilok i freskët – klasik italian.
+          </p>
+          <div class="menu-footer">
+            <div class="menu-like">
+              <span class="menu-like-icon">♥</span>
+              <span>31</span>
+            </div>
+            <button class="menu-btn" type="button">Detaje</button>
+          </div>
+        </article>
+
+        <article class="menu-item">
+          <img
+            src="https://source.unsplash.com/600x400/?pasta"
+            alt="Pasta Carbonara"
+            class="menu-image"
+          />
+          <div class="menu-name-row">
+            <span class="menu-name">Pasta Carbonara</span>
+            <span class="menu-price">9,20 €</span>
+          </div>
+          <p class="menu-desc">
+            Pasta me salcë kremoze, pancetta dhe djathë pecorino.
+          </p>
+          <div class="menu-footer">
+            <div class="menu-like">
+              <span class="menu-like-icon">♥</span>
+              <span>19</span>
+            </div>
+            <button class="menu-btn" type="button">Detaje</button>
+          </div>
+        </article>
+      </div>
     </section>
 
   </main>
