@@ -1,1086 +1,216 @@
-/* ========================================
-   GLOBAL: Reset & Schrift
-   ======================================== */
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-  font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-}
-
-/* ========================================
-   DESIGN-TOKENS
-   ======================================== */
-
-:root {
-  --bg-page: #f3f4f6;
-  --card-bg: #ffffff;
-  --card-border: rgba(148, 163, 184, 0.35);
-  --card-radius: 18px;
-  --text-main: #0f172a;
-  --text-muted: #64748b;
-
-  /* Gradient für Kamarieri & Sot ne fokus */
-  --call-card-gradient:
-    radial-gradient(circle at 0% 0%, rgba(148, 163, 253, 0.24) 0%, transparent 55%),
-    linear-gradient(135deg, #020617 0%, #020617 45%, #111827 100%);
-}
-
-/* ========================================
-   BODY / PAGE
-   ======================================== */
-
-html,
-body {
-  height: 100%;
-  background-color: var(--bg-page);
-}
-
-body {
-  min-height: 100vh;
-  color: var(--text-main);
-}
-
-.page {
-  width: 100%;
-  max-width: 480px;
-  margin: 0 auto;
-  min-height: 100vh;
-  padding: 16px 16px 32px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  background-color: var(--bg-page);
-}
-
-.page > * {
-  width: 100%;
-}
-
-.page--karte {
-  gap: 14px;
-  padding-top: 12px;
-}
-
-/* ========================================
-   HEADER
-   ======================================== */
-
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 6px;
-  margin-bottom: 4px;
-}
-
-/* ========================================
-   CARD BASE – ALLE CARDS GLEICH WIE „Porosia juaj“
-   ======================================== */
-
-.card {
-  background: var(--card-bg);
-  padding: 14px 14px;
-  border-radius: var(--card-radius);
-  border: 1px solid var(--card-border);
-  box-shadow: none;            /* Minimal / kein Shadow */
-}
-
-.card h1,
-.card h2 {
-  font-size: 1.05rem;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.card p {
-  font-size: 0.82rem;
-  color: var(--text-muted);
-}
-
-/* Restaurant-Card */
-
-.restaurant-card {
-  padding: 14px 16px;
-}
-
-.restaurant-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-/* LOGO – Quadrat, ganz sichtbar, nichts abgeschnitten */
-.rest-logo {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;               /* leicht abgerundet im Quadrat */
-  object-fit: contain;               /* Logo komplett sichtbar */
-  border: 1px solid #e2e8f0;
-  background: #f9fafb;
-  padding: 4px;                      /* innen etwas Platz */
-}
-
-.restaurant-name {
-  font-weight: 700;
-  font-size: 1.05rem;
-}
-
-.restaurant-meta {
-  font-size: 0.8rem;
-  color: #64748b;
-  margin-top: 2px;
-}
-
-/* ========================================
-   STATUS-ROW: POROSIA / LANGUAGE / KAMARIERI
-   ======================================== */
-
-.karte-topbar {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-}
-
-/* Grid: links Porosia, rechts Spalte mit Language + Kamarieri */
-.karte-status-row {
-  display: grid;
-  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
-  gap: 12px;
-  align-items: stretch;
-}
-
-/* rechte Spalte: Language + Kamarieri übereinander */
-.status-column-right {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-}
-
-/* Status-Card Basis – gleich wie Porosia juaj */
-.status-card {
-  flex: 1 1 0;
-  min-width: 0;
-  padding: 12px 12px 14px;
-  border-radius: var(--card-radius);
-  background: var(--card-bg);
-  border: 1px solid var(--card-border);
-  box-shadow: none;
-  color: var(--text-main);
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-
-/* Porosia / Kamarieri Höhe */
-.status-card--order,
-.status-card--lang,
-.status-card--call {
-  min-height: 132px;
-}
-
-/* Topreihe in Status-Cards */
-.status-card-top {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 10px;
-}
-
-.status-card-top--lang {
-  justify-content: flex-start;
-}
-
-.status-card-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Icon-Kreis in den Status-Cards */
-.status-card-top .icon-circle {
-  width: 42px;
-  height: 42px;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.12);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.status-icon-circle {
-  width: 26px;
-  height: 26px;
-  border-radius: 999px;
-  background-size: 20px 20px;
-  background-position: center;
-  background-repeat: no-repeat;
-}
-
-/* ICON PLACEHOLDER – bitte deine eigenen URLs setzen */
-.status-icon-circle--order {
-  background-image: url("https://images.pexels.com/photos/4109131/pexels-photo-4109131.jpeg?auto=compress&cs=tinysrgb&w=80");
-}
-
-.status-icon-circle--call {
-  background-image: url("https://i.postimg.cc/59vmM8dH/Chat-GPT-Image-6-Dez-2025-04-19-16.png");
-}
-
-/* Haupt-Button in Status-Cards (Porosia & Kamarieri) */
-.status-main-btn {
-  align-self: stretch;
-  margin-top: 16px;
-  border: none;
-  border-radius: 12px;
-  padding: 9px 16px;
-  font-size: 0.84rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  background: #111827;
-  color: #f9fafb;
-  box-shadow: none;
-  -webkit-tap-highlight-color: transparent;
-  transition:
-    background 0.18s ease-out,
-    color 0.18s ease-out,
-    transform 0.12s ease-out;
-  text-align: center;
-  white-space: nowrap;
-}
-
-.status-main-btn:hover {
-  background: #020617;
-  transform: translateY(-0.5px);
-}
-
-.status-main-btn:active {
-  transform: translateY(0) scale(0.97);
-}
-
-/* Aktive States */
-.order-toggle-btn--active {
-  background: #0f172a;
-  color: #f9fafb;
-}
-
-.call-waiter-btn--active {
-  background: #16a34a;
-  color: #f9fafb;
-}
-
-/* LANGUAGE CARD – Pills */
-.lang-pill-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-top: 10px;
-}
-
-.lang-pill {
-  border-radius: 999px;
-  border: 1px solid rgba(148, 163, 184, 0.7);
-  background: #f9fafb;
-  color: #111827;
-  font-size: 0.78rem;
-  padding: 4px 10px;
-  cursor: pointer;
-  min-width: 40px;
-  text-align: center;
-  transition:
-    background 0.16s ease-out,
-    color 0.16s ease-out,
-    border-color 0.16s ease-out,
-    transform 0.1s ease-out;
-}
-
-.lang-pill:hover {
-  background: #e5e7eb;
-  transform: translateY(-0.5px);
-}
-
-.lang-pill--active {
-  background: #111827;
-  color: #f9fafb;
-  border-color: #111827;
-}
-
-.lang-hint {
-  margin-top: 8px;
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-/* ========================================
-   POROSIA JUAJ – Card unter Porosia-Widget
-   (Referenz-Card für Style)
-   ======================================== */
-
-.order-details-container {
-  margin-top: 6px;
-}
-
-.order-details-card {
-  width: 100%;
-  border-radius: var(--card-radius);
-  border: 1px solid var(--card-border);
-  background: var(--card-bg);
-  box-shadow: none;
-  padding: 12px 14px 14px;
-
-  opacity: 0;
-  transform: translateY(6px);
-  transition:
-    opacity 0.22s ease-out,
-    transform 0.22s ease-out;
-}
-
-.order-details-card--open {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.order-details-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 6px;
-}
-
-.order-details-title {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-/* Status-Badge */
-.order-status-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 3px 8px;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  font-weight: 500;
-  white-space: nowrap;
-}
-
-/* Statusfarben */
-.order-status-badge--empty {
-  background: #e5e7eb;
-  color: #6b7280;
-}
-
-.order-status-badge--new {
-  background: #dbeafe;
-  color: #1d4ed8;
-}
-
-.order-status-badge--in-progress {
-  background: #fef9c3;
-  color: #a16207;
-}
-
-.order-status-badge--served {
-  background: #e0f2fe;
-  color: #0369a1;
-}
-
-.order-status-badge--paid {
-  background: #dcfce7;
-  color: #15803d;
-}
-
-.order-details-content {
-  margin-top: 4px;
-  font-size: 0.8rem;
-  color: #0f172a;
-}
-
-.order-items-list {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 6px;
-}
-
-.order-item-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  font-size: 0.8rem;
-}
-
-.order-item-name {
-  max-width: 70%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.order-item-price {
-  white-space: nowrap;
-  font-weight: 500;
-}
-
-.order-summary-row {
-  margin-top: 6px;
-  padding-top: 6px;
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-/* ========================================
-   SOT NE FOKUS – Widget mit Kamarieri-Gradient
-   ======================================== */
-
-.offers-card {
-  border-radius: var(--card-radius);
-  border: 1px solid var(--card-border);
-  /* WICHTIG: gleicher Farbverlauf wie Kamarieri-Card */
-  background: var(--call-card-gradient);
-  color: #f9fafb;
-  padding: 14px 14px 18px;
-  box-shadow: none;
-  width: 100%;
-  margin-top: 6px;
-}
-
-.offers-header-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: baseline;
-  margin-bottom: 12px;
-}
-
-.offers-label {
-  font-size: 0.7rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.85;
-}
-
-/* Slider */
-.offers-slider {
-  margin-top: 4px;
-  display: flex;
-  gap: 12px;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  -webkit-overflow-scrolling: touch;
-}
-
-.offers-slider::-webkit-scrollbar {
-  display: none;
-}
-
-.offer-slide {
-  flex: 0 0 100%;
-  scroll-snap-align: center;
-}
-
-/* Bild im Sot ne Fokus */
-.offer-image {
-  width: 100%;
-  height: 180px;
-  border-radius: 14px;
-  object-fit: cover;
-  background: #111827;
-  margin-bottom: 16px;
-}
-
-.offer-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-}
-
-.offer-title {
-  font-size: 0.98rem;
-  font-weight: 600;
-}
-
-.offer-price {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.offer-desc {
-  font-size: 0.8rem;
-  color: #e5e7eb;
-  line-height: 1.5;
-  margin-bottom: 14px;
-}
-
-.offer-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 6px;
-}
-
-.offer-info-only {
-  font-size: 0.78rem;
-  color: #e5e7eb;
-  opacity: 0.9;
-  margin-top: 6px;
-}
-
-.offers-dots {
-  margin-top: 14px;
-  display: flex;
-  justify-content: center;
-  gap: 6px;
-}
-
-.offers-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 999px;
-  border: none;
-  background: #4b5563;
-  padding: 0;
-  cursor: pointer;
-}
-
-.offers-dot.active {
-  width: 14px;
-  border-radius: 999px;
-  background: #f9fafb;
-}
-
-/* ========================================
-   SUCHE
-   ======================================== */
-
-.search-card {
-  padding: 10px 14px;
-}
-
-.search-wrapper {
-  margin-top: 0;
-}
-
-.search-pill {
-  display: flex;
-  align-items: center;
-  background: #f4f4f5;
-  border-radius: 999px;
-  padding: 4px 4px 4px 16px;
-}
-
-.search-input {
-  flex: 1;
-  border: none;
-  outline: none;
-  background: transparent;
-  font-size: 0.82rem;
-  color: #111827;
-  padding: 8px 6px 8px 0;
-}
-
-.search-input::placeholder {
-  color: #9ca3af;
-}
-
-.search-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 999px;
-  border: 1px solid #643A71;
-  background: #643A71;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: none;
-}
-
-.search-btn-icon {
-  width: 16px;
-  height: 16px;
-  border-radius: 999px;
-  border: 2px solid #ffffff;
-  position: relative;
-}
-
-.search-btn-icon::after {
-  content: "";
-  position: absolute;
-  width: 7px;
-  height: 2px;
-  border-radius: 999px;
-  background: #ffffff;
-  right: -1px;
-  bottom: 1px;
-  transform: rotate(45deg);
-}
-
-/* ========================================
-   TABS (DRINKS / FOOD)
-   ======================================== */
-
-.tabs-wrapper {
-  background: transparent;
-  border-radius: 0;
-  padding: 0;
-  margin-top: 6px;
-  margin-bottom: 4px;
-}
-
-.tabs-wrapper--drinks {
-  margin-top: 10px;
-}
-
-.tabs-wrapper--food {
-  margin-top: 12px;
-}
-
-.category-tabs {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-.category-tab {
-  padding: 6px 10px;
-  border-radius: 999px;
-  border: 1px solid rgba(17, 24, 39, 0.08);
-  font-size: 0.75rem;
-  background: #f9fafb;
-  cursor: pointer;
-  color: #111827;
-}
-
-.category-tab.active {
-  background: #111827;
-  color: #f9fafb;
-  border-color: #111827;
-}
-
-/* ========================================
-   GETRÄNKE – 2 Spalten Cards
-   ======================================== */
-
-#drinksSection h2 {
-  font-size: 1rem;
-  font-weight: 600;
-  margin-bottom: 6px;
-}
-
-/* Grid: 2 Spalten */
-.drinks-list {
-  margin-top: 8px;
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
-}
-
-/* Drink-Card – gleiche Rundung/Border, minimaler Shadow */
-.drink-item {
-  background: var(--card-bg);
-  border-radius: var(--card-radius);
-  padding: 10px 10px 16px;
-  border: 1px solid var(--card-border);
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  box-shadow: none;
-}
-
-/* Like oben */
-.drink-topbar {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  margin-bottom: 6px;
-}
-
-/* Like-Bubble */
-.icon-circle {
-  position: relative;
-  width: 32px;
-  height: 32px;
-  border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  outline: none;
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
-  transition:
-    transform 0.14s ease-out,
-    box-shadow 0.16s ease-out,
-    background 0.16s ease-out;
-}
-
-.icon-circle__inner {
-  width: 17px;
-  height: 17px;
-  display: block;
-}
-
-.heart-path {
-  fill: none;
-  stroke: #cbd5e1;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  transition:
-    fill 0.18s ease-out,
-    stroke 0.18s ease-out,
-    transform 0.18s ease-out;
-  transform-origin: center;
-}
-
-.like-count {
-  font-size: 0.78rem;
-  font-weight: 500;
-  color: #6b7280;
-  margin-left: 8px;
-}
-
-.like-wrap.is-liked .icon-circle {
-  background: #fff1f2;
-  box-shadow: 0 4px 10px rgba(255, 59, 48, 0.18);
-}
-
-.like-wrap.is-liked .heart-path {
-  fill: #ff3b30;
-  stroke: #ff3b30;
-}
-
-/* Bild */
-.drink-image {
-  width: 100%;
-  border-radius: 14px;
-  object-fit: cover;
-  aspect-ratio: 3 / 4;
-  display: block;
-}
-
-/* Titel + Preis */
-.drink-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 4px;
-  margin-top: 8px;
-}
-
-.drink-name {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #0f172a;
-}
-
-.drink-price {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: #111827;
-  white-space: nowrap;
-}
-
-/* Beschreibung */
-.drink-desc {
-  margin-top: 6px;
-  font-size: 0.75rem;
-  color: #64748b;
-  line-height: 1.38;
-}
-
-/* Footer: Menge + Wähle */
-.drink-footer {
-  margin-top: 14px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-}
-
-/* Mengen-Control */
-.qty-control {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 999px;
-  border: none;
-  background: #ffffff;
-  height: 32px;
-  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.06);
-}
-
-.qty-btn {
-  border: none;
-  background: transparent;
-  width: 28px;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1rem;
-  cursor: pointer;
-  color: #111827;
-}
-
-.qty-value {
-  min-width: 26px;
-  text-align: center;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-/* Wähle-Button (rund) */
-.btn-add-round {
-  border: none;
-  border-radius: 999px;
-  padding: 0 14px;
-  height: 32px;
-  background: #6c66e6;
-  color: #f9fafb;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.16);
-  transition:
-    background 0.18s ease-out,
-    transform 0.14s ease-out,
-    box-shadow 0.18s ease-out;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.btn-add-round span {
-  font-size: 0.78rem;
-  font-weight: 600;
-}
-
-/* ========================================
-   SPEISEKARTE – FOOD
-   ======================================== */
-
-.menu-list {
-  display: flex;
-  flex-direction: column;
-  gap: 30px;
-  margin-top: 10px;
-}
-
-/* Card */
-.menu-item {
-  background: var(--card-bg);
-  border-radius: var(--card-radius);
-  padding: 10px 12px 14px;
-  border: 1px solid var(--card-border);
-  display: grid;
-  grid-template-columns: 1fr auto;
-  grid-auto-rows: auto;
-  row-gap: 4px;
-}
-
-.menu-item-image {
-  grid-column: 1 / -1;
-  width: 100%;
-  max-height: 180px;
-  border-radius: 12px;
-  object-fit: cover;
-}
-
-.menu-item-header {
-  grid-column: 1 / -1;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 14px;
-}
-
-.menu-item-name {
-  font-size: 0.95rem;
-  font-weight: 600;
-}
-
-.menu-item-price {
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.menu-item-desc {
-  grid-column: 1 / -1;
-  font-size: 0.78rem;
-  color: #64748b;
-  margin-top: 10px;
-  margin-bottom: 6px;
-}
-
-/* Social-Leiste */
-.menu-item-social {
-  grid-column: 1 / 2;
-  align-self: center;
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  font-size: 0.78rem;
-  margin-top: 4px;
-}
-
-.social-btn {
-  border: none;
-  background: transparent;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 0.78rem;
-  color: #6b7280;
-  cursor: pointer;
-  padding: 4px 9px;
-  border-radius: 999px;
-  transition: background 0.12s ease, transform 0.08s ease, color 0.12s ease;
-}
-
-.social-icon {
-  width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.social-count {
-  font-weight: 500;
-}
-
-/* Aktionen rechts */
-.menu-item-actions {
-  grid-column: 2 / 3;
-  justify-self: end;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-/* Buttons */
-.btn {
-  border: none;
-  border-radius: 999px;
-  padding: 7px 14px;
-  font-size: 0.8rem;
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  text-decoration: none;
-  white-space: nowrap;
-}
-
-.btn-primary {
-  background: #643A71;
-  color: #ffffff;
-}
-
-.btn-dark {
-  background: #020617;
-  color: #f9fafb;
-}
-
-/* ========================================
-   FLOATING CART FAB
-   ======================================== */
-
-.cart-fab {
-  height: 54px;
-  padding: 0 18px;
-  border-radius: 999px;
-  border: 1px solid #643A71;
-  background: #643A71;
-  box-shadow: none;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  cursor: pointer;
-  position: fixed;
-  right: 18px;
-  bottom: 26px;
-  z-index: 50;
-
-  opacity: 0;
-  transform: translateY(16px);
-  pointer-events: none;
-  transition: opacity 0.25s ease, transform 0.25s ease, width 0.2s ease;
-}
-
-.cart-fab.visible {
-  opacity: 1;
-  transform: translateY(0);
-  pointer-events: auto;
-}
-
-.cart-fab-label {
-  color: #ffffff;
-  font-size: 0.8rem;
-  font-weight: 600;
-  white-space: nowrap;
-  display: none;
-}
-
-.cart-fab--has-items .cart-fab-label {
-  display: block;
-}
-
-.cart-fab-badge {
-  position: absolute;
-  top: -3px;
-  right: -3px;
-  min-width: 18px;
-  height: 18px;
-  border-radius: 999px;
-  background: #000000;
-  color: #ffffff;
-  font-size: 0.7rem;
-  padding: 0 5px;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  font-weight: 600;
-}
-
-/* ========================================
-   RESPONSIVE
-   ======================================== */
-
-@media (max-width: 400px) {
-  .status-card {
-    padding: 10px 10px 12px;
-    min-height: 120px;
-  }
-
-  .drink-item {
-    padding: 8px 8px 14px;
-  }
-
-  .menu-item {
-    padding: 8px 10px 12px;
-  }
-}
-
-img {
-  max-width: 100%;
-  height: auto;
-  display: block;
-}
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Karte</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f3f4f6" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page page--karte">
+    <!-- TOP: Restaurant-Card -->
+    <header class="karte-topbar">
+      <!-- Restaurant -->
+      <section class="card restaurant-card">
+        <div class="restaurant-header">
+          <!-- Logo: Quadrat, leicht abgerundet -->
+          <img
+            id="restaurantLogo"
+            class="rest-logo"
+            alt="Logo"
+            style="display:none;"
+          />
+          <div>
+            <div class="restaurant-name" id="restaurantName">Lokal</div>
+            <div class="restaurant-meta" id="restaurantMeta">
+              Mirësevini në menynë digjitale
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- STATUS-ROW: links Porosia, rechts Language + Kamarieri -->
+      <section class="karte-status-row">
+        <!-- Links: Porosia-Widget -->
+        <article class="status-card status-card--order">
+          <div class="status-card-top">
+            <div class="icon-circle">
+              <div class="status-icon-circle status-icon-circle--order"></div>
+            </div>
+            <div class="status-card-label" id="statusOrderLabel">
+              Porosia juaj
+            </div>
+          </div>
+          <button
+            id="orderToggleBtn"
+            class="status-main-btn order-toggle-btn"
+            type="button"
+          >
+            Shiko porosinë +
+          </button>
+        </article>
+
+        <!-- Rechts: Language + Kamarieri übereinander -->
+        <div class="status-column-right">
+          <!-- Language-Card -->
+          <article class="status-card status-card--lang" id="langCard">
+            <div class="status-card-top status-card-top--lang">
+              <div class="status-card-label" id="langTitle">
+                Sprache
+              </div>
+            </div>
+
+            <!-- Language Pills -->
+            <div class="lang-pill-row">
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="sq"
+              >
+                SQ
+              </button>
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="de"
+              >
+                DE
+              </button>
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="en"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="sr"
+              >
+                SR
+              </button>
+            </div>
+
+            <p class="lang-hint" id="langHint">
+              Zgjidh gjuhën për porosi &amp; kamarier.
+            </p>
+          </article>
+
+          <!-- Kamarieri-Card -->
+          <article class="status-card status-card--call">
+            <div class="status-card-top">
+              <div class="icon-circle">
+                <div class="status-icon-circle status-icon-circle--call"></div>
+              </div>
+              <div class="status-card-label" id="statusCallLabel">
+                Thirr kamarierin
+              </div>
+            </div>
+            <button
+              id="callWaiterBtn"
+              class="status-main-btn call-waiter-btn"
+              type="button"
+            >
+              Thirr kamarierin
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <!-- Porosia juaj – Card unter Porosia-Widget -->
+      <section
+        id="orderDetailsContainer"
+        class="order-details-container"
+        style="display:none;"
+      >
+        <article id="orderDetailsCard" class="order-details-card">
+          <div class="order-details-header">
+            <span class="order-details-title">Porosia juaj</span>
+            <span
+              id="orderStatusBadge"
+              class="order-status-badge order-status-badge--empty"
+            >
+              S'ka porosi
+            </span>
+          </div>
+          <div
+            id="orderDetailsContent"
+            class="order-details-content"
+          >
+            Ende nuk keni porositur.
+          </div>
+        </article>
+      </section>
+
+      <!-- SOT NE FOKUS – Slider-Widget -->
+      <section class="offers-card" id="offersSection" style="display:none;">
+        <div class="offers-header-row">
+          <div class="offers-label">SOT NE FOKUS</div>
+        </div>
+        <div class="offers-slider" id="offersSlider">
+          <!-- Slides dynamisch aus Firestore -->
+        </div>
+        <div class="offers-dots" id="offersDots"></div>
+      </section>
+
+      <!-- Suche -->
+      <section class="card search-card">
+        <div class="search-wrapper">
+          <div class="search-pill">
+            <input
+              id="searchInput"
+              class="search-input"
+              type="search"
+              placeholder="Kërko në meny."
+            />
+            <button type="button" class="search-btn">
+              <span class="search-btn-icon"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <!-- DRINKS-TABS -->
+    <section
+      class="tabs-wrapper tabs-wrapper--drinks"
+      id="drinksTabsWrapper"
+      style="display:none;"
+    >
+      <div class="category-tabs" id="drinksTabs"></div>
+    </section>
+
+    <!-- GETRÄNKE -->
+    <section class="card" id="drinksSection" style="display:none;">
+      <h2>Getränke</h2>
+      <div class="drinks-list" id="drinksList"></div>
+    </section>
+
+    <!-- FOOD-TABS -->
+    <section class="tabs-wrapper tabs-wrapper--food" id="foodTabsWrapper">
+      <div class="category-tabs" id="foodCategoryTabs"></div>
+    </section>
+
+    <!-- SPEISEKARTE -->
+    <section class="card">
+      <h2>Speisekarte</h2>
+      <div class="menu-list" id="menuList"></div>
+    </section>
+  </main>
+
+  <!-- Floating Cart Button unten rechts -->
+  <button class="cart-fab" id="cartFab" type="button">
+    <span class="cart-fab-icon"></span>
+    <span class="cart-fab-label" id="cartFabLabel">Shiko porosin</span>
+    <span class="cart-fab-badge" id="cartBadge">0</span>
+  </button>
+
+  <script type="module" src="karte.js"></script>
+</body>
+</html>
