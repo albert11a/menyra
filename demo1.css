@@ -1936,3 +1936,18 @@ img {
   margin: 0;
 }
 
+/* =========================================
+   SCHATTEN ANGLEICHEN: POROSIA = KAMARIERI
+   ========================================= */
+
+/* Kamarieri hat hier schon einen eigenen Shadow:
+   .status-card--call .status-card-top .icon-circle {
+       box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+   }
+   -> Wir geben Porosia exakt den gleichen.
+*/
+.status-card--order .status-card-top .icon-circle {
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.35);
+}
+
+
