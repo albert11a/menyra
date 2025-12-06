@@ -2,27 +2,37 @@
 <html lang="de">
 <head>
   <meta charset="UTF-8" />
-  <title>MENYRA – Karte Demo</title>
+  <title>MENYRA – Superdemo Karte</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <link rel="stylesheet" href="demo1.css" />
 </head>
 <body>
   <main class="page">
 
-    <!-- RESTAURANT OBEN -->
+    <!-- RESTAURANT + LANGUAGE SWITCHER -->
     <section class="restaurant-card">
-      <div class="restaurant-header">
-        <img
-          id="restaurantLogo"
-          class="rest-logo"
-          style="display:none;"
-          alt="Logo"
-        />
-        <div class="restaurant-text">
-          <div class="restaurant-name" id="restaurantName">Lokal</div>
-          <div class="restaurant-meta" id="restaurantMeta">
-            Mirësevini në MENYRA.
+      <div class="restaurant-row">
+        <div class="restaurant-main">
+          <img
+            id="restaurantLogo"
+            class="rest-logo"
+            style="display:none;"
+            alt="Logo"
+          />
+          <div class="restaurant-text">
+            <div class="restaurant-name" id="restaurantName">Lokal</div>
+            <div class="restaurant-meta" id="restaurantMeta">
+              Mirësevini në MENYRA.
+            </div>
           </div>
+        </div>
+
+        <!-- Language Switcher -->
+        <div class="lang-switcher" id="langSwitcher">
+          <button class="lang-btn" data-lang="sq">SQ</button>
+          <button class="lang-btn" data-lang="de">DE</button>
+          <button class="lang-btn" data-lang="en">EN</button>
+          <button class="lang-btn" data-lang="sr">SR</button>
         </div>
       </div>
     </section>
@@ -30,16 +40,16 @@
     <!-- SOT NË FOKUS – SLIDER -->
     <section class="offers-card" id="offersSection" style="display:none;">
       <div class="offers-header-row">
-        <span class="offers-label">SOT NË FOKUS</span>
-        <span class="offers-tag">Ofertat e ditës</span>
+        <span class="offers-label" id="offersLabel">SOT NË FOKUS</span>
+        <span class="offers-tag" id="offersTag">Ofertat e ditës</span>
       </div>
       <div class="offers-slider" id="offersSlider">
-        <!-- Slides kommen per JS -->
+        <!-- Slides per JS -->
       </div>
       <div class="offers-dots" id="offersDots"></div>
     </section>
 
-    <!-- POROSIA & KAMARIERI – WIDGET CARDS -->
+    <!-- POROSIA & KAMARIERI – MODERNE WIDGETS -->
     <section class="karte-status-row">
       <!-- LINKS: POROSIA -->
       <article class="status-card status-card--order">
@@ -47,7 +57,9 @@
           <div class="icon-circle">
             <div class="status-icon-circle status-icon-circle--order"></div>
           </div>
-          <div class="status-card-label">Porosia juaj</div>
+          <div class="status-card-label" id="orderCardLabel">
+            Porosia juaj
+          </div>
         </div>
         <button
           id="orderToggleBtn"
@@ -64,7 +76,9 @@
           <div class="icon-circle">
             <div class="status-icon-circle status-icon-circle--call"></div>
           </div>
-          <div class="status-card-label">Thirr kamarierin</div>
+          <div class="status-card-label" id="callCardLabel">
+            Thirr kamarierin
+          </div>
         </div>
         <button
           id="callWaiterBtn"
@@ -76,7 +90,7 @@
       </article>
     </section>
 
-    <!-- POROSIA JUAJ – DETAIL CARD -->
+    <!-- POROSIA JUAJ – DETAILCARD -->
     <section
       id="orderDetailsContainer"
       class="order-details-container"
@@ -84,7 +98,9 @@
     >
       <article id="orderDetailsCard" class="order-details-card">
         <div class="order-details-header">
-          <span class="order-details-title">Porosia juaj</span>
+          <span class="order-details-title" id="orderDetailsTitle">
+            Porosia juaj
+          </span>
           <span
             id="orderStatusBadge"
             class="order-status-badge order-status-badge--empty"
@@ -115,19 +131,18 @@
 
     <!-- GETRÄNKE -->
     <section class="card drinks-card" id="drinksSection" style="display:none;">
-      <h2 class="section-title">Getränke</h2>
+      <h2 class="section-title" id="drinksTitle">Getränke</h2>
       <div class="drinks-list" id="drinksList"></div>
     </section>
 
     <!-- SPEISEKARTE -->
     <section class="card menu-card">
-      <h2 class="section-title">Speisekarte</h2>
+      <h2 class="section-title" id="menuTitle">Speisekarte</h2>
       <div class="menu-list" id="menuList"></div>
     </section>
 
   </main>
 
-  <!-- DEMO SCRIPT -->
   <script type="module" src="demo1.js"></script>
 </body>
 </html>
