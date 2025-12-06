@@ -1,133 +1,216 @@
-<header class="karte-topbar">
-  <!-- RESTAURANT-CARD -->
-  <section class="card restaurant-card">
-    <div class="restaurant-header">
-      <div class="restaurant-main">
-        <img id="restaurantLogo" class="rest-logo" style="display:none;" alt="Logo" />
-        <div>
-          <div class="restaurant-name" id="restaurantName">Lokal</div>
-          <div class="restaurant-meta" id="restaurantMeta">Mirësevini në MENYRA</div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- ANGEBOTE / SOT NE FOKUS SLIDER -->
-  <section class="offers-card" id="offersSection" style="display:none;">
-    <div class="offers-header-row">
-      <div class="offers-label">SOT NE FOKUS</div>
-    </div>
-    <div class="offers-slider" id="offersSlider">
-      <!-- Slides dynamisch -->
-    </div>
-    <div class="offers-dots" id="offersDots"></div>
-  </section>
-
-  <!-- STATUS-ROW: LINKS POROSIA, RECHTS LANGUAGE + KAMARIERI -->
-  <section class="karte-status-row">
-    <!-- LINKS: POROSIA -->
-    <article class="status-card status-card--order">
-      <div class="status-card-top">
-        <div class="icon-circle">
-          <div class="status-icon-circle status-icon-circle--order"></div>
-        </div>
-        <div class="status-card-label" id="statusOrderLabel">Porosia juaj</div>
-      </div>
-      <button
-        id="orderToggleBtn"
-        class="status-main-btn order-toggle-btn"
-        type="button"
-      >
-        Shiko porosinë +
-      </button>
-    </article>
-
-    <!-- RECHTS: SPALTE MIT LANGUAGE + KAMARIERI -->
-    <div class="status-column-right">
-      <!-- LANGUAGE-CARD -->
-      <article class="status-card status-card--lang" id="langCard">
-        <div class="status-card-top status-card-top--lang">
-          <div class="status-card-label" id="langTitle">Gjuha</div>
-        </div>
-
-        <div class="lang-pill-row">
-          <button type="button" class="lang-pill" data-lang-btn data-lang="sq">
-            SQ
-          </button>
-          <button type="button" class="lang-pill" data-lang-btn data-lang="de">
-            DE
-          </button>
-          <button type="button" class="lang-pill" data-lang-btn data-lang="en">
-            EN
-          </button>
-          <button type="button" class="lang-pill" data-lang-btn data-lang="sr">
-            SR
-          </button>
-        </div>
-
-        <p class="lang-hint" id="langHint">
-          Zgjidh gjuhën për porosi & kamarier.
-        </p>
-      </article>
-
-      <!-- KAMARIERI-CARD -->
-      <article class="status-card status-card--call">
-        <div class="status-card-top">
-          <div class="icon-circle">
-            <div class="status-icon-circle status-icon-circle--call"></div>
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <title>MENYRA – Karte</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#f3f4f6" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <main class="page page--karte">
+    <!-- TOP: Restaurant-Card -->
+    <header class="karte-topbar">
+      <!-- Restaurant -->
+      <section class="card restaurant-card">
+        <div class="restaurant-header">
+          <!-- Logo: Quadrat, leicht abgerundet -->
+          <img
+            id="restaurantLogo"
+            class="rest-logo"
+            alt="Logo"
+            style="display:none;"
+          />
+          <div>
+            <div class="restaurant-name" id="restaurantName">Lokal</div>
+            <div class="restaurant-meta" id="restaurantMeta">
+              Mirësevini në menynë digjitale
+            </div>
           </div>
-          <div class="status-card-label" id="statusCallLabel">Thirr kamarierin</div>
         </div>
-        <button
-          id="callWaiterBtn"
-          class="status-main-btn call-waiter-btn"
-          type="button"
-        >
-          Thirr kamarierin
-        </button>
-      </article>
-    </div>
-  </section>
+      </section>
 
-  <!-- POROSIA JUAJ – Card unter den Widgets -->
-  <section
-    id="orderDetailsContainer"
-    class="order-details-container"
-    style="display:none;"
-  >
-    <article id="orderDetailsCard" class="order-details-card">
-      <div class="order-details-header">
-        <span class="order-details-title">Porosia juaj</span>
-        <span
-          id="orderStatusBadge"
-          class="order-status-badge order-status-badge--empty"
-        >
-          S'ka porosi
-        </span>
-      </div>
-      <div
-        id="orderDetailsContent"
-        class="order-details-content"
+      <!-- STATUS-ROW: links Porosia, rechts Language + Kamarieri -->
+      <section class="karte-status-row">
+        <!-- Links: Porosia-Widget -->
+        <article class="status-card status-card--order">
+          <div class="status-card-top">
+            <div class="icon-circle">
+              <div class="status-icon-circle status-icon-circle--order"></div>
+            </div>
+            <div class="status-card-label" id="statusOrderLabel">
+              Porosia juaj
+            </div>
+          </div>
+          <button
+            id="orderToggleBtn"
+            class="status-main-btn order-toggle-btn"
+            type="button"
+          >
+            Shiko porosinë +
+          </button>
+        </article>
+
+        <!-- Rechts: Language + Kamarieri übereinander -->
+        <div class="status-column-right">
+          <!-- Language-Card -->
+          <article class="status-card status-card--lang" id="langCard">
+            <div class="status-card-top status-card-top--lang">
+              <div class="status-card-label" id="langTitle">
+                Sprache
+              </div>
+            </div>
+
+            <!-- Language Pills -->
+            <div class="lang-pill-row">
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="sq"
+              >
+                SQ
+              </button>
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="de"
+              >
+                DE
+              </button>
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="en"
+              >
+                EN
+              </button>
+              <button
+                type="button"
+                class="lang-pill"
+                data-lang-btn
+                data-lang="sr"
+              >
+                SR
+              </button>
+            </div>
+
+            <p class="lang-hint" id="langHint">
+              Zgjidh gjuhën për porosi &amp; kamarier.
+            </p>
+          </article>
+
+          <!-- Kamarieri-Card -->
+          <article class="status-card status-card--call">
+            <div class="status-card-top">
+              <div class="icon-circle">
+                <div class="status-icon-circle status-icon-circle--call"></div>
+              </div>
+              <div class="status-card-label" id="statusCallLabel">
+                Thirr kamarierin
+              </div>
+            </div>
+            <button
+              id="callWaiterBtn"
+              class="status-main-btn call-waiter-btn"
+              type="button"
+            >
+              Thirr kamarierin
+            </button>
+          </article>
+        </div>
+      </section>
+
+      <!-- Porosia juaj – Card unter Porosia-Widget -->
+      <section
+        id="orderDetailsContainer"
+        class="order-details-container"
+        style="display:none;"
       >
-        Ende nuk keni porositur.
-      </div>
-    </article>
-  </section>
+        <article id="orderDetailsCard" class="order-details-card">
+          <div class="order-details-header">
+            <span class="order-details-title">Porosia juaj</span>
+            <span
+              id="orderStatusBadge"
+              class="order-status-badge order-status-badge--empty"
+            >
+              S'ka porosi
+            </span>
+          </div>
+          <div
+            id="orderDetailsContent"
+            class="order-details-content"
+          >
+            Ende nuk keni porositur.
+          </div>
+        </article>
+      </section>
 
-  <!-- SUCHE -->
-  <section class="card search-card">
-    <div class="search-wrapper">
-      <div class="search-pill">
-        <input
-          id="searchInput"
-          class="search-input"
-          type="search"
-          placeholder="Kërko në meny."
-        />
-        <button type="button" class="search-btn">
-          <span class="search-btn-icon"></span>
-        </button>
-      </div>
-    </div>
-  </section>
-</header>
+      <!-- SOT NE FOKUS – Slider-Widget -->
+      <section class="offers-card" id="offersSection" style="display:none;">
+        <div class="offers-header-row">
+          <div class="offers-label">SOT NE FOKUS</div>
+        </div>
+        <div class="offers-slider" id="offersSlider">
+          <!-- Slides dynamisch aus Firestore -->
+        </div>
+        <div class="offers-dots" id="offersDots"></div>
+      </section>
+
+      <!-- Suche -->
+      <section class="card search-card">
+        <div class="search-wrapper">
+          <div class="search-pill">
+            <input
+              id="searchInput"
+              class="search-input"
+              type="search"
+              placeholder="Kërko në meny."
+            />
+            <button type="button" class="search-btn">
+              <span class="search-btn-icon"></span>
+            </button>
+          </div>
+        </div>
+      </section>
+    </header>
+
+    <!-- DRINKS-TABS -->
+    <section
+      class="tabs-wrapper tabs-wrapper--drinks"
+      id="drinksTabsWrapper"
+      style="display:none;"
+    >
+      <div class="category-tabs" id="drinksTabs"></div>
+    </section>
+
+    <!-- GETRÄNKE -->
+    <section class="card" id="drinksSection" style="display:none;">
+      <h2>Getränke</h2>
+      <div class="drinks-list" id="drinksList"></div>
+    </section>
+
+    <!-- FOOD-TABS -->
+    <section class="tabs-wrapper tabs-wrapper--food" id="foodTabsWrapper">
+      <div class="category-tabs" id="foodCategoryTabs"></div>
+    </section>
+
+    <!-- SPEISEKARTE -->
+    <section class="card">
+      <h2>Speisekarte</h2>
+      <div class="menu-list" id="menuList"></div>
+    </section>
+  </main>
+
+  <!-- Floating Cart Button unten rechts -->
+  <button class="cart-fab" id="cartFab" type="button">
+    <span class="cart-fab-icon"></span>
+    <span class="cart-fab-label" id="cartFabLabel">Shiko porosin</span>
+    <span class="cart-fab-badge" id="cartBadge">0</span>
+  </button>
+
+  <script type="module" src="karte.js"></script>
+</body>
+</html>
